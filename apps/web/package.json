@@ -1,0 +1,16 @@
+{
+  "name": "@mega-bulten/web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "echo 'web app scaffolded in Phase 6'",
+    "lint": "echo 'no-op until Phase 6'",
+    "type-check": "echo 'no-op until Phase 6'"
+  },
+  "dependencies": {
+    "@mega-bulten/db": "workspace:*",
+    "@mega-bulten/shared": "workspace:*",
+    "@mega-bulten/email": "workspace:*",
+    "@mega-bulten/brand": "workspace:*"
+  }
+}
