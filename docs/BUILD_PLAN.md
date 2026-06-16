@@ -1,0 +1,40 @@
+# Build Plan — Mega Bülten (subagent-driven)
+
+Subagent legend: **architect**, **code-architect** (TS impl), **tdd-guide**,
+**database-reviewer**, **frontend-design**, **security-reviewer**, **e2e-runner**,
+**doc-updater**, **build-error-resolver**.
+
+| # | Phase | Subagent | Depends on | Parallel track |
+|---|---|---|---|---|
+| 0 | Discovery, ADRs, brand foundation | architect + doc-updater | — | spine |
+| 1 | Monorepo scaffold | code-architect | 0 | spine |
+| 2 | Infra / Docker Compose (web, worker, db) | code-architect + security-reviewer | 1 | spine |
+| 3 | Data model / Prisma + Zod contracts ★ | database-reviewer + tdd-guide | 1 | spine |
+| 4 | News ingestion (Exa + RSS, dedup) | code-architect + tdd-guide | 3 | A |
+| 5 | Email rendering + brand system | frontend-design + ts | 0,1 | B |
+| 6 | Dashboard shell + subscriber CRUD | frontend-design + code-architect | 3 | C |
+| 7 | Curation pipeline (Claude, cost-routed) ★ | code-architect + tdd-guide | 3,4,5 | A |
+| 8 | Delivery providers (ACS/Graph/Resend) | code-architect + security-reviewer | 3,5 | B |
+| 9 | Approval workflow + draft editor + preview | code-architect + frontend-design + tdd-guide | 5,6,7 | C |
+| 10 | Scheduling + auto-send (guardrails) ★ | code-architect + security-reviewer | 7,8,9 | spine |
+| 11 | Auth — Entra ID SSO (+ fallback seam) | security-reviewer + code-architect | 6 | D |
+| 12 | Testing, visual regression, security pass | tdd-guide + e2e-runner + security-reviewer | all | spine |
+| 13 | Polish, docs, deploy runbook | frontend-design + doc-updater | 12 | spine |
+
+**Critical path:** 0 → 1 → 2 → 3 → 7 → 9 → 10 → 12 → 13.
+**Parallel after Phase 3:** A = 4→7 · B = 5→8 · C = 6→9 · D = 11.
+
+## Status
+
+- [x] Phase 0 — docs/ADRs/brand foundation
+- [x] Phase 1 — monorepo scaffold (8 workspaces install clean)
+- [~] Phase 2 — Docker: compose has db+adminer (port 5433); web/worker Dockerfiles pending
+- [x] Phase 3 — Prisma + Zod ★ (migration `20260616154231_init`; 79 contract tests green; singleton client; seed)
+- [ ] Phase 4 — ingestion (track A) · Phase 5 — email/brand (track B) · Phase 6 — dashboard shell (track C) ← next, parallelizable
+- [ ] Phases 7–13
+
+## Key risks (see ARCHITECTURE.md / plan)
+
+M365 bulk throttle/reputation (→ ACS on subdomain) · Centrale Sans licensing (→ Nunito Sans,
+ADR-0002) · Turkish quality + hallucination (→ QA agent + approval gate) · Outlook rendering ·
+auto-send blast radius (→ guardrails + kill-switch).

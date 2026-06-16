@@ -1,0 +1,34 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: bulten_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: bulten
+      POSTGRES_PASSWORD: bulten
+      POSTGRES_DB: mega_bulten
+    ports:
+      - "5433:5432"
+    volumes:
+      - bulten_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bulten -d mega_bulten"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  adminer:
+    image: adminer
+    container_name: bulten_adminer
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+
+  # web + worker service definitions (Dockerfiles) are added in Phase 2.
+  # web:    Next.js dashboard + admin API
+  # worker: curation pipeline + scheduler
+
+volumes:
+  bulten_pgdata:

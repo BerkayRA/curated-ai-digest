@@ -1,0 +1,41 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# builds
+dist/
+.next/
+out/
+build/
+*.tsbuildinfo
+
+# turbo
+.turbo/
+
+# env
+.env
+.env.*
+!.env.example
+
+# prisma (keep schema + migrations; ignore local db artifacts)
+packages/db/prisma/*.db
+
+# logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# coverage / test artifacts
+coverage/
+playwright-report/
+test-results/
+# Visual-regression baselines are machine/OS-specific Chrome renders; regenerate
+# locally with `playwright test --update-snapshots`. Deterministic gates (axe,
+# overflow, console, keyboard) are the committed checks.
+**/*-snapshots/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json

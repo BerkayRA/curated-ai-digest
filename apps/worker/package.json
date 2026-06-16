@@ -1,0 +1,19 @@
+{
+  "name": "@mega-bulten/worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "lint": "eslint src --max-warnings 0",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@mega-bulten/db": "workspace:*",
+    "@mega-bulten/shared": "workspace:*",
+    "@mega-bulten/curation": "workspace:*",
+    "@mega-bulten/email": "workspace:*"
+  }
+}

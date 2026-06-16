@@ -1,0 +1,241 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum IssueStatus {
+  draft
+  in_review
+  approved
+  scheduled
+  sent
+  failed
+  cancelled
+}
+
+enum ArticleStatus {
+  candidate
+  selected
+  rejected
+}
+
+enum SendStatus {
+  queued
+  sent
+  delivered
+  bounced
+  failed
+}
+
+enum EmailProviderKind {
+  microsoft_graph
+  acs_email
+  resend
+}
+
+enum SubscriberStatus {
+  active
+  unsubscribed
+  bounced
+}
+
+// ---------------------------------------------------------------------------
+// Issue — one edition of the newsletter
+// ---------------------------------------------------------------------------
+
+model Issue {
+  id           String      @id @default(cuid())
+  isoWeek      String      @unique @map("iso_week") // e.g. "2026-W24"
+  status       IssueStatus @default(draft)
+  subject      String // TR marketing subject line
+  preheader    String? // TR preview text
+  bodyHtml     String?     @map("body_html") // rendered email HTML
+  bodyJson     Json?       @map("body_json") // structured editable content
+  scheduledAt  DateTime?   @map("scheduled_at")
+  sentAt       DateTime?   @map("sent_at")
+  approvedById String?     @map("approved_by_id") // FK reserved for future User model
+  autoSent     Boolean     @default(false) @map("auto_sent")
+  createdAt    DateTime    @default(now()) @map("created_at")
+  updatedAt    DateTime    @updatedAt @map("updated_at")
+
+  items IssueItem[]
+  sends Send[]
+
+  @@index([status])
+  @@map("issues")
+}
+
+// ---------------------------------------------------------------------------
+// CandidateArticle — raw ingest candidates before editorial selection
+// ---------------------------------------------------------------------------
+
+model CandidateArticle {
+  id               String        @id @default(cuid())
+  sourceUrl        String        @unique @map("source_url")
+  sourceName       String        @map("source_name")
+  title            String
+  rawExcerpt       String?       @map("raw_excerpt")
+  publishedAt      DateTime?     @map("published_at")
+  contentHash      String        @unique @map("content_hash") // SHA-256 for dedup
+  importanceScore  Float?        @map("importance_score")
+  relevanceScore   Float?        @map("relevance_score")
+  status           ArticleStatus @default(candidate)
+  fetchedAt        DateTime      @default(now()) @map("fetched_at")
+  ingestRunId      String?       @map("ingest_run_id")
+
+  ingestRun IngestRun? @relation(fields: [ingestRunId], references: [id])
+
+  @@index([status])
+  @@index([ingestRunId])
+  @@map("candidate_articles")
+}
+
+// ---------------------------------------------------------------------------
+// IssueItem — curated items selected into a specific issue (max 3)
+// ---------------------------------------------------------------------------
+
+model IssueItem {
+  id                 String  @id @default(cuid())
+  issueId            String  @map("issue_id")
+  candidateArticleId String? @map("candidate_article_id") // null for manually-added items
+  order              Int // 0..2
+  titleTr            String  @map("title_tr")
+  summaryTr          String  @map("summary_tr")
+  sourceUrl          String  @map("source_url")
+  sourceName         String  @map("source_name")
+  factCheckNotes     String? @map("fact_check_notes")
+  qaFlags            Json?   @map("qa_flags")
+
+  issue Issue @relation(fields: [issueId], references: [id], onDelete: Cascade)
+
+  @@unique([issueId, order])
+  @@index([issueId])
+  @@map("issue_items")
+}
+
+// ---------------------------------------------------------------------------
+// Subscriber — newsletter recipients
+// ---------------------------------------------------------------------------
+
+model Subscriber {
+  id               String           @id @default(cuid())
+  email            String           @unique
+  displayName      String?          @map("display_name")
+  company          String?
+  status           SubscriberStatus @default(active)
+  locale           String           @default("tr-TR")
+  unsubscribeToken String           @unique @map("unsubscribe_token")
+  source           String           @default("manual") // "manual" | "import"
+  createdAt        DateTime         @default(now()) @map("created_at")
+  updatedAt        DateTime         @updatedAt @map("updated_at")
+
+  @@index([status])
+  @@map("subscribers")
+}
+
+// ---------------------------------------------------------------------------
+// Settings — single-row application configuration
+// ---------------------------------------------------------------------------
+
+model Settings {
+  id               String            @id @default(cuid())
+  autoSendEnabled  Boolean           @default(false) @map("auto_send_enabled")
+  sendDayOfWeek    String            @map("send_day_of_week") // e.g. "Thursday"
+  sendTime         String            @map("send_time") // "HH:mm"
+  timezone         String            @default("Europe/Istanbul")
+  activeProvider   EmailProviderKind @default(acs_email) @map("active_provider")
+  fromAddress      String            @map("from_address")
+  replyTo          String?           @map("reply_to")
+  pipelineLeadDays Int               @default(2) @map("pipeline_lead_days")
+  updatedAt        DateTime          @updatedAt @map("updated_at")
+
+  @@map("settings")
+}
+
+// ---------------------------------------------------------------------------
+// Send — per-subscriber delivery record for each issue
+// ---------------------------------------------------------------------------
+
+model Send {
+  id                String     @id @default(cuid())
+  issueId           String     @map("issue_id")
+  subscriberId      String     @map("subscriber_id")
+  status            SendStatus @default(queued)
+  providerMessageId String?    @map("provider_message_id")
+  error             String?
+  sentAt            DateTime?  @map("sent_at")
+  createdAt         DateTime   @default(now()) @map("created_at")
+
+  issue Issue @relation(fields: [issueId], references: [id], onDelete: Cascade)
+
+  @@index([issueId])
+  @@index([subscriberId])
+  @@map("sends")
+}
+
+// ---------------------------------------------------------------------------
+// IngestRun — tracks each article-fetch execution
+// ---------------------------------------------------------------------------
+
+model IngestRun {
+  id             String    @id @default(cuid())
+  startedAt      DateTime  @default(now()) @map("started_at")
+  finishedAt     DateTime? @map("finished_at")
+  source         String
+  candidateCount Int       @default(0) @map("candidate_count")
+  status         String
+  error          String?
+
+  articles CandidateArticle[]
+
+  @@index([status])
+  @@map("ingest_runs")
+}
+
+// ---------------------------------------------------------------------------
+// PipelineRun — cost-aware observability for AI pipeline stages
+// ---------------------------------------------------------------------------
+
+model PipelineRun {
+  id         String    @id @default(cuid())
+  issueId    String?   @map("issue_id")
+  stage      String // "rank" | "curate" | "copywrite" | "editor_qa" | "render"
+  model      String
+  tokensIn   Int       @default(0) @map("tokens_in")
+  tokensOut  Int       @default(0) @map("tokens_out")
+  costUsd    Float     @default(0) @map("cost_usd")
+  status     String
+  error      String?
+  startedAt  DateTime  @default(now()) @map("started_at")
+  finishedAt DateTime? @map("finished_at")
+
+  @@index([issueId])
+  @@index([stage])
+  @@map("pipeline_runs")
+}
+
+// ---------------------------------------------------------------------------
+// AuditLog — immutable record of all state-changing actions
+// ---------------------------------------------------------------------------
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String?  @map("actor_id")
+  action    String // e.g. "issue.status_changed", "subscriber.created"
+  entity    String // model name
+  entityId  String   @map("entity_id")
+  meta      Json?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([entity, entityId])
+  @@index([actorId])
+  @@map("audit_logs")
+}

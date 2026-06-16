@@ -1,0 +1,14 @@
+**/node_modules
+**/dist
+**/.next
+**/.turbo
+**/coverage
+.git
+.gitignore
+**/.env
+**/.env.*
+!**/.env.example
+**/*.log
+playwright-report
+test-results
+.DS_Store
