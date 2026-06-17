@@ -16,6 +16,21 @@ import { transitionIssue } from './issue-transition.js';
 import type { TransitionOptions, TransitionResult } from './issue-transition.js';
 
 // ---------------------------------------------------------------------------
+// PII scrubbing
+// ---------------------------------------------------------------------------
+
+/** Regex matching common email address patterns. */
+const EMAIL_PATTERN = /[\w.+-]+@[\w-]+\.[\w.]+/g;
+
+/**
+ * Replaces email addresses in an error string with `[redacted]` before
+ * persisting to the database so subscriber PII is not stored in Send.error.
+ */
+export function scrubPii(input: string): string {
+  return input.replace(EMAIL_PATTERN, '[redacted]');
+}
+
+// ---------------------------------------------------------------------------
 // Repository interface — injected so the worker / tests can substitute
 // ---------------------------------------------------------------------------
 
@@ -56,7 +71,7 @@ export const defaultDispatchRepo: DispatchRepo = {
         subscriberId,
         status,
         providerMessageId: providerMessageId ?? null,
-        error: error ?? null,
+        error: error !== undefined ? scrubPii(error) : null,
         sentAt: status === 'sent' ? new Date() : null,
       },
     });
@@ -231,13 +246,14 @@ export async function dispatchIssue(
       }),
     );
   } catch (batchError) {
-    // Batch failed — record individual failures
+    // Batch failed — record individual failures with PII scrubbed from error message
+    const rawError = batchError instanceof Error ? batchError.message : String(batchError);
     for (const { subscriberId } of messages) {
       await repo.recordSend({
         issueId,
         subscriberId,
         status: 'failed',
-        error: batchError instanceof Error ? batchError.message : String(batchError),
+        error: rawError,
       });
       failureCount++;
     }

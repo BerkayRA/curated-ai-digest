@@ -71,12 +71,12 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       }
 
       if (items && items.length > 0) {
-        // Apply item updates — order updates included
+        // Apply item updates — constrain by issueId to prevent cross-issue mutation
         for (const item of items) {
           const { id, ...updateData } = item;
           if (Object.keys(updateData).length === 0) continue;
           await tx.issueItem.update({
-            where: { id },
+            where: { id, issueId: params.id },
             data: updateData,
           });
         }

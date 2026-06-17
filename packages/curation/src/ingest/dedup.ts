@@ -1,4 +1,4 @@
-import { canonicalizeUrl, contentHash } from './canonicalize.js';
+import { canonicalizeUrl, contentHash, isAllowedScheme } from './canonicalize.js';
 import type { RawCandidate, EnrichedCandidate } from './types.js';
 
 // ---------------------------------------------------------------------------
@@ -19,10 +19,11 @@ export function enrichCandidate(raw: RawCandidate): EnrichedCandidate {
  * Deduplicate an array of raw candidates within a single run.
  *
  * Strategy (applied in order):
- * 1. Enrich each candidate (compute canonicalUrl + contentHash).
- * 2. Keep the first occurrence of each contentHash — later duplicates (same
+ * 1. Reject candidates whose sourceUrl scheme is not http or https.
+ * 2. Enrich each candidate (compute canonicalUrl + contentHash).
+ * 3. Keep the first occurrence of each contentHash — later duplicates (same
  *    canonical URL + same title) are dropped.
- * 3. As a secondary guard, also keep only the first occurrence of each
+ * 4. As a secondary guard, also keep only the first occurrence of each
  *    canonicalUrl so two differently-titled articles from the exact same URL
  *    don't both survive.
  *
@@ -36,6 +37,9 @@ export function deduplicateWithinRun(
   const result: EnrichedCandidate[] = [];
 
   for (const raw of raws) {
+    // Reject non-http/https URLs (e.g. javascript:, data:, file:)
+    if (!isAllowedScheme(raw.sourceUrl)) continue;
+
     const enriched = enrichCandidate(raw);
 
     if (seenHashes.has(enriched.contentHash)) continue;

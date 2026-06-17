@@ -10,6 +10,7 @@ import { IssueStatusSchema } from '@mega-bulten/shared';
 import { ok, err } from '@/lib/api-response';
 import { getErrorMessage } from '@/lib/error';
 import { transitionIssue } from '@/lib/issue-transition';
+import { assertSameOrigin } from '@/lib/assert-same-origin';
 import { auth } from '@/auth';
 
 export const dynamic = 'force-dynamic';
@@ -24,6 +25,9 @@ interface RouteParams {
 }
 
 export async function POST(request: Request, { params }: RouteParams) {
+  const csrfCheck = assertSameOrigin(request);
+  if (csrfCheck !== null) return csrfCheck;
+
   try {
     const session = await auth();
     // Middleware guarantees auth on this route; fallback is a safety net only.

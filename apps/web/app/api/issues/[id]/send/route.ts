@@ -8,6 +8,7 @@ import { NextResponse } from 'next/server';
 import { ok, err } from '@/lib/api-response';
 import { getErrorMessage } from '@/lib/error';
 import { dispatchIssue } from '@/lib/dispatch';
+import { assertSameOrigin } from '@/lib/assert-same-origin';
 import { auth } from '@/auth';
 
 export const dynamic = 'force-dynamic';
@@ -16,7 +17,10 @@ interface RouteParams {
   params: { id: string };
 }
 
-export async function POST(_request: Request, { params }: RouteParams) {
+export async function POST(request: Request, { params }: RouteParams) {
+  const csrfCheck = assertSameOrigin(request);
+  if (csrfCheck !== null) return csrfCheck;
+
   try {
     const session = await auth();
     // Middleware guarantees auth on this route; fallback is a safety net only.

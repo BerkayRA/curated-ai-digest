@@ -25,6 +25,9 @@ const NOISE_PARAMS = new Set([
   'ck_subscriber_id',
 ]);
 
+/** Protocols permitted for candidate source URLs. */
+const ALLOWED_PROTOCOLS = new Set(['http:', 'https:']);
+
 /**
  * Returns a canonical form of the given URL:
  * - Lowercases scheme and host.
@@ -62,6 +65,19 @@ export function canonicalizeUrl(raw: string): string {
 
   // toString() already lowercases scheme + host per the WHATWG URL spec.
   return parsed.toString();
+}
+
+/**
+ * Returns true when the given raw URL has an allowed protocol (http or https).
+ * URLs that fail to parse are rejected.
+ */
+export function isAllowedScheme(raw: string): boolean {
+  try {
+    const { protocol } = new URL(raw);
+    return ALLOWED_PROTOCOLS.has(protocol);
+  } catch {
+    return false;
+  }
 }
 
 /**

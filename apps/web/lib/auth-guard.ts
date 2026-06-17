@@ -14,6 +14,7 @@
 const PUBLIC_PREFIXES = [
   '/login',
   '/api/auth',
+  '/api/health',
   '/unsubscribe',
   '/_next/static',
   '/_next/image',
@@ -25,7 +26,12 @@ const PUBLIC_PREFIXES = [
  * Used by middleware.ts and unit tests.
  */
 export function isPublicPath(pathname: string): boolean {
-  return PUBLIC_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`) || pathname.startsWith(`${prefix}?`));
+  return PUBLIC_PREFIXES.some(
+    (prefix) =>
+      pathname === prefix ||
+      pathname.startsWith(`${prefix}/`) ||
+      pathname.startsWith(`${prefix}?`),
+  );
 }
 
 /**
