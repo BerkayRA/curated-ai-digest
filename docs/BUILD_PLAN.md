@@ -38,9 +38,14 @@ Subagent legend: **architect**, **code-architect** (TS impl), **tdd-guide**,
 - [x] Phase 9 — approval workflow + draft editor + live preview + dispatch service + public unsubscribe
 - [x] Phase 11 — auth: Entra ID SSO + argon2 local fallback (AUTH_MODE seam). Split edge-safe `auth.config.ts` (middleware) vs Node `auth.ts` (argon2). Fixed two production bugs: argon2 leaking into edge bundle (crashed all routes) + missing `trustHost` (auth failing open). Runtime-verified route protection.
 - [x] Phase 10 — scheduling + auto-send ★ (croner scheduler from Settings; curate+send jobs; guardrails; shared @mega-bulten/delivery package; worker bootstrap)
-- [ ] Phase 2 (finish) — web + worker Dockerfiles · Phase 12 — testing/visual/security · Phase 13 — polish/docs/runbook ← remaining
+- [x] Phase 2 (finish) — web + worker Dockerfiles (Next standalone, argon2 on musl), compose web+worker, root .env.example
+- [x] Phase 12 (security) — review pass + fixes: iframe XSS, seed tokens, security headers/CSP, CSRF (SameSite + Origin check), Adminer dev-profile, status validation, item-ownership, PII scrub, scheme allowlist, CSV bound, /api/health; docs/SECURITY.md
+- [~] Phase 12 (e2e/visual) — Playwright functional + visual regression + axe (running)
+- [x] Phase 13 — docs/RUNBOOK.md, SECURITY.md, README deploy/status
 
-**Verified state:** 386 tests pass (shared 79, curation 85, email 55, delivery 29, worker 23, web 115); `pnpm -r type-check` clean across 10 workspaces; web + worker builds green; auth enforcement runtime-verified.
+**Verified state:** 413 tests pass (shared 79, curation 97, email 55, delivery 37, worker 23, web 122); `pnpm -r type-check` clean across 10 workspaces; web + worker builds green; auth enforcement + CSP runtime-verified. Docker compose validated.
+
+**Deferred (documented in SECURITY.md):** Next 15 upgrade (on patched 14.2.35), distributed rate limiting, vitest≥3.2.6, prod DB credential rotation, nonce-based CSP.
 
 **Wiring TODOs surfaced:** worker must add `@mega-bulten/email` to curation deps + pass `renderDigestEmail` as `renderFn`; confirm exact Claude pricing in `pipeline/config.ts`; Graph `sendMail` drops custom headers (List-Unsubscribe must live in HTML footer).
 

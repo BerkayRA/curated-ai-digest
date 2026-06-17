@@ -58,7 +58,11 @@ export const authConfig: NextAuthConfig = {
       options: {
         httpOnly: true,
         sameSite: 'lax',
-        secure: process.env.NODE_ENV === 'production',
+        // A Secure cookie requires HTTPS, so key this on the deployment URL scheme
+        // rather than NODE_ENV: production over HTTPS (APP_BASE_URL=https://…) → Secure;
+        // local/e2e over plain HTTP → not Secure (else the browser drops the cookie and
+        // sessions never persist). Production MUST set APP_BASE_URL to an https:// URL.
+        secure: (process.env.APP_BASE_URL ?? '').startsWith('https://'),
         path: '/',
       },
     },
