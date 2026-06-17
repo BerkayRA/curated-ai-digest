@@ -8,6 +8,7 @@
  */
 
 import { redirect } from 'next/navigation';
+import { AuthError } from 'next-auth';
 import { auth, signIn } from '@/auth';
 import styles from './login.module.css';
 
@@ -53,11 +54,22 @@ const BUKA_PARTICLES = [
 
 async function localSignIn(formData: FormData): Promise<void> {
   'use server';
-  await signIn('credentials', {
-    email: formData.get('email'),
-    password: formData.get('password'),
-    redirectTo: '/',
-  });
+  try {
+    await signIn('credentials', {
+      email: formData.get('email'),
+      password: formData.get('password'),
+      redirectTo: '/',
+    });
+  } catch (error) {
+    // A failed sign-in throws an AuthError — surface it as a friendly ?error=
+    // param on /login instead of an uncaught server-side exception. The success
+    // path throws NEXT_REDIRECT (not an AuthError), so it is re-thrown untouched.
+    if (error instanceof AuthError) {
+      const code = error.type === 'CredentialsSignin' ? 'CredentialsSignin' : 'Default';
+      redirect(`/login?error=${code}`);
+    }
+    throw error;
+  }
 }
 
 // ---------------------------------------------------------------------------
