@@ -35,6 +35,7 @@ export const sampleIssue: DigestEmailData = {
   ],
   unsubscribeUrl: '{{unsubscribeUrl}}',
   senderAddress: 'Mega Bilişim Teknolojileri A.Ş., Ankara, Türkiye',
+  assetBaseUrl: 'https://bulten.megabilgisayar.com.tr',
 };
 
 /** Two-item variant for test coverage of the 2-item render path. */

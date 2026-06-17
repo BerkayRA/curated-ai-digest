@@ -26,7 +26,13 @@ import type { DigestEmailData, RenderedEmail } from './types.js';
  * @returns Promise resolving to { html, text } — both parts required by most providers.
  */
 export async function renderDigestEmail(data: DigestEmailData): Promise<RenderedEmail> {
-  const element = React.createElement(DigestEmail, data);
+  // Email images are referenced by absolute URL (not embedded), so they require the
+  // web app to be reachable at assetBaseUrl when the recipient opens the message.
+  const merged: DigestEmailData = {
+    ...data,
+    assetBaseUrl: data.assetBaseUrl ?? process.env.APP_BASE_URL ?? '',
+  };
+  const element = React.createElement(DigestEmail, merged);
   const html = await render(element);
   const text = toPlainText(html);
 
