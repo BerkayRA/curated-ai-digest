@@ -40,7 +40,7 @@ Subagent legend: **architect**, **code-architect** (TS impl), **tdd-guide**,
 - [x] Phase 10 — scheduling + auto-send ★ (croner scheduler from Settings; curate+send jobs; guardrails; shared @mega-bulten/delivery package; worker bootstrap)
 - [x] Phase 2 (finish) — web + worker Dockerfiles (Next standalone, argon2 on musl), compose web+worker, root .env.example
 - [x] Phase 12 (security) — review pass + fixes: iframe XSS, seed tokens, security headers/CSP, CSRF (SameSite + Origin check), Adminer dev-profile, status validation, item-ownership, PII scrub, scheme allowlist, CSV bound, /api/health; docs/SECURITY.md
-- [~] Phase 12 (e2e/visual) — Playwright functional + visual regression + axe (running)
+- [x] Phase 12 (e2e/visual) — Playwright on system Chrome (channel:'chrome'), 5 breakpoints; functional + auth + visual + axe a11y all green (115 passed). Surfaced+fixed: login AuthError handling, scheme-based secure cookie, login rendered inside dashboard shell (route-group fix), sidebar WCAG AA contrast (darker brand-blue surface + dark active pill)
 - [x] Phase 13 — docs/RUNBOOK.md, SECURITY.md, README deploy/status
 
 **Verified state:** 413 tests pass (shared 79, curation 97, email 55, delivery 37, worker 23, web 122); `pnpm -r type-check` clean across 10 workspaces; web + worker builds green; auth enforcement + CSP runtime-verified. Docker compose validated.
