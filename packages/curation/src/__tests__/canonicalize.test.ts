@@ -113,3 +113,43 @@ describe('contentHash', () => {
     expect(h1).toBe(h2);
   });
 });
+
+// ---------------------------------------------------------------------------
+// isAllowedScheme
+// ---------------------------------------------------------------------------
+
+import { isAllowedScheme } from '../ingest/canonicalize.js';
+
+describe('isAllowedScheme', () => {
+  it('allows http URLs', () => {
+    expect(isAllowedScheme('http://example.com/article')).toBe(true);
+  });
+
+  it('allows https URLs', () => {
+    expect(isAllowedScheme('https://example.com/article')).toBe(true);
+  });
+
+  it('rejects javascript: URLs', () => {
+    expect(isAllowedScheme('javascript:alert(1)')).toBe(false);
+  });
+
+  it('rejects data: URLs', () => {
+    expect(isAllowedScheme('data:text/html,<h1>hello</h1>')).toBe(false);
+  });
+
+  it('rejects file: URLs', () => {
+    expect(isAllowedScheme('file:///etc/passwd')).toBe(false);
+  });
+
+  it('rejects ftp: URLs', () => {
+    expect(isAllowedScheme('ftp://example.com/file')).toBe(false);
+  });
+
+  it('rejects invalid (non-URL) strings', () => {
+    expect(isAllowedScheme('not a url')).toBe(false);
+  });
+
+  it('rejects empty string', () => {
+    expect(isAllowedScheme('')).toBe(false);
+  });
+});

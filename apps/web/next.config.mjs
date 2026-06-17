@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'standalone',
   transpilePackages: [
     '@mega-bulten/brand',
     '@mega-bulten/shared',
@@ -13,6 +14,47 @@ const nextConfig = {
   // in Next.js 15.
   experimental: {
     serverComponentsExternalPackages: ['argon2'],
+  },
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          { key: 'X-Frame-Options', value: 'DENY' },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=()',
+          },
+          {
+            key: 'Strict-Transport-Security',
+            value: 'max-age=63072000; includeSubDomains; preload',
+          },
+          {
+            key: 'Content-Security-Policy',
+            value: [
+              "default-src 'self'",
+              // Next App Router injects inline bootstrap/hydration scripts; without
+              // 'unsafe-inline' (or a per-request nonce) the app won't hydrate.
+              // Pragmatic for this internal, auth-gated tool; nonce-based CSP is the
+              // documented hardening step (see docs/SECURITY.md).
+              "script-src 'self' 'unsafe-inline'",
+              "style-src 'self' 'unsafe-inline'",
+              "img-src 'self' data: https:",
+              "font-src 'self'",
+              // 'self' (not 'none') so the email-preview srcdoc iframe is permitted.
+              "frame-src 'self'",
+              // Clickjacking protection (who may embed US) — pairs with X-Frame-Options.
+              "frame-ancestors 'none'",
+              "object-src 'none'",
+              "base-uri 'self'",
+              "form-action 'self'",
+            ].join('; '),
+          },
+        ],
+      },
+    ];
   },
   webpack: (config, { nextRuntime }) => {
     // Resolve .js extension imports in ESM workspace packages to .ts source files.

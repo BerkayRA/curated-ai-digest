@@ -53,6 +53,16 @@ export const authConfig: NextAuthConfig = {
   trustHost: true,
   session: { strategy: 'jwt' },
   pages: { signIn: '/login', error: '/login' },
+  cookies: {
+    sessionToken: {
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
+        path: '/',
+      },
+    },
+  },
   callbacks: {
     /**
      * Entra mode: enforce tenant + group/domain allowlist. Local mode: the

@@ -132,3 +132,35 @@ describe('filterAgainstExisting', () => {
     expect(result).toHaveLength(0);
   });
 });
+
+// ---------------------------------------------------------------------------
+// URL scheme allowlist guard in deduplicateWithinRun
+// ---------------------------------------------------------------------------
+
+describe('deduplicateWithinRun — scheme allowlist', () => {
+  it('skips candidates with javascript: scheme', () => {
+    const raw = makeRaw({ sourceUrl: 'javascript:alert(1)', title: 'Malicious' });
+    const result = deduplicateWithinRun([raw]);
+    expect(result).toHaveLength(0);
+  });
+
+  it('skips candidates with data: scheme', () => {
+    const raw = makeRaw({ sourceUrl: 'data:text/html,<script>evil</script>', title: 'Data' });
+    const result = deduplicateWithinRun([raw]);
+    expect(result).toHaveLength(0);
+  });
+
+  it('skips candidates with file: scheme', () => {
+    const raw = makeRaw({ sourceUrl: 'file:///etc/passwd', title: 'Local File' });
+    const result = deduplicateWithinRun([raw]);
+    expect(result).toHaveLength(0);
+  });
+
+  it('keeps valid http candidates alongside rejected ones', () => {
+    const good = makeRaw({ sourceUrl: 'https://example.com/article', title: 'Good' });
+    const bad = makeRaw({ sourceUrl: 'javascript:void(0)', title: 'Bad' });
+    const result = deduplicateWithinRun([good, bad]);
+    expect(result).toHaveLength(1);
+    expect(result[0]?.sourceUrl).toBe('https://example.com/article');
+  });
+});

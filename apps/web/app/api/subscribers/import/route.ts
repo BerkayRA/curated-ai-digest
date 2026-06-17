@@ -7,6 +7,9 @@ import { randomUUID } from 'crypto';
 
 export const dynamic = 'force-dynamic';
 
+/** Maximum allowed CSV body size (5 MB). */
+const MAX_CSV_BYTES = 5 * 1024 * 1024;
+
 export interface ImportResult {
   imported: number;
   skippedDuplicates: number;
@@ -26,9 +29,16 @@ export async function POST(request: NextRequest) {
       if (!file || typeof file === 'string') {
         return NextResponse.json(err('CSV dosyası gerekli (form field: "file")'), { status: 400 });
       }
-      csvText = await (file as Blob).text();
+      const blob = file as Blob;
+      if (blob.size > MAX_CSV_BYTES) {
+        return NextResponse.json(err('CSV dosyası 5 MB sınırını aşıyor'), { status: 413 });
+      }
+      csvText = await blob.text();
     } else {
       const body = await request.text();
+      if (Buffer.byteLength(body, 'utf8') > MAX_CSV_BYTES) {
+        return NextResponse.json(err('CSV dosyası 5 MB sınırını aşıyor'), { status: 413 });
+      }
       csvText = body;
     }
 

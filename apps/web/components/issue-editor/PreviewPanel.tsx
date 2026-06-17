@@ -112,7 +112,7 @@ export function PreviewPanel({ issueId, subject, preheader, isoWeek, items }: Pr
           className={styles.previewFrame}
           srcDoc={html}
           title="E-posta önizlemesi"
-          sandbox="allow-same-origin"
+          sandbox=""
           aria-label="E-posta önizlemesi"
         />
       ) : (

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import { prisma } from '@mega-bulten/db';
 import { CreateSubscriberSchema } from '@mega-bulten/shared';
 import { ok, err } from '@/lib/api-response';
@@ -7,18 +8,23 @@ import { randomUUID } from 'crypto';
 
 export const dynamic = 'force-dynamic';
 
+const SubscriberStatusSchema = z.enum(['active', 'unsubscribed', 'bounced']).optional();
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const status = searchParams.get('status');
+    const rawStatus = searchParams.get('status');
+
+    const parsedStatus = SubscriberStatusSchema.safeParse(rawStatus ?? undefined);
+    const status = parsedStatus.success ? parsedStatus.data : undefined;
 
     const subscribers = await prisma.subscriber.findMany({
-      where: status ? { status: status as 'active' | 'unsubscribed' | 'bounced' } : undefined,
+      where: status ? { status } : undefined,
       orderBy: { createdAt: 'desc' },
     });
 
     const total = await prisma.subscriber.count({
-      where: status ? { status: status as 'active' | 'unsubscribed' | 'bounced' } : undefined,
+      where: status ? { status } : undefined,
     });
 
     return NextResponse.json(
