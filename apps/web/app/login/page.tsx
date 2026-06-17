@@ -7,6 +7,7 @@
  * Auth errors from Auth.js are surfaced via ?error=... search param.
  */
 
+import Image from 'next/image';
 import { redirect } from 'next/navigation';
 import { AuthError } from 'next-auth';
 import { auth, signIn } from '@/auth';
@@ -102,16 +103,16 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   return (
     <main className={styles.page}>
       <article className={styles.card}>
-        {/* Brand mark */}
+        {/* Brand mark — official Mega wordmark (blue on light card) */}
         <div className={styles.brandMark}>
-          <div className={styles.logoMark} aria-hidden="true">
-            <span className={styles.logoText}>MB</span>
-            <span className={styles.dotAccent} />
-          </div>
-          <div className={styles.brandLabel}>
-            <span className={styles.brandName}>Mega Bülten</span>
-            <span className={styles.brandSub}>Yönetim Paneli</span>
-          </div>
+          <Image
+            src="/brand/mega-wordmark-blue.png"
+            width={200}
+            height={73}
+            alt="Mega Bilişim Teknolojileri"
+            priority
+          />
+          <span className={styles.productLabel}>Bülten · Yönetim Paneli</span>
         </div>
 
         <h1 className={styles.heading}>Hoş Geldiniz</h1>

@@ -51,11 +51,12 @@ const NUNITO_URL =
 
 // Wordmark image — hosted path in production. For development previews this
 // resolves to the brand assets directory. Replace with CDN URL when deploying.
-// PLACEHOLDER: swap this for the official CDN-hosted wordmark URL pre-launch.
-const WORDMARK_WHITE_URL =
-  'https://mega-bulten.mega.com.tr/assets/brand/mega-wordmark-white.png';
-const WORDMARK_WIDTH = 160;
-const WORDMARK_HEIGHT = 40;
+// The official white wordmark, served from the web app's public dir at
+// `${assetBaseUrl}/brand/mega-wordmark-white.png`. Email images are referenced by
+// absolute URL (not embedded), so the app must be reachable at assetBaseUrl.
+const WORDMARK_PATH = '/brand/mega-wordmark-white.png';
+const WORDMARK_WIDTH = 168;
+const WORDMARK_HEIGHT = 61;
 
 // ---------------------------------------------------------------------------
 // Sub-components
@@ -262,7 +263,10 @@ export function DigestEmail(props: DigestEmailData) {
     items,
     unsubscribeUrl,
     senderAddress,
+    assetBaseUrl,
   } = props;
+
+  const wordmarkUrl = `${assetBaseUrl ?? ''}${WORDMARK_PATH}`;
 
   const formattedDate = new Date(issueDate).toLocaleDateString('tr-TR', {
     day: 'numeric',
@@ -338,13 +342,10 @@ export function DigestEmail(props: DigestEmailData) {
             {/* Wordmark row */}
             <Row>
               <Column style={{ padding: `${space.xl} ${space.xl} ${space.md} ${space.xl}` }}>
-                {/*
-                 * PLACEHOLDER wordmark — replace WORDMARK_WHITE_URL with the
-                 * official CDN-hosted asset before launch.
-                 * The alt text is critical for Outlook (images off by default).
-                 */}
+                {/* Official Mega white wordmark. alt text is critical for Outlook
+                    (images off by default). */}
                 <Img
-                  src={WORDMARK_WHITE_URL}
+                  src={wordmarkUrl}
                   width={WORDMARK_WIDTH}
                   height={WORDMARK_HEIGHT}
                   alt="mega Bilişim Teknolojileri"

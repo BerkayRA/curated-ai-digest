@@ -45,6 +45,12 @@ describe('renderDigestEmail', () => {
       }
     });
 
+    it('renders the white wordmark from the asset base URL', async () => {
+      const { html } = await renderDigestEmail(sampleIssue);
+      expect(html).toContain('/brand/mega-wordmark-white.png');
+      expect(html).toContain('https://bulten.megabilgisayar.com.tr/brand/mega-wordmark-white.png');
+    });
+
     it('html contains the unsubscribe URL placeholder', async () => {
       const { html } = await renderDigestEmail(sampleIssue);
       expect(html).toContain('{{unsubscribeUrl}}');

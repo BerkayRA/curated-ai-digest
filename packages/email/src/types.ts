@@ -39,6 +39,12 @@ export interface DigestEmailData {
   readonly unsubscribeUrl: string;
   /** Physical address line shown in the footer (CAN-SPAM / GDPR compliance). */
   readonly senderAddress: string;
+  /**
+   * Absolute base URL for email image assets (e.g. the wordmark). Defaults to
+   * process.env.APP_BASE_URL at render time. Images are referenced (not embedded),
+   * so the web app must be reachable here when the recipient opens the email.
+   */
+  readonly assetBaseUrl?: string;
 }
 
 /** Output of renderDigestEmail(). */
