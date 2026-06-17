@@ -33,10 +33,14 @@ Subagent legend: **architect**, **code-architect** (TS impl), **tdd-guide**,
 - [x] Phase 4 — ingestion (Exa + 9 RSS feeds, canonicalize+dedup, idempotent persist; 46 tests)
 - [x] Phase 5 — email/brand (React Email digest, Buka dot-dissolve inline SVG, Outlook-safe, placeholder wordmark SVGs; 20 tests)
 - [x] Phase 6 — dashboard shell (Next 14 App Router; Archive/Subscribers/Settings + admin API; branded shell; 12 tests; build green)
-- [ ] Phase 7 — curation pipeline ★ (track A) · Phase 8 — delivery providers (track B) · Phase 11 — auth (track D) ← next
-- [ ] Phases 9, 10, 12, 13
+- [x] Phase 7 — curation pipeline ★ (5 cost-routed Claude stages, tool-use structured output, QA→copywrite retry, idempotent per isoWeek, renderFn injected; 85 curation tests)
+- [x] Phase 8 — delivery providers (ACS default + Graph + Resend behind EmailProvider; rate-limit + backoff; factory; 55 email tests)
+- [ ] Phase 9 — approval workflow + draft editor + preview (apps/web) ← next
+- [ ] Phase 11 — auth (Entra SSO) · Phase 10 — scheduling + auto-send · Phase 12 — testing/visual/security · Phase 13 — polish/docs
 
-**Verified state:** 157 tests pass (shared 79, curation 46, email 20, web 12); `pnpm -r type-check` clean; web build green.
+**Verified state:** 231 tests pass (shared 79, curation 85, email 55, web 12); `pnpm -r type-check` clean across 9 workspaces; web build green.
+
+**Wiring TODOs surfaced:** worker must add `@mega-bulten/email` to curation deps + pass `renderDigestEmail` as `renderFn`; confirm exact Claude pricing in `pipeline/config.ts`; Graph `sendMail` drops custom headers (List-Unsubscribe must live in HTML footer).
 
 ## Key risks (see ARCHITECTURE.md / plan)
 

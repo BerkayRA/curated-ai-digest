@@ -19,6 +19,11 @@
     "@mega-bulten/shared": "workspace:*",
     "@react-email/components": "^0.0.32",
     "@react-email/render": "^1.0.3",
+    "@azure/communication-email": "^1.0.0",
+    "@azure/identity": "^4.5.0",
+    "@microsoft/microsoft-graph-client": "^3.0.7",
+    "resend": "^4.0.1",
+    "p-limit": "^6.1.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
