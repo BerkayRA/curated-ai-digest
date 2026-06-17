@@ -10,6 +10,7 @@ import { IssueStatusSchema } from '@mega-bulten/shared';
 import { ok, err } from '@/lib/api-response';
 import { getErrorMessage } from '@/lib/error';
 import { transitionIssue } from '@/lib/issue-transition';
+import { auth } from '@/auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,6 +25,10 @@ interface RouteParams {
 
 export async function POST(request: Request, { params }: RouteParams) {
   try {
+    const session = await auth();
+    // Middleware guarantees auth on this route; fallback is a safety net only.
+    const actorId = session?.user?.id ?? session?.user?.email ?? 'system';
+
     const body: unknown = await request.json();
     const parsed = TransitionBodySchema.safeParse(body);
 
@@ -45,7 +50,7 @@ export async function POST(request: Request, { params }: RouteParams) {
     const result = await transitionIssue({
       issueId: params.id,
       to,
-      actorId: 'admin',
+      actorId,
     });
 
     return NextResponse.json(ok(result));

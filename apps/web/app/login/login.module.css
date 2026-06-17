@@ -1,0 +1,269 @@
+/* ============================================================
+   Login page — Mega Bülten
+   Process Blue brand, single-card centred layout.
+   ============================================================ */
+
+.page {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-gray-light);
+  padding: var(--space-xl);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle brand-coloured background strip */
+.page::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(160deg, var(--color-brand-tint) 0%, transparent 55%);
+  pointer-events: none;
+}
+
+/* ── Card ──────────────────────────────────────────────────── */
+
+.card {
+  position: relative;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-gray-light);
+  padding: var(--space-xxl) var(--space-xl);
+  max-width: 440px;
+  width: 100%;
+  box-shadow:
+    0 2px 8px rgba(0, 137, 207, 0.06),
+    0 12px 40px rgba(0, 0, 0, 0.08);
+}
+
+/* ── Brand mark ────────────────────────────────────────────── */
+
+.brandMark {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-xl);
+}
+
+.logoMark {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  background-color: var(--color-brand);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.logoText {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--color-surface);
+  letter-spacing: -0.02em;
+}
+
+.dotAccent {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 8px;
+  height: 8px;
+  background-color: var(--color-accent-orange);
+  border-radius: 50%;
+  border: 2px solid var(--color-surface);
+}
+
+.brandLabel {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.brandName {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--color-ink);
+  letter-spacing: -0.02em;
+}
+
+.brandSub {
+  font-size: var(--text-xs);
+  color: var(--color-ink-muted);
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* ── Heading ───────────────────────────────────────────────── */
+
+.heading {
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--color-ink);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin-bottom: var(--space-xs);
+}
+
+.subheading {
+  font-size: var(--text-sm);
+  color: var(--color-ink-muted);
+  margin-bottom: var(--space-xl);
+  line-height: 1.5;
+}
+
+/* ── SSO button (Entra mode) ───────────────────────────────── */
+
+.ssoButton {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-lg);
+  background-color: var(--color-brand);
+  color: var(--color-surface);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-base);
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-out-expo),
+    transform var(--duration-fast) var(--ease-out-expo);
+  text-decoration: none;
+}
+
+.ssoButton:hover {
+  background-color: var(--color-brand-dark);
+  text-decoration: none;
+}
+
+.ssoButton:active {
+  transform: scale(0.98);
+}
+
+.microsoftIcon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+/* ── Local credentials form ────────────────────────────────── */
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.label {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.input {
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  border: 1.5px solid var(--color-gray);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-base);
+  color: var(--color-ink);
+  background-color: var(--color-surface);
+  transition: border-color var(--duration-fast) var(--ease-out-expo);
+  outline: none;
+}
+
+.input:focus {
+  border-color: var(--color-brand);
+  box-shadow: 0 0 0 3px rgba(0, 137, 207, 0.12);
+}
+
+.input::placeholder {
+  color: var(--color-ink-muted);
+}
+
+.submitButton {
+  width: 100%;
+  padding: var(--space-md) var(--space-lg);
+  background-color: var(--color-brand);
+  color: var(--color-surface);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-base);
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-out-expo),
+    transform var(--duration-fast) var(--ease-out-expo);
+  margin-top: var(--space-xs);
+}
+
+.submitButton:hover {
+  background-color: var(--color-brand-dark);
+}
+
+.submitButton:active {
+  transform: scale(0.98);
+}
+
+.submitButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ── Error notice ──────────────────────────────────────────── */
+
+.errorNotice {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  background-color: #fdf2f2;
+  border: 1px solid #f5c6c6;
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-md);
+}
+
+.errorIcon {
+  font-size: 16px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.errorText {
+  font-size: var(--text-sm);
+  color: #b91c1c;
+  line-height: 1.5;
+}
+
+/* ── Buka particle motif (decorative) ──────────────────────── */
+
+.bukaAccent {
+  position: absolute;
+  bottom: var(--space-lg);
+  right: var(--space-lg);
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.bukaParticle {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: var(--c);
+}

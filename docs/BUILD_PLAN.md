@@ -35,10 +35,12 @@ Subagent legend: **architect**, **code-architect** (TS impl), **tdd-guide**,
 - [x] Phase 6 — dashboard shell (Next 14 App Router; Archive/Subscribers/Settings + admin API; branded shell; 12 tests; build green)
 - [x] Phase 7 — curation pipeline ★ (5 cost-routed Claude stages, tool-use structured output, QA→copywrite retry, idempotent per isoWeek, renderFn injected; 85 curation tests)
 - [x] Phase 8 — delivery providers (ACS default + Graph + Resend behind EmailProvider; rate-limit + backoff; factory; 55 email tests)
-- [ ] Phase 9 — approval workflow + draft editor + preview (apps/web) ← next
-- [ ] Phase 11 — auth (Entra SSO) · Phase 10 — scheduling + auto-send · Phase 12 — testing/visual/security · Phase 13 — polish/docs
+- [x] Phase 9 — approval workflow + draft editor + live preview + dispatch service + public unsubscribe
+- [x] Phase 11 — auth: Entra ID SSO + argon2 local fallback (AUTH_MODE seam). Split edge-safe `auth.config.ts` (middleware) vs Node `auth.ts` (argon2). Fixed two production bugs: argon2 leaking into edge bundle (crashed all routes) + missing `trustHost` (auth failing open). Runtime-verified route protection.
+- [ ] Phase 10 — scheduling + auto-send ★ (worker + extract dispatch to shared) ← next
+- [ ] Phase 12 — testing/visual/security · Phase 13 — polish/docs
 
-**Verified state:** 231 tests pass (shared 79, curation 85, email 55, web 12); `pnpm -r type-check` clean across 9 workspaces; web build green.
+**Verified state:** 334 tests pass (shared 79, curation 85, email 55, web 115); `pnpm -r type-check` clean across 9 workspaces; web build green; auth enforcement runtime-verified (protected→401/redirect, public→200).
 
 **Wiring TODOs surfaced:** worker must add `@mega-bulten/email` to curation deps + pass `renderDigestEmail` as `renderFn`; confirm exact Claude pricing in `pipeline/config.ts`; Graph `sendMail` drops custom headers (List-Unsubscribe must live in HTML footer).
 
