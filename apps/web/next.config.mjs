@@ -5,6 +5,7 @@ const nextConfig = {
     '@mega-bulten/shared',
     '@mega-bulten/db',
     '@mega-bulten/email',
+    '@mega-bulten/delivery',
   ],
   // argon2 uses native Node.js addons (node:crypto) and must never be bundled
   // by webpack. Mark it as external so Next.js requires it at runtime instead.

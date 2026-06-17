@@ -1,12 +1,12 @@
 /**
- * Dispatch service unit tests — imports re-exported from @mega-bulten/delivery.
+ * Dispatch service unit tests.
  * Uses injected mock provider + mock repo + mock transitionFn.
  * No real DB or email calls.
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { dispatchIssue } from '../lib/dispatch';
-import type { DispatchRepo } from '../lib/dispatch';
+import { dispatchIssue } from '../dispatch.js';
+import type { DispatchRepo } from '../dispatch.js';
 import type { EmailProvider, EmailMessage, SendResult } from '@mega-bulten/email';
 import type { IssueStatus } from '@mega-bulten/shared';
 
@@ -164,7 +164,6 @@ describe('dispatchIssue', () => {
     expect(aliceMsg).toBeDefined();
     expect(aliceMsg!.headers?.['List-Unsubscribe']).toMatch(/token-alice-abc123/);
     expect(aliceMsg!.headers?.['List-Unsubscribe-Post']).toBe('List-Unsubscribe=One-Click');
-    // Unsubscribe URL is also inside the HTML body (injected by renderDigestEmail)
     expect(aliceMsg!.html).toBeTruthy();
 
     const bobMsg = messages.find((m) => m.to.email === 'bob@example.com');
@@ -189,7 +188,7 @@ describe('dispatchIssue', () => {
     expect(calls.every((c) => c.providerMessageId !== undefined)).toBe(true);
   });
 
-  it('transitions issue to sent on success', async () => {
+  it('calls transitionFn with to=sent on success', async () => {
     const repo = makeMockRepo();
     const provider = makeMockProvider();
 
