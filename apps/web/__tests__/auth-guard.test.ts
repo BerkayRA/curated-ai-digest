@@ -25,6 +25,12 @@ describe('isPublicPath', () => {
     '/_next/static/chunks/main.js',
     '/_next/image?url=foo',
     '/favicon.ico',
+    // static brand/favicon assets must load pre-auth
+    '/icon.png',
+    '/apple-icon.png',
+    '/brand/mega-wordmark-white.png',
+    '/brand/mega-wordmark-blue.png',
+    '/some/nested/asset.svg',
   ];
 
   it.each(publicPaths)('treats %s as public', (path) => {

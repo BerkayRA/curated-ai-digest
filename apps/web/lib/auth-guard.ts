@@ -19,13 +19,24 @@ const PUBLIC_PREFIXES = [
   '/_next/static',
   '/_next/image',
   '/favicon.ico',
+  // Brand/favicon static assets served from app/ and public/ — must load pre-auth
+  // (login page logo, favicon) and for external email clients.
+  '/brand',
+  '/icon.png',
+  '/apple-icon.png',
 ] as const;
+
+/** Static asset file extensions that are always public (favicon, logos, fonts, etc.). */
+const PUBLIC_ASSET_EXT = /\.(png|jpe?g|gif|svg|webp|avif|ico|css|js|map|woff2?|ttf|otf)$/i;
 
 /**
  * Returns true when the pathname is publicly accessible (no auth required).
  * Used by middleware.ts and unit tests.
  */
 export function isPublicPath(pathname: string): boolean {
+  if (PUBLIC_ASSET_EXT.test(pathname)) {
+    return true;
+  }
   return PUBLIC_PREFIXES.some(
     (prefix) =>
       pathname === prefix ||
