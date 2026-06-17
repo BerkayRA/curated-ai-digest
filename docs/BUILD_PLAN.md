@@ -30,8 +30,13 @@ Subagent legend: **architect**, **code-architect** (TS impl), **tdd-guide**,
 - [x] Phase 1 — monorepo scaffold (8 workspaces install clean)
 - [~] Phase 2 — Docker: compose has db+adminer (port 5433); web/worker Dockerfiles pending
 - [x] Phase 3 — Prisma + Zod ★ (migration `20260616154231_init`; 79 contract tests green; singleton client; seed)
-- [ ] Phase 4 — ingestion (track A) · Phase 5 — email/brand (track B) · Phase 6 — dashboard shell (track C) ← next, parallelizable
-- [ ] Phases 7–13
+- [x] Phase 4 — ingestion (Exa + 9 RSS feeds, canonicalize+dedup, idempotent persist; 46 tests)
+- [x] Phase 5 — email/brand (React Email digest, Buka dot-dissolve inline SVG, Outlook-safe, placeholder wordmark SVGs; 20 tests)
+- [x] Phase 6 — dashboard shell (Next 14 App Router; Archive/Subscribers/Settings + admin API; branded shell; 12 tests; build green)
+- [ ] Phase 7 — curation pipeline ★ (track A) · Phase 8 — delivery providers (track B) · Phase 11 — auth (track D) ← next
+- [ ] Phases 9, 10, 12, 13
+
+**Verified state:** 157 tests pass (shared 79, curation 46, email 20, web 12); `pnpm -r type-check` clean; web build green.
 
 ## Key risks (see ARCHITECTURE.md / plan)
 

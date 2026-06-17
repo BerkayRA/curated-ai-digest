@@ -1,0 +1,24 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: var(--radius-pill);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+/* Issue statuses */
+.draft         { background: var(--color-gray-light); color: var(--color-ink-muted); }
+.in_review     { background: #fff3cd; color: #7a5100; }
+.approved      { background: #d4edda; color: #155724; }
+.scheduled     { background: var(--color-brand-tint); color: var(--color-brand-dark); }
+.sent          { background: #d4edda; color: #155724; }
+.failed        { background: #f8d7da; color: #721c24; }
+.cancelled     { background: var(--color-gray-light); color: var(--color-ink-muted); }
+
+/* Subscriber statuses */
+.active        { background: #d4edda; color: #155724; }
+.unsubscribed  { background: var(--color-gray-light); color: var(--color-ink-muted); }
+.bounced       { background: #f8d7da; color: #721c24; }

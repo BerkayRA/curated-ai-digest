@@ -10,6 +10,22 @@
   },
   "scripts": {
     "lint": "eslint src --max-warnings 0",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "test": "vitest run",
+    "preview": "email dev --dir ./src/templates"
+  },
+  "dependencies": {
+    "@mega-bulten/brand": "workspace:*",
+    "@mega-bulten/shared": "workspace:*",
+    "@react-email/components": "^0.0.32",
+    "@react-email/render": "^1.0.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "react-email": "^3.0.6",
+    "vitest": "^2.1.8"
   }
 }
