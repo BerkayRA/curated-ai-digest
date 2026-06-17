@@ -1,0 +1,245 @@
+/* ============================================================
+   Admin Shell — Mega Bülten brand-driven layout
+   Process Blue sidebar + dot-dissolve Buka motif footer
+   ============================================================ */
+
+.shell {
+  display: flex;
+  min-height: 100dvh;
+  background-color: var(--color-gray-light);
+}
+
+/* ── Sidebar ─────────────────────────────────────────────── */
+
+.sidebar {
+  width: 240px;
+  min-height: 100dvh;
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-brand);
+  padding: var(--space-lg) 0 0;
+  flex-shrink: 0;
+  z-index: 10;
+}
+
+.sidebarBrand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 0 var(--space-lg) var(--space-xl);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  margin-bottom: var(--space-lg);
+}
+
+.logoMark {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  background-color: var(--color-surface);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.logoText {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-brand);
+  letter-spacing: -0.02em;
+}
+
+.dotAccent {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 8px;
+  height: 8px;
+  background-color: var(--color-accent-orange);
+  border-radius: 50%;
+  border: 2px solid var(--color-brand);
+}
+
+.brandLabel {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.brandName {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--color-surface);
+  letter-spacing: -0.02em;
+}
+
+.brandSub {
+  font-size: var(--text-xs);
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* ── Navigation ──────────────────────────────────────────── */
+
+.navList {
+  list-style: none;
+  padding: 0 var(--space-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-sm);
+  color: rgba(255, 255, 255, 0.8);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  text-decoration: none;
+  transition:
+    background-color var(--duration-fast) var(--ease-out-expo),
+    color var(--duration-fast) var(--ease-out-expo);
+  position: relative;
+}
+
+.navItem:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+  color: var(--color-surface);
+  text-decoration: none;
+}
+
+.navItemActive {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: var(--color-surface);
+  font-weight: 600;
+}
+
+.navIcon {
+  width: 20px;
+  text-align: center;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.navLabel {
+  flex: 1;
+}
+
+.navActiveDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--color-accent-teal);
+  flex-shrink: 0;
+}
+
+/* ── Sidebar footer with Buka dot-dissolve motif ──────────── */
+
+.sidebarFooter {
+  margin-top: auto;
+  padding: var(--space-lg);
+}
+
+.bukaMotif {
+  position: relative;
+  height: 64px;
+  opacity: 0.45;
+}
+
+.bukaParticle {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--c);
+}
+
+/* ── Content area ────────────────────────────────────────── */
+
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* ── Topbar ──────────────────────────────────────────────── */
+
+.topbar {
+  height: 60px;
+  background-color: var(--color-surface);
+  border-bottom: 1px solid var(--color-gray-light);
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 9;
+}
+
+.topbarInner {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-xl);
+}
+
+.topbarLeft {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.topbarAccentLine {
+  height: 3px;
+  width: 32px;
+  background: linear-gradient(
+    90deg,
+    var(--color-brand) 0%,
+    var(--color-accent-teal) 60%,
+    var(--color-accent-orange) 100%
+  );
+  border-radius: var(--radius-pill);
+}
+
+.topbarRight {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.userBadge {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.userAvatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--color-brand);
+  color: var(--color-surface);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Main content ────────────────────────────────────────── */
+
+.main {
+  flex: 1;
+  padding: var(--space-xl);
+  overflow-y: auto;
+}

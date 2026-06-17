@@ -1,0 +1,168 @@
+/* ============================================================
+   Settings form — sectioned card layout
+   ============================================================ */
+
+.noSettings {
+  padding: var(--space-xl);
+  background: var(--color-gray-light);
+  border-radius: var(--radius-md);
+  color: var(--color-ink-muted);
+  font-size: var(--text-sm);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  max-width: 760px;
+}
+
+.formError {
+  background: #fef2f2;
+  border: 1px solid #fca5a5;
+  color: #991b1b;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+}
+
+.formSuccess {
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+  color: #166534;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+}
+
+/* ── Section card ─────────────────────────────────────── */
+
+.section {
+  background: var(--color-surface);
+  border: 1px solid var(--color-gray-light);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.sectionTitle {
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--color-ink);
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--color-gray-light);
+}
+
+/* ── Fields ───────────────────────────────────────────── */
+
+.fieldGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--space-md);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.label {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.input,
+.select {
+  height: 40px;
+  padding: 0 var(--space-sm);
+  border: 1px solid var(--color-gray);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  color: var(--color-ink);
+  background: var(--color-surface);
+  transition: border-color var(--duration-fast), box-shadow var(--duration-fast);
+  width: 100%;
+}
+
+.input:focus,
+.select:focus {
+  outline: none;
+  border-color: var(--color-brand);
+  box-shadow: 0 0 0 3px var(--color-brand-tint);
+}
+
+/* ── Toggle switch ────────────────────────────────────── */
+
+.toggleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-lg);
+}
+
+.toggleLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  cursor: pointer;
+}
+
+.toggleLabelText {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.toggleLabelHint {
+  font-size: var(--text-xs);
+  color: var(--color-ink-muted);
+  max-width: 400px;
+}
+
+.toggle {
+  position: relative;
+  width: 48px;
+  height: 28px;
+  border-radius: var(--radius-pill);
+  background: var(--color-gray);
+  border: none;
+  cursor: pointer;
+  transition: background-color var(--duration-normal) var(--ease-out-expo);
+  flex-shrink: 0;
+}
+
+.toggle:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}
+
+.toggleOn {
+  background: var(--color-brand);
+}
+
+.toggleThumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--color-surface);
+  transition: transform var(--duration-normal) var(--ease-out-expo);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+.toggleOn .toggleThumb {
+  transform: translateX(20px);
+}
+
+/* ── Form actions ─────────────────────────────────────── */
+
+.formActions {
+  display: flex;
+  justify-content: flex-start;
+}
