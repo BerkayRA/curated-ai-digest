@@ -18,7 +18,9 @@
   top: 0;
   display: flex;
   flex-direction: column;
-  background-color: var(--color-brand);
+  /* Deeper brand blue so white/near-white text clears WCAG AA 4.5:1
+     (white on #0a6fa3 ≈ 5.5:1). Process Blue #0089cf only reached ~3:1. */
+  background-color: var(--color-brand-dark);
   padding: var(--space-lg) 0 0;
   flex-shrink: 0;
   z-index: 10;
@@ -48,7 +50,9 @@
 .logoText {
   font-size: 14px;
   font-weight: 700;
-  color: var(--color-brand);
+  /* On the white logo chip: brand-dark clears AA (#0a6fa3 on white ≈ 5.5:1);
+     plain Process Blue was 3.83:1. */
+  color: var(--color-brand-dark);
   letter-spacing: -0.02em;
 }
 
@@ -78,7 +82,8 @@
 
 .brandSub {
   font-size: var(--text-xs);
-  color: rgba(255, 255, 255, 0.7);
+  /* 0.9 alpha on the deeper blue clears AA for this small uppercase label. */
+  color: rgba(255, 255, 255, 0.9);
   font-weight: 400;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -100,7 +105,8 @@
   gap: var(--space-sm);
   padding: var(--space-sm) var(--space-md);
   border-radius: var(--radius-sm);
-  color: rgba(255, 255, 255, 0.8);
+  /* 0.9 alpha on #0a6fa3 ≈ 4.8:1 (clears AA); 0.8 only reached ~4.1. */
+  color: rgba(255, 255, 255, 0.9);
   font-size: var(--text-sm);
   font-weight: 500;
   text-decoration: none;
@@ -117,7 +123,10 @@
 }
 
 .navItemActive {
-  background-color: rgba(255, 255, 255, 0.2);
+  /* Darken (not lighten) the active pill: a white overlay lightened the blue to
+     ~#3b8cb5 and dropped white-text contrast to 3.74. A dark overlay deepens the
+     blue so white text clears AA (~7:1) and still reads as the selected item. */
+  background-color: rgba(0, 0, 0, 0.22);
   color: var(--color-surface);
   font-weight: 600;
 }
