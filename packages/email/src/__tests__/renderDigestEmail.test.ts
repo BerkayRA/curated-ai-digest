@@ -128,7 +128,8 @@ describe('renderDigestEmail', () => {
 
     it('html uses Process Blue brand color as inline style', async () => {
       const { html } = await renderDigestEmail(sampleIssue);
-      expect(html.toLowerCase()).toContain('#0089cf');
+      // Aligned to the radar's Process Blue #009FDA (ADR-0003).
+      expect(html.toLowerCase()).toContain('#009fda');
     });
 
     it('html contains the issue label', async () => {

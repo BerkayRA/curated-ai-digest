@@ -22,9 +22,30 @@ export type {
 } from './ingest/types.js';
 
 // Source providers (pluggable ingestion — ADR-0003)
-export { defaultProviders } from './ingest/providers.js';
+export { defaultProviders, isRadarEnabled } from './ingest/providers.js';
 export { rssProvider } from './ingest/rss-source.js';
 export { exaProvider } from './ingest/exa-source.js';
+export {
+  radarProvider,
+  createRadarProvider,
+  fetchRadarCandidates,
+  parseRadarBody,
+  mapEventToCandidate,
+  slug,
+  RADAR_CATEGORIES,
+  RADAR_RINGS,
+  RADAR_CHANGE_TYPES,
+  DEFAULT_RADAR_FEED_URL,
+  DEFAULT_RADAR_REPO_URL,
+} from './ingest/radar-source.js';
+export type {
+  RadarProviderConfig,
+  RadarCategory,
+  RadarRing,
+  RadarChangeType,
+  RadarEvent,
+  FetchImpl,
+} from './ingest/radar-source.js';
 
 // Feed source catalogue (consumers may want to read the list)
 export { FEEDS, EXA_QUERIES, DEFAULT_TOPIC } from './ingest/sources.js';
