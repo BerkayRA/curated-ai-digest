@@ -23,10 +23,11 @@ Initial build of the weekly AI-news digest system.
 - **Modular ingestion** — a pluggable `SourceProvider` interface; built-in **RSS** and **Exa**
   providers; a configurable `topic` (default _on-prem & enterprise AI workflows_); per-provider
   failure isolation.
-- **Radar source provider** — consumes the sibling
-  [On-Prem AI Adoption Radar](https://github.com/ekaynac/onprem-ai-adoption-radar)'s
-  `history.jsonl` / change feed and maps ring decisions into newsletter candidates; deterministic,
-  off by default (`RADAR_ENABLED` / `RADAR_FEED_URL`).
+- **Optional radar source provider** — can consume a deterministic news radar's
+  `history.jsonl` / change feed (e.g. the
+  [On-Prem AI Adoption Radar](https://github.com/ekaynac/onprem-ai-adoption-radar)) and map ring
+  decisions into newsletter candidates; deterministic, off by default
+  (`RADAR_ENABLED` / `RADAR_FEED_URL`).
 - **Curation pipeline** — five cost-routed, resumable Claude stages (rank → curate → copywrite →
   editor/QA → render) with a fact-check + brand-voice QA loop and per-stage token/cost logging.
 - **Branded email** — React Email templates → Outlook-safe HTML with the Buka chameleon header
