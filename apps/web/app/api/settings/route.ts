@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@mega-bulten/db';
-import { UpdateSettingsSchema } from '@mega-bulten/shared';
+import { prisma } from '@digest/db';
+import { UpdateSettingsSchema } from '@digest/shared';
 import { ok, err } from '@/lib/api-response';
 import { getErrorMessage } from '@/lib/error';
 

@@ -2,12 +2,12 @@
 const nextConfig = {
   output: 'standalone',
   transpilePackages: [
-    '@mega-bulten/brand',
-    '@mega-bulten/shared',
-    '@mega-bulten/db',
-    '@mega-bulten/email',
-    '@mega-bulten/delivery',
-    '@mega-bulten/curation',
+    '@digest/brand',
+    '@digest/shared',
+    '@digest/db',
+    '@digest/email',
+    '@digest/delivery',
+    '@digest/curation',
   ],
   // argon2 uses native Node.js addons (node:crypto) and must never be bundled
   // by webpack. Mark it as external so Next.js requires it at runtime instead.

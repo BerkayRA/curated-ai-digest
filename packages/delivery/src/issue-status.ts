@@ -7,7 +7,7 @@
  *   approved / scheduled / sent → failed
  */
 
-import type { IssueStatus } from '@mega-bulten/shared';
+import type { IssueStatus } from '@digest/shared';
 
 // ---------------------------------------------------------------------------
 // Allowed transitions map

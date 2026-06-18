@@ -1,6 +1,6 @@
 ---
 name: Feature request
-about: Suggest an idea or enhancement for Mega Bülten
+about: Suggest an idea or enhancement for Curated AI Digest
 title: 'feat: '
 labels: enhancement
 assignees: ''
@@ -13,7 +13,7 @@ What problem does this solve? Who benefits (e.g. editors, subscribers, ops)?
 ## Proposed solution
 
 What you'd like to happen. If it touches a known seam, name it (a new `SourceProvider`, an
-`EmailProvider`, a curation stage, a dashboard surface, the `@mega-bulten/radar` package, …).
+`EmailProvider`, a curation stage, a dashboard surface, the `@digest/radar` package, …).
 
 ## Alternatives considered
 

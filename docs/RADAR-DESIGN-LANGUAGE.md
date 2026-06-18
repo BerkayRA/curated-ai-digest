@@ -1,9 +1,9 @@
-# Radar Design Language → Mega Bülten echo guide
+# Radar Design Language → Curated AI Digest echo guide
 
 > Extracted from the radar's committed design system (`src/radar/web/templates/_base_styles.html`,
 > a single dependency-free Jinja `<style>` partial) by the S1 research workflow. The radar's
 > README states this system was **"Generated with the Open Design app and ported into the
-> shared design system"** following the Mega standard (light + dark). Mega Bülten (a standalone
+> shared design system"** following the Mega standard (light + dark). Curated AI Digest (a standalone
 > project) adopts the **same** Mega design standard, so it stays visually consistent with any
 > radar it's optionally paired with.
 
@@ -39,7 +39,7 @@ OK greens `#15803d`/`#166534`. Badge hues: startup violet `#6d28d9` on `#ede9fe`
 --font: "Centrale Sans", "Hanken Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
 ```
 - **Centrale Sans** via `local()` only (commercial, not bundled).
-- **Hanken Grotesk** (OFL) is the bundled fallback — self-hosted `woff2`, weights **400/700**, `font-display: swap`. **Switch Mega Bülten's fallback from Nunito Sans → Hanken Grotesk for unity.**
+- **Hanken Grotesk** (OFL) is the bundled fallback — self-hosted `woff2`, weights **400/700**, `font-display: swap`. **Switch Curated AI Digest's fallback from Nunito Sans → Hanken Grotesk for unity.**
 - Mono: `ui-monospace, "SF Mono", monospace` (ring labels, numbers).
 - `h1` 1.9rem/700/-0.02em · `h2` 1.25rem/700 · **eyebrow labels** 0.7rem UPPERCASE, `letter-spacing .06–.08em`, 700, muted (the signature label tell).
 
@@ -69,7 +69,7 @@ One soft shadow on cards only; everything else = 1px borders. Container `max-wid
 CSS custom properties + `@media (prefers-color-scheme: dark)` — **no toggle, no JS**. Same token
 names redeclared in the dark block; `--blue` constant. Flex layouts (not grid); semantic landmarks.
 
-## Echo guide — moves Mega Bülten adopts (web + email)
+## Echo guide — moves Curated AI Digest adopts (web + email)
 
 1. **Process-Blue hero band + white Buka dots** (web via `::before`; **email: bake the dot grid
    into a tiled background-image or a pre-rendered PNG band** — clients strip pseudo-elements).

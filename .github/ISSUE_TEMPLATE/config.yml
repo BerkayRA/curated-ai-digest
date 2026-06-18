@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
   - name: Security vulnerability
-    url: https://github.com/megabilgisayar/mega-bulten/security/policy
+    url: https://github.com/megabilgisayar/curated-ai-digest/security/policy
     about: Please report security issues privately per SECURITY.md — do not open a public issue.
   - name: Question / discussion
-    url: https://github.com/megabilgisayar/mega-bulten/discussions
+    url: https://github.com/megabilgisayar/curated-ai-digest/discussions
     about: For usage questions and open-ended discussion, start a discussion instead of an issue.

@@ -1,8 +1,8 @@
-# Operations Runbook — Mega Bülten
+# Operations Runbook — Curated AI Digest
 
 **Last Updated:** 2026-06-17
 
-This guide walks an operator through setting up and running Mega Bülten. Follow each section in order.
+This guide walks an operator through setting up and running Curated AI Digest. Follow each section in order.
 
 ---
 
@@ -34,7 +34,7 @@ You will need API keys and credentials from these services:
      - **Azure Communication Services (ACS)** — recommended for bulk sends
        - ACS resource endpoint
        - ACS connection string or access key
-       - Verified sender email domain (e.g., `bulten@megabilgisayar.com.tr`)
+       - Verified sender email domain (e.g., `digest@megabilgisayar.com.tr`)
      - **Microsoft Graph** — use if you have O365 with bulk sendMail access
        - Tenant ID, Client ID, Client Secret
        - Licensed user UPN for sending
@@ -54,7 +54,7 @@ You will need API keys and credentials from these services:
 ### 2.1 Clone & Install Dependencies
 
 ```bash
-cd /path/to/mega-bulten
+cd /path/to/curated-ai-digest
 pnpm install
 ```
 
@@ -63,7 +63,7 @@ pnpm install
 Create a `.env` file at the root with the database URL:
 
 ```bash
-DATABASE_URL="postgresql://bulten:bulten@localhost:5433/mega_bulten"
+DATABASE_URL="postgresql://digest:digest@localhost:5433/curated_ai_digest"
 ```
 
 This matches the `docker-compose.yml` credentials. If you change them, update both.
@@ -83,8 +83,8 @@ Required variables:
 
 | Variable | Purpose | Example | Notes |
 |----------|---------|---------|-------|
-| `DATABASE_URL` | PostgreSQL connection | `postgresql://bulten:bulten@localhost:5433/mega_bulten` | **Required.** Must match docker-compose |
-| `APP_BASE_URL` | Dashboard base URL | `http://localhost:3100` or `https://bulten.example.com` | **Required.** Used for auth redirects |
+| `DATABASE_URL` | PostgreSQL connection | `postgresql://digest:digest@localhost:5433/curated_ai_digest` | **Required.** Must match docker-compose |
+| `APP_BASE_URL` | Dashboard base URL | `http://localhost:3100` or `https://digest.example.com` | **Required.** Used for auth redirects |
 | `AUTH_SECRET` | Session signing secret | `$(openssl rand -base64 32)` | **Required.** Generate fresh value (see below) |
 | `AUTH_MODE` | Auth strategy | `local` (dev) or `entra` (prod) | **Required.** Default is `local` for dev |
 | `ADMIN_EMAIL` | Local auth admin email | `admin@mega.com.tr` | **Required if `AUTH_MODE=local`** |
@@ -107,16 +107,16 @@ Required variables:
 
 | Variable | Purpose | Example | Notes |
 |----------|---------|---------|-------|
-| `DATABASE_URL` | PostgreSQL connection | `postgresql://bulten:bulten@localhost:5433/mega_bulten` | **Required.** Must match web |
+| `DATABASE_URL` | PostgreSQL connection | `postgresql://digest:digest@localhost:5433/curated_ai_digest` | **Required.** Must match web |
 | `ANTHROPIC_API_KEY` | Claude API key | `sk-ant-...` | **Required.** Obtain from Anthropic console |
 | `EXA_API_KEY` | Exa search API key | `...` | **Required.** Contact Exa support |
-| `APP_BASE_URL` | Web app base URL | `https://bulten.example.com` | **Required.** Used for unsubscribe links |
+| `APP_BASE_URL` | Web app base URL | `https://digest.example.com` | **Required.** Used for unsubscribe links |
 | `ACS_CONNECTION_STRING` | ACS connection string | `endpoint=https://...;accesskey=...` | **Required if `activeProvider=acs_email` in Settings** |
-| `ACS_SENDER_ADDRESS` | ACS verified sender | `bulten@megabilgisayar.com.tr` | **Required if `activeProvider=acs_email` in Settings** |
+| `ACS_SENDER_ADDRESS` | ACS verified sender | `digest@megabilgisayar.com.tr` | **Required if `activeProvider=acs_email` in Settings** |
 | `GRAPH_TENANT_ID` | Azure AD tenant ID | (UUID) | **Required if `activeProvider=microsoft_graph` in Settings** |
 | `GRAPH_CLIENT_ID` | Graph app client ID | (UUID) | **Required if `activeProvider=microsoft_graph` in Settings** |
 | `GRAPH_CLIENT_SECRET` | Graph app secret | (secret value) | **Required if `activeProvider=microsoft_graph` in Settings** |
-| `GRAPH_SENDER_ID` | Graph sender UPN | `bulten@example.com` | **Required if `activeProvider=microsoft_graph` in Settings** |
+| `GRAPH_SENDER_ID` | Graph sender UPN | `digest@example.com` | **Required if `activeProvider=microsoft_graph` in Settings** |
 | `RESEND_API_KEY` | Resend API key | `re_...` | **Required if `activeProvider=resend` in Settings** |
 | `AUTOSEND_MIN_SUBSCRIBERS` | Min subscribers for auto-send | `1` | Optional. Default: 1 |
 | `AUTOSEND_MAX_SUBSCRIBERS` | Max subscribers for auto-send | `50000` | Optional. Default: 50000 |
@@ -131,7 +131,7 @@ cp packages/db/.env.example packages/db/.env
 
 | Variable | Purpose | Example | Notes |
 |----------|---------|---------|-------|
-| `DATABASE_URL` | PostgreSQL connection | `postgresql://bulten:bulten@localhost:5433/mega_bulten` | **Required.** Must match other .env files |
+| `DATABASE_URL` | PostgreSQL connection | `postgresql://digest:digest@localhost:5433/curated_ai_digest` | **Required.** Must match other .env files |
 
 #### **`packages/curation/.env`** — Curation Pipeline
 
@@ -144,7 +144,7 @@ cp packages/curation/.env.example packages/curation/.env
 |----------|---------|---------|-------|
 | `ANTHROPIC_API_KEY` | Claude API key | `sk-ant-...` | **Required.** Same as worker |
 | `EXA_API_KEY` | Exa search API key | `...` | **Required.** Same as worker |
-| `DATABASE_URL` | PostgreSQL connection | `postgresql://bulten:bulten@localhost:5433/mega_bulten` | **Required.** Same as others |
+| `DATABASE_URL` | PostgreSQL connection | `postgresql://digest:digest@localhost:5433/curated_ai_digest` | **Required.** Same as others |
 
 #### **`packages/email/.env`** — Email Providers
 
@@ -228,12 +228,12 @@ If you want to deploy with Entra ID SSO, you need an Azure AD app registration. 
 ### 4.1 Create App Registration in Azure Portal
 
 1. Go to **Azure Portal** → **Azure Active Directory** → **App registrations** → **New registration**
-2. **Name:** `Mega Bülten` (or your preferred name)
+2. **Name:** `Curated AI Digest` (or your preferred name)
 3. **Supported account types:** Choose based on your tenant setup (typically "Accounts in this organizational directory only")
 4. **Redirect URI:**
    - **Platform:** Web
    - **URI:** `{APP_BASE_URL}/api/auth/callback/microsoft-entra-id`
-   - Example: `https://bulten.megabilgisayar.com.tr/api/auth/callback/microsoft-entra-id`
+   - Example: `https://digest.megabilgisayar.com.tr/api/auth/callback/microsoft-entra-id`
 5. Click **Register**
 
 ### 4.2 Capture Client ID & Tenant ID
@@ -246,7 +246,7 @@ After registration, you'll see:
 ### 4.3 Create Client Secret
 
 1. Go to **Certificates & secrets** → **Client secrets** → **New client secret**
-2. **Description:** `Mega Bülten API`
+2. **Description:** `Curated AI Digest API`
 3. **Expires:** Choose your preferred expiration (e.g., 2 years)
 4. Click **Add**
 5. Copy the **Value** (not the ID) to `AUTH_MICROSOFT_ENTRA_ID_SECRET`
@@ -296,13 +296,13 @@ Paste this into `AUTH_MICROSOFT_ENTRA_ID_ISSUER`.
 
 ## 5. Email Deliverability (Critical)
 
-Email is the core feature of Mega Bülten. This section covers the most important operations decision.
+Email is the core feature of Curated AI Digest. This section covers the most important operations decision.
 
 ### 5.1 Dedicated Sending Subdomain (Strongly Recommended)
 
 **Problem:** If you send from your corporate domain (`info@megabilgisayar.com.tr`), bounces and complaints will damage your domain reputation, affecting all business email.
 
-**Solution:** Use a **dedicated subdomain** for newsletter sends (e.g., `bulten@megabilgisayar.com.tr` or `noreply-bulten@megabilgisayar.com.tr`).
+**Solution:** Use a **dedicated subdomain** for newsletter sends (e.g., `digest@megabilgisayar.com.tr` or `noreply-digest@megabilgisayar.com.tr`).
 
 **Benefits:**
 - Reputation isolation: newsletter reputation does not affect corporate email
@@ -319,7 +319,7 @@ ACS provides dedicated subdomains or allows you to bring your own. Follow the st
 
 1. **In Azure Portal**, go to your ACS resource → **Domains**
 2. If using an ACS-provided subdomain (e.g., `*.azurecomm.net`), ACS handles SPF/DKIM
-3. If bringing your own domain (e.g., `bulten.megabilgisayar.com.tr`):
+3. If bringing your own domain (e.g., `digest.megabilgisayar.com.tr`):
    - Azure will provide DNS record values
    - Add these records to your DNS provider:
      - **SPF record**
@@ -328,17 +328,17 @@ ACS provides dedicated subdomains or allows you to bring your own. Follow the st
 
 **SPF Example:**
 ```
-bulten.megabilgisayar.com.tr IN TXT "v=spf1 include:spf.protection.outlook.com ~all"
+digest.megabilgisayar.com.tr IN TXT "v=spf1 include:spf.protection.outlook.com ~all"
 ```
 
 **DKIM Example (provided by ACS):**
 ```
-selector1._domainkey.bulten.megabilgisayar.com.tr IN CNAME selector1-bulten-megabilgisayar-com-tr._domainkey.azurecomm.net
+selector1._domainkey.digest.megabilgisayar.com.tr IN CNAME selector1-digest-megabilgisayar-com-tr._domainkey.azurecomm.net
 ```
 
 **DMARC Example:**
 ```
-_dmarc.bulten.megabilgisayar.com.tr IN TXT "v=DMARC1; p=quarantine; rua=mailto:dmarc-report@megabilgisayar.com.tr"
+_dmarc.digest.megabilgisayar.com.tr IN TXT "v=DMARC1; p=quarantine; rua=mailto:dmarc-report@megabilgisayar.com.tr"
 ```
 
 #### **For Microsoft Graph**
@@ -354,7 +354,7 @@ Graph uses your O365/Exchange Online infrastructure. You should already have SPF
 #### **For Resend**
 
 1. Go to **Resend Dashboard** → **Domains** → **Add Domain**
-2. Enter your domain (e.g., `bulten.megabilgisayar.com.tr`)
+2. Enter your domain (e.g., `digest.megabilgisayar.com.tr`)
 3. Resend provides DNS records to add:
    - SPF record
    - DKIM record(s)
@@ -395,14 +395,14 @@ Choose **one** of the three providers and fill in its credentials:
 ### 6.1 Start Infrastructure
 
 ```bash
-cd /path/to/mega-bulten
+cd /path/to/curated-ai-digest
 
 # Start PostgreSQL and Adminer
 pnpm db:up
 
 # Wait for database to be ready (check the healthcheck)
 docker ps
-# Look for "bulten_db" with status "healthy"
+# Look for "digest_db" with status "healthy"
 ```
 
 ### 6.2 Run Database Migrations
@@ -605,7 +605,7 @@ Every pipeline run writes a `PipelineRun` row with actual token counts and calcu
 **Error:** No draft appears in Archive after scheduled pipeline time
 
 **Diagnosis:**
-1. Check worker logs: `docker logs bulten_worker` (if Docker)
+1. Check worker logs: `docker logs digest_worker` (if Docker)
 2. Look for errors in ingest, rank, or curate stages
 3. Check Settings: is the `sendDayOfWeek` and `sendTime` configured correctly?
 
@@ -639,14 +639,14 @@ Every pipeline run writes a `PipelineRun` row with actual token counts and calcu
 
 ### Database Backups
 
-PostgreSQL is running in Docker with a named volume `bulten_pgdata`. To back up:
+PostgreSQL is running in Docker with a named volume `digest_pgdata`. To back up:
 
 ```bash
 # Export the database
-docker exec bulten_db pg_dump -U bulten mega_bulten > backup_$(date +%Y%m%d_%H%M%S).sql
+docker exec digest_db pg_dump -U digest curated_ai_digest > backup_$(date +%Y%m%d_%H%M%S).sql
 
 # Restore from backup
-docker exec -i bulten_db psql -U bulten mega_bulten < backup_20260617_093000.sql
+docker exec -i digest_db psql -U digest curated_ai_digest < backup_20260617_093000.sql
 ```
 
 ### Monitoring
@@ -660,9 +660,9 @@ Key tables to monitor:
 
 ### Logs
 
-- **Web:** Check Docker logs: `docker logs bulten_web`
-- **Worker:** Check Docker logs: `docker logs bulten_worker`
-- **Database:** Check Adminer at `http://localhost:8080` (credentials: `bulten` / `bulten`)
+- **Web:** Check Docker logs: `docker logs digest_web`
+- **Worker:** Check Docker logs: `docker logs digest_worker`
+- **Database:** Check Adminer at `http://localhost:8080` (credentials: `digest` / `digest`)
 
 ---
 

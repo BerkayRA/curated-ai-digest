@@ -39,7 +39,7 @@ export async function HeroHeader(): Promise<React.ReactElement> {
             src="/brand/mega-logo-white.svg"
             width={136}
             height={44}
-            alt="Mega Bülten"
+            alt="Curated AI Digest"
             priority
           />
           <div className={styles.heroAccount}>
@@ -60,7 +60,7 @@ export async function HeroHeader(): Promise<React.ReactElement> {
               Yönetim Paneli
             </EyebrowLabel>
             <h1 id="hero-heading" className={styles.heroTitle}>
-              Mega Bülten
+              Curated AI Digest
             </h1>
             <p className={styles.heroTagline}>
               Yapay zeka dünyasından haftalık, özenle seçilmiş haberler.

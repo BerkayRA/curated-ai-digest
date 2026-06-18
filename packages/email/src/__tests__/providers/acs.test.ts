@@ -36,7 +36,7 @@ import type { EmailMessage } from '../../providers/provider.js';
 
 const msg: EmailMessage = {
   to: { email: 'subscriber@example.com', name: 'Test User' },
-  from: { email: 'bulten@mega.com.tr', name: 'Mega Bülten' },
+  from: { email: 'digest@mega.com.tr', name: 'Curated AI Digest' },
   subject: 'Test subject',
   html: '<p>Hello</p>',
   text: 'Hello',
@@ -68,7 +68,7 @@ describe('AcsEmailProvider', () => {
     });
 
     it('returns ok:false with detail when both connection string and endpoint are missing', async () => {
-      const provider = new AcsEmailProvider({ config: { senderAddress: 'bulten@test.com' } });
+      const provider = new AcsEmailProvider({ config: { senderAddress: 'digest@test.com' } });
       const result = await provider.verifyConfig();
       expect(result.ok).toBe(false);
       expect(result.detail).toContain('ACS_CONNECTION_STRING');
@@ -76,7 +76,7 @@ describe('AcsEmailProvider', () => {
 
     it('returns ok:true when connection string + sender address are present', async () => {
       const provider = new AcsEmailProvider({
-        config: { connectionString: 'endpoint=https://test.com;accesskey=x', senderAddress: 'bulten@test.com' },
+        config: { connectionString: 'endpoint=https://test.com;accesskey=x', senderAddress: 'digest@test.com' },
       });
       const result = await provider.verifyConfig();
       expect(result.ok).toBe(true);
@@ -84,7 +84,7 @@ describe('AcsEmailProvider', () => {
 
     it('returns ok:true when endpoint + sender address are present', async () => {
       const provider = new AcsEmailProvider({
-        config: { endpoint: 'https://test.communication.azure.com', senderAddress: 'bulten@test.com' },
+        config: { endpoint: 'https://test.communication.azure.com', senderAddress: 'digest@test.com' },
       });
       const result = await provider.verifyConfig();
       expect(result.ok).toBe(true);

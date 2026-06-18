@@ -48,7 +48,7 @@ describe('renderDigestEmail', () => {
     it('renders the white Buka chameleon logo from the asset base URL', async () => {
       const { html } = await renderDigestEmail(sampleIssue);
       expect(html).toContain('/brand/mega-logo-white.png');
-      expect(html).toContain('https://bulten.megabilgisayar.com.tr/brand/mega-logo-white.png');
+      expect(html).toContain('https://digest.megabilgisayar.com.tr/brand/mega-logo-white.png');
     });
 
     it('html contains the unsubscribe URL placeholder', async () => {

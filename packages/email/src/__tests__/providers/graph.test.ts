@@ -60,12 +60,12 @@ const cfg = {
   tenantId: 'tenant-abc',
   clientId: 'client-abc',
   clientSecret: 'secret-abc',
-  senderId: 'bulten@mega.com.tr',
+  senderId: 'digest@mega.com.tr',
 };
 
 const msg: EmailMessage = {
   to: { email: 'subscriber@example.com', name: 'Test User' },
-  from: { email: 'bulten@mega.com.tr', name: 'Mega Bülten' },
+  from: { email: 'digest@mega.com.tr', name: 'Curated AI Digest' },
   subject: 'Weekly digest',
   html: '<p>Content</p>',
   text: 'Content',

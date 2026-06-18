@@ -1,5 +1,5 @@
-import { SubscriberImportRowSchema } from '@mega-bulten/shared';
-import type { SubscriberImportRow } from '@mega-bulten/shared';
+import { SubscriberImportRowSchema } from '@digest/shared';
+import type { SubscriberImportRow } from '@digest/shared';
 
 export interface CsvImportResult {
   valid: SubscriberImportRow[];

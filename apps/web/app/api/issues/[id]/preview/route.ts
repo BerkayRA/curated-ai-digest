@@ -6,8 +6,8 @@
 
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { renderDigestEmail } from '@mega-bulten/email';
-import type { DigestEmailData, DigestItem } from '@mega-bulten/email';
+import { renderDigestEmail } from '@digest/email';
+import type { DigestEmailData, DigestItem } from '@digest/email';
 import { ok, err } from '@/lib/api-response';
 import { getErrorMessage } from '@/lib/error';
 

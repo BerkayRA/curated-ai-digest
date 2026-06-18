@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { isoWeekSchema } from '@mega-bulten/shared';
+import { isoWeekSchema } from '@digest/shared';
 import { ok, err } from '@/lib/api-response';
 import { getErrorMessage } from '@/lib/error';
 import { nextIsoWeek } from '@/lib/iso-week';
@@ -42,8 +42,8 @@ export async function POST(request: NextRequest) {
 
     // Heavy deps are dynamically imported so they never enter the edge/client
     // bundle and only load when the pipeline is actually invoked.
-    const { runWeeklyPipeline } = await import('@mega-bulten/curation');
-    const { renderDigestEmail } = await import('@mega-bulten/email');
+    const { runWeeklyPipeline } = await import('@digest/curation');
+    const { renderDigestEmail } = await import('@digest/email');
 
     const result = await runWeeklyPipeline({ isoWeek, renderFn: renderDigestEmail });
 

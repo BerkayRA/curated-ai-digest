@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
-import '@mega-bulten/brand/tokens.css';
+import '@digest/brand/tokens.css';
 import '../styles/global.css';
 
 export const metadata: Metadata = {
-  title: 'Mega Bülten',
-  description: 'Haftalık AI haber bülteni yönetim paneli',
+  title: 'Curated AI Digest',
+  description: 'Haftalık AI haber digesti yönetim paneli',
 };
 
 interface RootLayoutProps {

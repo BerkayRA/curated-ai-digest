@@ -14,7 +14,7 @@
  */
 
 import { Resend } from 'resend';
-import type { EmailProviderKind } from '@mega-bulten/shared';
+import type { EmailProviderKind } from '@digest/shared';
 import { sendBatchWithLimits } from './rate-limit.js';
 import type {
   EmailMessage,

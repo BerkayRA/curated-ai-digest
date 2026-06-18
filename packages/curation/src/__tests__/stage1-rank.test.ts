@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { runRankStage } from '../pipeline/stage1-rank.js';
 import type { StageOptions, PipelineRepository } from '../pipeline/types.js';
 import type { Logger } from '../ingest/types.js';
-import type { CandidateArticle } from '@mega-bulten/db';
+import type { CandidateArticle } from '@digest/db';
 import type { AnthropicClient } from '../pipeline/types.js';
 
 // ---------------------------------------------------------------------------

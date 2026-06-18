@@ -24,7 +24,7 @@
 
 import { EmailClient, KnownEmailSendStatus } from '@azure/communication-email';
 import { DefaultAzureCredential } from '@azure/identity';
-import type { EmailProviderKind } from '@mega-bulten/shared';
+import type { EmailProviderKind } from '@digest/shared';
 import { sendBatchWithLimits } from './rate-limit.js';
 import type {
   EmailMessage,

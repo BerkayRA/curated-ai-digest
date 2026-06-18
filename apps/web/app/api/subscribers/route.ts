@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { prisma } from '@mega-bulten/db';
-import { CreateSubscriberSchema } from '@mega-bulten/shared';
+import { prisma } from '@digest/db';
+import { CreateSubscriberSchema } from '@digest/shared';
 import { ok, err } from '@/lib/api-response';
 import { getErrorMessage } from '@/lib/error';
 import { randomUUID } from 'crypto';

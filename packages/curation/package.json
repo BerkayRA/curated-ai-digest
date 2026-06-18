@@ -1,5 +1,5 @@
 {
-  "name": "@mega-bulten/curation",
+  "name": "@digest/curation",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -14,8 +14,8 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@mega-bulten/db": "workspace:*",
-    "@mega-bulten/shared": "workspace:*",
+    "@digest/db": "workspace:*",
+    "@digest/shared": "workspace:*",
     "@anthropic-ai/sdk": "^0.39.0",
     "exa-js": "^1.5.13",
     "rss-parser": "^3.13.0",

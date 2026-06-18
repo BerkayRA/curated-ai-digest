@@ -30,7 +30,7 @@ RUN pnpm install --frozen-lockfile
 # Generate Prisma client for the worker — same schema, no live DB needed.
 COPY packages/db/prisma packages/db/prisma
 RUN DATABASE_URL="postgresql://x:x@localhost:5432/x" \
-    pnpm --filter @mega-bulten/db generate
+    pnpm --filter @digest/db generate
 
 
 # ─── Stage 2: builder ────────────────────────────────────────────────────────
@@ -50,7 +50,7 @@ COPY . .
 # Restore the full pnpm virtual store so workspace symlinks resolve.
 COPY --from=deps /repo/node_modules/.pnpm ./node_modules/.pnpm
 
-RUN pnpm --filter @mega-bulten/worker build
+RUN pnpm --filter @digest/worker build
 
 
 # ─── Stage 3: runner ─────────────────────────────────────────────────────────

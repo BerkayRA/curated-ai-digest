@@ -1,8 +1,8 @@
 {
-  "name": "mega-bulten",
+  "name": "curated-ai-digest",
   "version": "0.1.0",
   "private": true,
-  "description": "Mega Bülten — weekly AI-news digest newsletter system. Claude-powered curation agents + branded email + approval dashboard for Mega Bilgisayar Tic. Ltd. Şti.",
+  "description": "Curated AI Digest — weekly AI-news digest newsletter system. Claude-powered curation agents + branded email + approval dashboard for Mega Bilgisayar Tic. Ltd. Şti.",
   "packageManager": "pnpm@10.33.0",
   "engines": {
     "node": ">=20"
@@ -16,8 +16,8 @@
     "test:e2e": "turbo run test:e2e",
     "db:up": "docker compose up -d db adminer",
     "db:down": "docker compose down",
-    "db:migrate": "pnpm --filter @mega-bulten/db migrate",
-    "db:seed": "pnpm --filter @mega-bulten/db seed",
+    "db:migrate": "pnpm --filter @digest/db migrate",
+    "db:seed": "pnpm --filter @digest/db seed",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,css}\""
   },
   "devDependencies": {

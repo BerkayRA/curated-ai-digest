@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { color } from '@mega-bulten/brand';
+import { color } from '@digest/brand';
 
 /**
  * BukaDotMotif — inline SVG rendering of the Buka chameleon dot-dissolve treatment.

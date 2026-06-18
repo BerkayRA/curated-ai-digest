@@ -1,4 +1,4 @@
-# Mega Bülten
+# Curated AI Digest
 
 **A self-hosted, Claude-powered system that curates, writes, brands, and sends a weekly Turkish AI-news digest — with a human approval gate by default and guarded auto-send for holidays.**
 
@@ -9,7 +9,7 @@
 ![Build](https://img.shields.io/badge/build-passing-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
-Mega Bülten is a **standalone, self-hosted** system that turns the week's AI news into a
+Curated AI Digest is a **standalone, self-hosted** system that turns the week's AI news into a
 **branded, marketing-grade Turkish newsletter** for customers and prospects. Its ingestion is
 modular, so beyond curated RSS feeds and neural search it **can optionally** pull from a
 deterministic news radar — such as the
@@ -29,7 +29,7 @@ fully automated auto-send.
 ## Why
 
 A company that sells AI to its customers should *look* like it lives and breathes AI — without a
-person manually hunting for stories and writing the newsletter every single week. Mega Bülten
+person manually hunting for stories and writing the newsletter every single week. Curated AI Digest
 automates the hunting, ranking, writing, fact-checking, and rendering, then hands a finished draft to
 a human for a one-click approve-and-send. It is **self-hosted** (the same Docker topology as the rest
 of Mega's infra), **provider-agnostic** for email delivery, and **modular** in how it ingests news —
@@ -104,8 +104,8 @@ Ingest (SourceProviders: RSS + Exa + radar; canonicalize + dedup by contentHash)
 Requires **Node ≥ 20**, **pnpm 10**, and **Docker** (for Postgres).
 
 ```bash
-git clone https://github.com/megabilgisayar/mega-bulten.git
-cd mega-bulten
+git clone https://github.com/megabilgisayar/curated-ai-digest.git
+cd curated-ai-digest
 
 pnpm install
 pnpm db:up          # Postgres (+ Adminer in the dev profile) on host port 5433
@@ -145,7 +145,7 @@ edited from the dashboard.
 
 **News topic & the radar source provider** are configured from the dashboard `Settings`. The topic
 defaults to *"on-prem & enterprise AI workflows"* (threaded into curation prompts and provider
-queries) so Mega Bülten pairs with the radar out of the box. The radar provider is toggled with
+queries) so Curated AI Digest pairs with the radar out of the box. The radar provider is toggled with
 `RADAR_ENABLED` and pointed at any radar exposing the same machine-readable contract via
 `RADAR_FEED_URL` (defaults to the on-prem radar's committed `history.jsonl`). See
 [`docs/RADAR-DATA-CONTRACT.md`](docs/RADAR-DATA-CONTRACT.md) for the feed shape.
@@ -163,7 +163,7 @@ packages/
   email/      React Email templates + the pluggable EmailProvider interface (ACS / Graph / Resend)
   delivery/   Dispatch service: rate-limit + retry/backoff, batch send, PII-scrubbed send records
   brand/      Design tokens (CSS custom properties), Buka/logo assets, font wiring
-  radar/      @mega-bulten/radar — RFC-001 scaffold for an LLM-optional, topic-configurable radar
+  radar/      @digest/radar — RFC-001 scaffold for an LLM-optional, topic-configurable radar
 docs/         PRD, ARCHITECTURE, BRAND, BUILD_PLAN, RUNBOOK, SECURITY, ADRs, RFC-001, radar findings
 ```
 
@@ -177,7 +177,7 @@ docs/         PRD, ARCHITECTURE, BRAND, BUILD_PLAN, RUNBOOK, SECURITY, ADRs, RFC
 - [`docs/RADAR-DESIGN-LANGUAGE.md`](docs/RADAR-DESIGN-LANGUAGE.md) — how the UI echoes the radar's system
 - [`docs/RADAR-DATA-CONTRACT.md`](docs/RADAR-DATA-CONTRACT.md) — the radar feed the `radar` provider consumes
 - [`docs/SECURITY.md`](docs/SECURITY.md) — applied security fixes and deferred items (internal audit)
-- [`docs/RFC-001-mega-radar.md`](docs/RFC-001-mega-radar.md) — design for our own deterministic radar (`@mega-bulten/radar`)
+- [`docs/RFC-001-mega-radar.md`](docs/RFC-001-mega-radar.md) — design for our own deterministic radar (`@digest/radar`)
 - ADRs: [stack & architecture](docs/adr/ADR-0001-stack-and-architecture.md) ·
   [typography](docs/adr/ADR-0002-typography.md) ·
   [modular ingestion, radar & editorial](docs/adr/ADR-0003-modular-ingestion-radar-and-editorial.md)

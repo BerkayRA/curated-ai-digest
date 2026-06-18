@@ -2,7 +2,7 @@
 // Pipeline-level types (separate from ingest types)
 // ---------------------------------------------------------------------------
 
-import type { CandidateArticle, PipelineRun } from '@mega-bulten/db';
+import type { CandidateArticle, PipelineRun } from '@digest/db';
 import type { Logger } from '../ingest/types.js';
 import type { PipelineStage } from './config.js';
 import type Anthropic from '@anthropic-ai/sdk';

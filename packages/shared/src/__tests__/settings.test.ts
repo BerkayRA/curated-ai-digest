@@ -9,12 +9,12 @@ describe('UpdateSettingsSchema', () => {
       sendTime: '09:00',
       timezone: 'Europe/Istanbul',
       activeProvider: 'acs_email',
-      fromAddress: 'bulten@example.com',
+      fromAddress: 'digest@example.com',
       replyTo: 'reply@example.com',
       pipelineLeadDays: 2,
     });
     expect(result.autoSendEnabled).toBe(true);
-    expect(result.fromAddress).toBe('bulten@example.com');
+    expect(result.fromAddress).toBe('digest@example.com');
   });
 
   it('accepts an empty object (all fields optional)', () => {
@@ -42,7 +42,7 @@ describe('UpdateSettingsSchema', () => {
   });
 
   it('lowercases fromAddress via emailSchema', () => {
-    const result = UpdateSettingsSchema.parse({ fromAddress: 'BULTEN@EXAMPLE.COM' });
-    expect(result.fromAddress).toBe('bulten@example.com');
+    const result = UpdateSettingsSchema.parse({ fromAddress: 'DIGEST@EXAMPLE.COM' });
+    expect(result.fromAddress).toBe('digest@example.com');
   });
 });

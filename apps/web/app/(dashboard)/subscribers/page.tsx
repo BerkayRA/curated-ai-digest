@@ -1,11 +1,11 @@
-import { prisma } from '@mega-bulten/db';
+import { prisma } from '@digest/db';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { SubscribersClient } from '@/components/subscribers/SubscribersClient';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  title: 'Aboneler — Mega Bülten',
+  title: 'Aboneler — Curated AI Digest',
 };
 
 export default async function SubscribersPage() {
@@ -15,7 +15,7 @@ export default async function SubscribersPage() {
 
   return (
     <section aria-label="Aboneler">
-      <PageHeader title="Aboneler" description="Bülten alıcılarını yönetin" />
+      <PageHeader title="Aboneler" description="Digest alıcılarını yönetin" />
       <SubscribersClient initialSubscribers={subscribers} />
     </section>
   );

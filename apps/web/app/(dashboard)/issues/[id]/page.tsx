@@ -5,13 +5,13 @@
  */
 
 import { notFound } from 'next/navigation';
-import { prisma } from '@mega-bulten/db';
+import { prisma } from '@digest/db';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { issueStatusLabel } from '@/components/ui/Badge';
 import { StatusPill, issueStatusTone } from '@/components/ui/StatusPill';
 import { IssueEditor } from '@/components/issue-editor/IssueEditor';
 import { AuditPanel } from '@/components/issue-editor/AuditPanel';
-import type { IssueStatus } from '@mega-bulten/shared';
+import type { IssueStatus } from '@digest/shared';
 import styles from './issue-detail.module.css';
 
 export const dynamic = 'force-dynamic';
@@ -26,10 +26,10 @@ export async function generateMetadata({ params }: IssueDetailPageProps) {
     select: { subject: true, isoWeek: true },
   });
 
-  if (!issue) return { title: 'Bulunamadı — Mega Bülten' };
+  if (!issue) return { title: 'Bulunamadı — Curated AI Digest' };
 
   return {
-    title: `${issue.isoWeek}: ${issue.subject} — Mega Bülten`,
+    title: `${issue.isoWeek}: ${issue.subject} — Curated AI Digest`,
   };
 }
 

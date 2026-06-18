@@ -12,7 +12,7 @@
  *   const provider = createEmailProvider('resend', { perMinute: 200 });
  */
 
-import type { EmailProviderKind } from '@mega-bulten/shared';
+import type { EmailProviderKind } from '@digest/shared';
 import { AcsEmailProvider } from './acs.js';
 import { GraphEmailProvider } from './graph.js';
 import { ResendEmailProvider } from './resend.js';

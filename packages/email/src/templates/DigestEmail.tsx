@@ -1,5 +1,5 @@
 /**
- * DigestEmail — Mega Bülten weekly AI-news digest template.
+ * DigestEmail — Curated AI Digest weekly AI-news digest template.
  *
  * Bold editorial design that echoes the sibling on-prem AI radar (see
  * docs/RADAR-DESIGN-LANGUAGE.md and docs/design/open-design/email.html):
@@ -14,7 +14,7 @@
  *
  * Outlook / bulletproof compatibility notes:
  * - Table-based layout; no flex/grid in structural divs.
- * - All styles inlined with literal hex values from @mega-bulten/brand tokens
+ * - All styles inlined with literal hex values from @digest/brand tokens
  *   (CSS custom properties are unreliable in Outlook — no `var(--x)`).
  * - MSO conditional comments wrap the rounded container for Outlook.
  * - Web-safe font fallback: clients fall back to Arial regardless of the stack.
@@ -40,7 +40,7 @@ import {
   Text,
   Link,
 } from '@react-email/components';
-import { color } from '@mega-bulten/brand';
+import { color } from '@digest/brand';
 import type { DigestEmailData, DigestItem } from '../types.js';
 
 // ---------------------------------------------------------------------------
@@ -144,7 +144,7 @@ function HeaderBand({
               lineHeight: '1',
             }}
           >
-            Haftalık YZ Bülteni
+            Haftalık YZ Digest
           </Text>
         </Column>
       </Row>
@@ -569,7 +569,7 @@ export function DigestEmail(props: DigestEmailData) {
                             lineHeight: '1',
                           }}
                         >
-                          Mega Bülten
+                          Curated AI Digest
                         </Text>
                         <Text
                           style={{
@@ -591,7 +591,7 @@ export function DigestEmail(props: DigestEmailData) {
                             margin: '0 0 18px 0',
                           }}
                         >
-                          Mega Bülten — Mega Bilgisayar Tic. Ltd. Şti&rsquo;nin haftalık yapay zeka
+                          Curated AI Digest — Mega Bilgisayar Tic. Ltd. Şti&rsquo;nin haftalık yapay zeka
                           digesti.
                         </Text>
                       </Column>

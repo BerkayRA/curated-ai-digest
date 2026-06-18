@@ -1,5 +1,5 @@
 /**
- * Playwright E2E configuration for @mega-bulten/web.
+ * Playwright E2E configuration for @digest/web.
  *
  * Written as a CommonJS module (.cjs) because the web app's tsconfig uses
  * module: ESNext (required by Next.js App Router). With Node 20.4 (which
@@ -20,7 +20,7 @@ const BASE_URL = `http://localhost:${PORT}`;
 const E2E_DIR = path.join(__dirname, 'e2e');
 
 // Stable auth credentials for local testing.
-const TEST_EMAIL = 'e2e-admin@mega-bulten.test';
+const TEST_EMAIL = 'e2e-admin@curated-ai-digest.test';
 const TEST_PASSWORD = 'Test1234!';
 
 // Pre-built argon2id hash of TEST_PASSWORD.
@@ -107,8 +107,8 @@ module.exports = defineConfig({
       AUTH_MODE: 'local',
       ADMIN_EMAIL: TEST_EMAIL,
       ADMIN_PASSWORD_HASH: ADMIN_PASSWORD_HASH,
-      AUTH_SECRET: 'e2e-test-secret-for-mega-bulten-playwright-runs-only',
-      DATABASE_URL: 'postgresql://bulten:bulten@localhost:5433/mega_bulten',
+      AUTH_SECRET: 'e2e-test-secret-for-curated-ai-digest-playwright-runs-only',
+      DATABASE_URL: 'postgresql://digest:digest@localhost:5433/curated_ai_digest',
       APP_BASE_URL: BASE_URL,
     },
   },

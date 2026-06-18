@@ -4,7 +4,7 @@
 // ---------------------------------------------------------------------------
 
 /**
- * Default ingestion topic (ADR-0003, decision 3). Mega Bülten stays a general
+ * Default ingestion topic (ADR-0003, decision 3). Curated AI Digest stays a general
  * AI digest but ships tuned toward enterprise / on-prem so it pairs with the
  * radar out of the box. Threaded into provider queries via SourceContext.topic.
  *

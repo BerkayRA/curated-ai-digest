@@ -1,5 +1,5 @@
 // ---------------------------------------------------------------------------
-// @mega-bulten/radar — config schema (radar.config.yaml)
+// @digest/radar — config schema (radar.config.yaml)
 //
 // Mirrors the reference radar's `config/seed-sources.yaml` (see
 // docs/RADAR-DATA-CONTRACT.md) and extends it with a topic, category quotas,

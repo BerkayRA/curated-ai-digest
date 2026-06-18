@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { isoWeekSchema } from '@mega-bulten/shared';
+import { isoWeekSchema } from '@digest/shared';
 
 // ---------------------------------------------------------------------------
 // Create-draft DTO — validated at the API boundary.

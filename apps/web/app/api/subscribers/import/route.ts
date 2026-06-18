@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@mega-bulten/db';
+import { prisma } from '@digest/db';
 import { ok, err } from '@/lib/api-response';
 import { parseCsvImport } from '@/lib/csv-import';
 import { getErrorMessage } from '@/lib/error';

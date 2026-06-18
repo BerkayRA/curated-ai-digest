@@ -1,5 +1,5 @@
 {
-  "name": "@mega-bulten/web",
+  "name": "@digest/web",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -13,12 +13,12 @@
     "test:e2e:update": "playwright test --config playwright.config.cjs --update-snapshots"
   },
   "dependencies": {
-    "@mega-bulten/brand": "workspace:*",
-    "@mega-bulten/curation": "workspace:*",
-    "@mega-bulten/db": "workspace:*",
-    "@mega-bulten/delivery": "workspace:*",
-    "@mega-bulten/email": "workspace:*",
-    "@mega-bulten/shared": "workspace:*",
+    "@digest/brand": "workspace:*",
+    "@digest/curation": "workspace:*",
+    "@digest/db": "workspace:*",
+    "@digest/delivery": "workspace:*",
+    "@digest/email": "workspace:*",
+    "@digest/shared": "workspace:*",
     "argon2": "^0.41.1",
     "next": "^14.2.30",
     "next-auth": "5.0.0-beta.25",

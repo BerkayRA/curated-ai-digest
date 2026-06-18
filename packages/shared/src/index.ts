@@ -1,5 +1,5 @@
 // ---------------------------------------------------------------------------
-// @mega-bulten/shared — single source of truth for enums, primitives, and DTOs
+// @digest/shared — single source of truth for enums, primitives, and DTOs
 // ---------------------------------------------------------------------------
 
 export * from './enums.js';

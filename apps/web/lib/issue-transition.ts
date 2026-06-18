@@ -1,5 +1,5 @@
 /**
- * Transition service — re-exported from @mega-bulten/delivery.
+ * Transition service — re-exported from @digest/delivery.
  *
  * The canonical implementation lives in the shared delivery package
  * so both apps/web and apps/worker share the same state-machine logic.
@@ -7,9 +7,9 @@
 
 export {
   transitionIssue,
-} from '@mega-bulten/delivery';
+} from '@digest/delivery';
 
 export type {
   TransitionOptions,
   TransitionResult,
-} from '@mega-bulten/delivery';
+} from '@digest/delivery';

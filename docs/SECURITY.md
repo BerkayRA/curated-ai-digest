@@ -149,8 +149,8 @@
 
 ### (d) Rotating default DB credentials
 
-**Current state:** `docker-compose.yml` uses `POSTGRES_USER: bulten` / `POSTGRES_PASSWORD: bulten` as defaults, which are also present in `.env.example`.
+**Current state:** `docker-compose.yml` uses `POSTGRES_USER: digest` / `POSTGRES_PASSWORD: digest` as defaults, which are also present in `.env.example`.
 
 **Rationale for deferral:** Credential rotation requires coordination with the deployment pipeline (updated secrets in CI/CD, updated `DATABASE_URL` in `.env`, potential migration re-run). The compose file is development-only; production should already use environment-specific secrets via `env_file` or a secrets manager.
 
-**Recommendation:** For production deployments, inject `POSTGRES_USER` and `POSTGRES_PASSWORD` from a secrets manager (HashiCorp Vault, AWS Secrets Manager, etc.) rather than using the compose defaults. Remove the `bulten/bulten` defaults from any production `.env` files.
+**Recommendation:** For production deployments, inject `POSTGRES_USER` and `POSTGRES_PASSWORD` from a secrets manager (HashiCorp Vault, AWS Secrets Manager, etc.) rather than using the compose defaults. Remove the `digest/digest` defaults from any production `.env` files.

@@ -1,4 +1,4 @@
-# Architecture — Mega Bülten
+# Architecture — Curated AI Digest
 
 ## System overview
 
@@ -28,11 +28,11 @@ Self-hosted (Docker Compose) monorepo. Two runtimes share Prisma + Zod contracts
 
 | Package | Responsibility |
 |---|---|
-| `@mega-bulten/shared` | Zod schemas, enums, DTOs — single source of truth for the data/wire contract. |
-| `@mega-bulten/db` | Prisma schema, generated client, migrations, seed. |
-| `@mega-bulten/curation` | Claude agent pipeline stages (cost-routed), each idempotent + resumable. |
-| `@mega-bulten/email` | React Email templates + `EmailProvider` interface + ACS/Graph/Resend impls. |
-| `@mega-bulten/brand` | Design tokens (CSS custom properties), Buka/logo assets, font wiring. |
+| `@digest/shared` | Zod schemas, enums, DTOs — single source of truth for the data/wire contract. |
+| `@digest/db` | Prisma schema, generated client, migrations, seed. |
+| `@digest/curation` | Claude agent pipeline stages (cost-routed), each idempotent + resumable. |
+| `@digest/email` | React Email templates + `EmailProvider` interface + ACS/Graph/Resend impls. |
+| `@digest/brand` | Design tokens (CSS custom properties), Buka/logo assets, font wiring. |
 
 ## Curation pipeline
 

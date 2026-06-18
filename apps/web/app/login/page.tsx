@@ -14,7 +14,7 @@ import { auth, signIn } from '@/auth';
 import styles from './login.module.css';
 
 export const metadata = {
-  title: 'Giriş Yap — Mega Bülten',
+  title: 'Giriş Yap — Curated AI Digest',
 };
 
 // ---------------------------------------------------------------------------
@@ -112,7 +112,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             alt="Mega Bilgisayar Tic. Ltd. Şti"
             priority
           />
-          <span className={styles.productLabel}>Bülten · Yönetim Paneli</span>
+          <span className={styles.productLabel}>Curated AI Digest · Yönetim Paneli</span>
         </div>
 
         <h1 className={styles.heading}>Hoş Geldiniz</h1>

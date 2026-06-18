@@ -37,7 +37,7 @@
 import { Client } from '@microsoft/microsoft-graph-client';
 import { TokenCredentialAuthenticationProvider } from '@microsoft/microsoft-graph-client/authProviders/azureTokenCredentials/index.js';
 import { ClientSecretCredential } from '@azure/identity';
-import type { EmailProviderKind } from '@mega-bulten/shared';
+import type { EmailProviderKind } from '@digest/shared';
 import { sendBatchWithLimits } from './rate-limit.js';
 import type {
   EmailMessage,

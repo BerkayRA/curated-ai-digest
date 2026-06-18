@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/Button';
 import { issueStatusLabel } from '@/components/ui/Badge';
 import { EyebrowLabel } from '@/components/ui/EyebrowLabel';
 import { StatusPill, issueStatusTone } from '@/components/ui/StatusPill';
-import type { IssueStatus } from '@mega-bulten/shared';
+import type { IssueStatus } from '@digest/shared';
 import type { IssueEditorData, EditableItem } from './types';
 import { IssueItemCard } from './IssueItemCard';
 import { PreviewPanel } from './PreviewPanel';

@@ -1,5 +1,5 @@
 // ---------------------------------------------------------------------------
-// @mega-bulten/radar — deterministic scoring + ring classification
+// @digest/radar — deterministic scoring + ring classification
 //
 // PURE functions: no I/O, no clock, no randomness. Same inputs → same outputs,
 // so the radar is reproducible and trivially unit-testable. See

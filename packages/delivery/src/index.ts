@@ -1,5 +1,5 @@
 /**
- * @mega-bulten/delivery — public API
+ * @digest/delivery — public API
  *
  * Dispatch service + auto-send guardrails shared between apps/web and apps/worker.
  */

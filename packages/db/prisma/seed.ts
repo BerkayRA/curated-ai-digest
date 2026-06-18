@@ -18,7 +18,7 @@ async function main(): Promise<void> {
       timezone: 'Europe/Istanbul',
       activeProvider: EmailProviderKind.acs_email,
       pipelineLeadDays: 2,
-      fromAddress: 'bulten@example.com',
+      fromAddress: 'digest@example.com',
       replyTo: 'iletisim@example.com',
     },
   });
