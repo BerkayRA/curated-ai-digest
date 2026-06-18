@@ -1,26 +1,19 @@
 import { describe, it, expect, vi } from 'vitest';
-import type { IngestRepository, Logger, SourceError, RawCandidate, PersistRunOpts } from '../ingest/types.js';
-
-// ---------------------------------------------------------------------------
-// Orchestrator tests — DB and network are fully mocked
-// ---------------------------------------------------------------------------
-
-// We mock the two source modules so the orchestrator never touches the network.
-vi.mock('../ingest/rss-source.js', () => ({
-  fetchAllFeeds: vi.fn(),
-}));
-
-vi.mock('../ingest/exa-source.js', () => ({
-  fetchExaCandidates: vi.fn(),
-}));
-
-// Import mocked modules AFTER vi.mock declarations so Vitest hoists them.
-import { fetchAllFeeds } from '../ingest/rss-source.js';
-import { fetchExaCandidates } from '../ingest/exa-source.js';
 import { runIngest } from '../ingest/orchestrator.js';
+import { DEFAULT_TOPIC } from '../ingest/sources.js';
+import type {
+  IngestRepository,
+  Logger,
+  SourceError,
+  RawCandidate,
+  PersistRunOpts,
+  SourceContext,
+  SourceFetchResult,
+  SourceProvider,
+} from '../ingest/types.js';
 
 // ---------------------------------------------------------------------------
-// Helpers
+// Orchestrator tests — providers are injected as fakes; no network or DB.
 // ---------------------------------------------------------------------------
 
 const noopLogger: Logger = {
@@ -48,6 +41,27 @@ function makeCandidate(url: string, title: string): RawCandidate {
   };
 }
 
+/** A provider that returns a fixed result, ignoring context. */
+function fakeProvider(id: string, result: SourceFetchResult, label = id): SourceProvider {
+  return {
+    id,
+    label,
+    fetch: async () => result,
+  };
+}
+
+/** A provider that records the context it received. */
+function recordingProvider(id: string, sink: { ctx?: SourceContext }): SourceProvider {
+  return {
+    id,
+    label: id,
+    fetch: async (ctx: SourceContext) => {
+      sink.ctx = ctx;
+      return { candidates: [], errors: [] };
+    },
+  };
+}
+
 /** Typed mock for persistRun so noUncheckedIndexedAccess doesn't complain. */
 function makePersistRunSpy(
   returnId: string = 'run-id',
@@ -61,126 +75,168 @@ function makePersistRunSpy(
 
 describe('runIngest orchestrator', () => {
   it('returns a result with ingestRunId from the repository', async () => {
-    vi.mocked(fetchAllFeeds).mockResolvedValue({ candidates: [], errors: [] });
-    vi.mocked(fetchExaCandidates).mockResolvedValue({ candidates: [], errors: [] });
-
-    const result = await runIngest({ repository: makeFakeRepo(), logger: noopLogger });
+    const result = await runIngest({
+      repository: makeFakeRepo(),
+      logger: noopLogger,
+      providers: [fakeProvider('rss', { candidates: [], errors: [] })],
+    });
     expect(result.ingestRunId).toBe('fake-run-id');
   });
 
-  it('reports zero fetched/deduped/persisted when sources return nothing', async () => {
-    vi.mocked(fetchAllFeeds).mockResolvedValue({ candidates: [], errors: [] });
-    vi.mocked(fetchExaCandidates).mockResolvedValue({ candidates: [], errors: [] });
-
-    const result = await runIngest({ repository: makeFakeRepo(), logger: noopLogger });
+  it('reports zero fetched/deduped/persisted when providers return nothing', async () => {
+    const result = await runIngest({
+      repository: makeFakeRepo(),
+      logger: noopLogger,
+      providers: [
+        fakeProvider('rss', { candidates: [], errors: [] }),
+        fakeProvider('exa', { candidates: [], errors: [] }),
+      ],
+    });
     expect(result.fetched).toBe(0);
     expect(result.deduped).toBe(0);
     expect(result.persisted).toBe(0);
     expect(result.errors).toHaveLength(0);
   });
 
-  it('counts fetched correctly from combined RSS + Exa candidates', async () => {
-    vi.mocked(fetchAllFeeds).mockResolvedValue({
-      candidates: [
-        makeCandidate('https://a.com/article', 'Article A'),
-        makeCandidate('https://b.com/article', 'Article B'),
+  it('merges candidates from all providers and counts per source', async () => {
+    const result = await runIngest({
+      repository: makeFakeRepo(),
+      logger: noopLogger,
+      providers: [
+        fakeProvider('rss', {
+          candidates: [
+            makeCandidate('https://a.com/article', 'Article A'),
+            makeCandidate('https://b.com/article', 'Article B'),
+          ],
+          errors: [],
+        }),
+        fakeProvider('exa', {
+          candidates: [makeCandidate('https://c.com/article', 'Article C')],
+          errors: [],
+        }),
       ],
-      errors: [],
     });
-    vi.mocked(fetchExaCandidates).mockResolvedValue({
-      candidates: [makeCandidate('https://c.com/article', 'Article C')],
-      errors: [],
-    });
-
-    const result = await runIngest({ repository: makeFakeRepo(), logger: noopLogger });
     expect(result.fetched).toBe(3);
+    expect(result.bySource).toEqual({ rss: 2, exa: 1 });
   });
 
   it('deduplicates within-run before persisting', async () => {
     const dup = makeCandidate('https://example.com/article?utm_source=x', 'Same Title');
-    vi.mocked(fetchAllFeeds).mockResolvedValue({ candidates: [dup, dup], errors: [] });
-    vi.mocked(fetchExaCandidates).mockResolvedValue({ candidates: [], errors: [] });
-
     const persistRun = makePersistRunSpy();
+
     const result = await runIngest({
       repository: makeFakeRepo({ persistRun }),
       logger: noopLogger,
+      providers: [fakeProvider('rss', { candidates: [dup, dup], errors: [] })],
     });
 
     expect(result.deduped).toBe(1);
-    // The candidate passed to persistRun should also be 1 (after DB filter returns empty sets)
     const firstCall = persistRun.mock.calls.at(0);
     expect(firstCall).toBeDefined();
     expect(firstCall?.[0].candidates).toHaveLength(1);
   });
 
   it('filters candidates already in the DB', async () => {
-    vi.mocked(fetchAllFeeds).mockResolvedValue({
-      candidates: [
-        makeCandidate('https://known.com/article', 'Known Article'),
-        makeCandidate('https://new.com/article', 'New Article'),
-      ],
-      errors: [],
-    });
-    vi.mocked(fetchExaCandidates).mockResolvedValue({ candidates: [], errors: [] });
-
     const persistRun = makePersistRunSpy();
     const repo = makeFakeRepo({
       findExistingUrls: async () => new Set(['https://known.com/article']),
       persistRun,
     });
 
-    const result = await runIngest({ repository: repo, logger: noopLogger });
-    expect(result.persisted).toBe(1);
+    const result = await runIngest({
+      repository: repo,
+      logger: noopLogger,
+      providers: [
+        fakeProvider('rss', {
+          candidates: [
+            makeCandidate('https://known.com/article', 'Known Article'),
+            makeCandidate('https://new.com/article', 'New Article'),
+          ],
+          errors: [],
+        }),
+      ],
+    });
 
-    const firstCall = persistRun.mock.calls.at(0);
-    expect(firstCall).toBeDefined();
-    const firstCandidate = firstCall?.[0].candidates.at(0);
+    expect(result.persisted).toBe(1);
+    const firstCandidate = persistRun.mock.calls.at(0)?.[0].candidates.at(0);
     expect(firstCandidate?.canonicalUrl).toBe('https://new.com/article');
   });
 
-  it('collects errors from a failing source without aborting the run', async () => {
+  it('collects non-fatal errors a provider returns without aborting the run', async () => {
     const sourceError: SourceError = { source: 'OpenAI Blog', message: 'Network timeout' };
-    vi.mocked(fetchAllFeeds).mockResolvedValue({
-      candidates: [makeCandidate('https://safe.com/post', 'Safe Post')],
-      errors: [sourceError],
+    const result = await runIngest({
+      repository: makeFakeRepo(),
+      logger: noopLogger,
+      providers: [
+        fakeProvider('rss', {
+          candidates: [makeCandidate('https://safe.com/post', 'Safe Post')],
+          errors: [sourceError],
+        }),
+      ],
     });
-    vi.mocked(fetchExaCandidates).mockResolvedValue({ candidates: [], errors: [] });
-
-    const result = await runIngest({ repository: makeFakeRepo(), logger: noopLogger });
 
     expect(result.errors).toHaveLength(1);
     expect(result.errors[0]?.source).toBe('OpenAI Blog');
-    // Despite the error, the one valid candidate should still be persisted.
     expect(result.persisted).toBe(1);
   });
 
-  it('handles a source that throws entirely without crashing the orchestrator', async () => {
-    // fetchAllFeeds itself rejects — simulates an unexpected crash.
-    vi.mocked(fetchAllFeeds).mockRejectedValue(new Error('Unexpected source crash'));
-    vi.mocked(fetchExaCandidates).mockResolvedValue({ candidates: [], errors: [] });
+  it('isolates a thrown provider: others still contribute, error captured', async () => {
+    const throwing: SourceProvider = {
+      id: 'exa',
+      label: 'exa',
+      fetch: async () => {
+        throw new Error('Unexpected source crash');
+      },
+    };
 
-    // The orchestrator should re-throw here since fetchAllFeeds crashing is
-    // outside the per-feed error-collection boundary.  Verify the test
-    // expectation matches the documented behavior (throws).
-    await expect(
-      runIngest({ repository: makeFakeRepo(), logger: noopLogger }),
-    ).rejects.toThrow('Unexpected source crash');
+    const result = await runIngest({
+      repository: makeFakeRepo(),
+      logger: noopLogger,
+      providers: [
+        fakeProvider('rss', {
+          candidates: [makeCandidate('https://rss.com/article', 'RSS Article')],
+          errors: [],
+        }),
+        throwing,
+      ],
+    });
+
+    // RSS still contributed despite Exa throwing.
+    expect(result.fetched).toBe(1);
+    expect(result.persisted).toBe(1);
+    expect(result.bySource).toEqual({ rss: 1, exa: 0 });
+
+    // The thrown error is captured as a SourceError keyed by the provider id.
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0]?.source).toBe('exa');
+    expect(result.errors[0]?.message).toBe('Unexpected source crash');
   });
 
-  it('propagates Exa errors non-fatally when RSS returns results', async () => {
-    vi.mocked(fetchAllFeeds).mockResolvedValue({
-      candidates: [makeCandidate('https://rss.com/article', 'RSS Article')],
-      errors: [],
-    });
-    vi.mocked(fetchExaCandidates).mockResolvedValue({
-      candidates: [],
-      errors: [{ source: 'exa:query', message: 'Rate limited' }],
+  it('threads the default topic into every provider context', async () => {
+    const a = { ctx: undefined as SourceContext | undefined };
+    const b = { ctx: undefined as SourceContext | undefined };
+
+    await runIngest({
+      repository: makeFakeRepo(),
+      logger: noopLogger,
+      providers: [recordingProvider('rss', a), recordingProvider('exa', b)],
     });
 
-    const result = await runIngest({ repository: makeFakeRepo(), logger: noopLogger });
-    expect(result.fetched).toBe(1);
-    expect(result.errors).toHaveLength(1);
-    expect(result.errors[0]?.source).toBe('exa:query');
+    expect(a.ctx?.topic).toBe(DEFAULT_TOPIC);
+    expect(b.ctx?.topic).toBe(DEFAULT_TOPIC);
+    expect(a.ctx?.logger).toBe(noopLogger);
+  });
+
+  it('threads an overridden topic into every provider context', async () => {
+    const sink = { ctx: undefined as SourceContext | undefined };
+
+    await runIngest({
+      repository: makeFakeRepo(),
+      logger: noopLogger,
+      topic: 'edge AI inference',
+      providers: [recordingProvider('rss', sink)],
+    });
+
+    expect(sink.ctx?.topic).toBe('edge AI inference');
   });
 });
