@@ -1,25 +1,77 @@
 /**
- * Mega brand design tokens — CSS custom properties (web dashboard).
- * Mirrors tokens.ts. See docs/BRAND.md. Import once at the app root.
+ * Mega brand design tokens — CSS custom properties (web app).
+ * Aligned to the shared "Mega standard" used by the sibling onprem-ai-adoption-radar
+ * so the two products read as one system. Mirrors tokens.ts.
+ * See docs/RADAR-DESIGN-LANGUAGE.md + ADR-0003. Import once at the app root.
+ *
+ * Light values live in :root; the @media (prefers-color-scheme: dark) block redeclares
+ * the same names (navy, not gray). --color-brand (#009FDA) is held constant in both.
  */
+
+/* Hanken Grotesk — the bundled OFL fallback for the commercial Centrale Sans. */
+@font-face {
+  font-family: 'Hanken Grotesk';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/hanken-grotesk-400.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Hanken Grotesk';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/hanken-grotesk-700.woff2') format('woff2');
+}
+
 :root {
-  /* palette */
-  --color-brand: #0089cf; /* Pantone Process Blue */
-  --color-brand-dark: #0a6fa3;
-  --color-brand-tint: #e6f4fb;
-  --color-gray: #c8c9c7; /* Pantone Cool Gray 3 */
-  --color-gray-light: #edeeee;
+  /* palette — light (radar :root) */
+  --color-brand: #009fda; /* Process Blue (constant across themes) */
+  --color-brand-dark: #0082b3;
+  --color-brand-darker: #005f85;
+  --color-brand-tint: #e6f6fc;
+  --color-gray: #bcbec0; /* Cool Gray */
+  --color-gray-light: #f0f0f0;
+  --color-surface-20: #f0f0f0;
+  --color-surface-30: #e8e8e9;
   --color-ink: #1a1a1a;
-  --color-ink-muted: #5a5f63;
+  --color-ink-muted: #6b7280;
   --color-surface: #ffffff;
+  --color-bg: #ffffff;
+  --color-border: #e8e8e9;
+  --color-border-mid: #bcbec0;
+  --color-link: #0082b3;
+  --color-row-hover: #f0f0f0;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+
+  /* ring decision colors */
+  --ring-adopt-bg: rgba(0, 159, 218, 0.12);
+  --ring-adopt-border: rgba(0, 159, 218, 0.35);
+  --ring-adopt-text: #0082b3;
+  --ring-pilot-bg: rgba(0, 95, 133, 0.1);
+  --ring-pilot-border: rgba(0, 95, 133, 0.3);
+  --ring-pilot-text: #005f85;
+  --ring-watch-bg: rgba(200, 145, 0, 0.12);
+  --ring-watch-border: rgba(200, 145, 0, 0.35);
+  --ring-watch-text: #8c6200;
+  --ring-avoid-bg: rgba(185, 48, 37, 0.1);
+  --ring-avoid-border: rgba(185, 48, 37, 0.3);
+  --ring-avoid-text: #b93025;
 
   /* Buka dot-dissolve accents — decorative only */
   --color-accent-teal: #36b39a;
   --color-accent-orange: #f39200;
   --color-accent-magenta: #e6007e;
 
-  /* typography (Nunito Sans fallback — ADR-0002) */
-  --font-sans: 'Nunito Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  /* Buka dot-pattern (hero = white dots, footer = gray dots), 20px tile */
+  --dot-hero: radial-gradient(circle, rgba(255, 255, 255, 0.18) 1.5px, transparent 1.5px);
+  --dot-footer: radial-gradient(circle, rgba(188, 190, 192, 0.45) 1.5px, transparent 1.5px);
+  --dot-size: 20px 20px;
+
+  /* typography — Centrale Sans (local) → Hanken Grotesk (bundled) → system */
+  --font-sans: 'Centrale Sans', 'Hanken Grotesk', system-ui, -apple-system, 'Segoe UI', Roboto,
+    sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, monospace;
 
   --text-xs: 12px;
   --text-sm: 14px;
@@ -36,9 +88,11 @@
   --space-xl: 40px;
   --space-xxl: 64px;
 
-  /* radius */
+  /* radius ladder */
+  --radius-badge: 0.3rem;
+  --radius-input: 0.4rem;
   --radius-sm: 6px;
-  --radius-md: 12px;
+  --radius-md: 0.5rem;
   --radius-lg: 20px;
   --radius-pill: 999px;
 
@@ -46,4 +100,28 @@
   --duration-fast: 150ms;
   --duration-normal: 300ms;
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Automatic dark mode — navy surfaces; --color-brand stays #009FDA. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-brand-dark: #33b3e8;
+    --color-brand-darker: #60aacc;
+    --color-brand-tint: #10293a;
+    --color-gray: #2e3d52;
+    --color-gray-light: #141820;
+    --color-surface-20: #141820;
+    --color-surface-30: #141820;
+    --color-ink: #dde4ef;
+    --color-ink-muted: #8499b5;
+    --color-surface: #181e2a;
+    --color-bg: #0c1118;
+    --color-border: #222b3a;
+    --color-border-mid: #2e3d52;
+    --color-link: #33c0f0;
+    --color-row-hover: #141820;
+    --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.35);
+    --ring-adopt-text: #33b3e8;
+    --ring-pilot-text: #60aacc;
+  }
 }
