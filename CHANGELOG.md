@@ -55,5 +55,5 @@ Initial build of the weekly AI-news digest system.
   argon2 credential hashing, signed unsubscribe tokens, PII scrubbing in send records, and static-
   asset allowlisting in the auth middleware. See [`docs/SECURITY.md`](docs/SECURITY.md).
 
-[Unreleased]: https://github.com/megabilgisayar/curated-ai-digest/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/megabilgisayar/curated-ai-digest/releases/tag/v0.1.0
+[Unreleased]: https://github.com/BerkayRA/curated-ai-digest/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/BerkayRA/curated-ai-digest/releases/tag/v0.1.0

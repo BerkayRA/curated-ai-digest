@@ -9,7 +9,7 @@ Curated AI Digest is a **pnpm + Turborepo monorepo** targeting **Node ≥ 20** a
 **Docker** to run the local Postgres instance.
 
 ```bash
-git clone https://github.com/megabilgisayar/curated-ai-digest.git
+git clone https://github.com/BerkayRA/curated-ai-digest.git
 cd curated-ai-digest
 
 pnpm install
