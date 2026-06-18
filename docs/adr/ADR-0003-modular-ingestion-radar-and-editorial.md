@@ -30,8 +30,9 @@ system**.
    AI digest but ships tuned toward enterprise/on-prem to pair with the radar out of the box.
 
 4. **Brand blue aligns to the radar's `#009FDA`.** Adopt the radar's exact Process Blue as
-   our primary token so the two products look unified (was `#0089CF`). Re-key the logo PNGs
-   to match if the hue drift is visible. Cool Gray / Black / Buka dot-pattern unchanged.
+   our primary token so Mega Bülten stays visually consistent with a paired radar (was
+   `#0089CF`). Re-key the logo PNGs to match if the hue drift is visible. Cool Gray / Black /
+   Buka dot-pattern unchanged.
 
 5. **Editorial design via Open Design.** Use the Open Design MCP (`web-artifacts-builder` /
    editorial skills) to author a bold editorial design that echoes the radar's visual

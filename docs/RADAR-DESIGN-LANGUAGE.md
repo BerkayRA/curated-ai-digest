@@ -3,8 +3,9 @@
 > Extracted from the radar's committed design system (`src/radar/web/templates/_base_styles.html`,
 > a single dependency-free Jinja `<style>` partial) by the S1 research workflow. The radar's
 > README states this system was **"Generated with the Open Design app and ported into the
-> shared design system"** following the Mega standard (light + dark). Mega Bülten pulls from
-> the **same** Mega standard so the two products read as one system.
+> shared design system"** following the Mega standard (light + dark). Mega Bülten (a standalone
+> project) adopts the **same** Mega design standard, so it stays visually consistent with any
+> radar it's optionally paired with.
 
 ## Tokens — light (`:root`)
 

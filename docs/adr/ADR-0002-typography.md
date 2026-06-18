@@ -10,9 +10,9 @@ a licensed font requires the proper webfont license; shipping it unlicensed is n
 ## Decision
 
 - **Bundled fallback = Hanken Grotesk** (OFL). Revised from the original Nunito Sans choice to
-  match the sibling **onprem-ai-adoption-radar**, which self-hosts Hanken Grotesk as its
-  Centrale Sans fallback. Using the same fallback makes the two products read as one system
-  (ADR-0003). Self-hosted `woff2` (weights 400/700) in `packages/brand/fonts` +
+  match the **onprem-ai-adoption-radar** (a radar Mega Bülten can optionally integrate with),
+  which self-hosts Hanken Grotesk as its Centrale Sans fallback. Using the same fallback keeps
+  them visually consistent when paired (ADR-0003). Self-hosted `woff2` (weights 400/700) in `packages/brand/fonts` +
   `apps/web/public/fonts`, wired via `@font-face` in `tokens.css`, `font-display: swap`.
 - Font stack: `'Centrale Sans', 'Hanken Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif`
   — Centrale Sans loads only via `local()` when the visitor has it installed.

@@ -9,12 +9,14 @@
 ![Build](https://img.shields.io/badge/build-passing-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
-Mega Bülten is the **editorial sibling** of the
-[On-Prem AI Adoption Radar](https://github.com/ekaynac/onprem-ai-adoption-radar). The radar makes
-*decisions* (adopt / pilot / watch / avoid) about AI tooling; Mega Bülten turns the week's AI news —
-including the radar's own ring changes — into a **branded, marketing-grade Turkish newsletter** that
-goes out to customers and prospects. Both products share one **Mega design standard** (Process Blue
-hero, Buka dot-dissolve motif, light + dark), so they read as two parts of one system.
+Mega Bülten is a **standalone, self-hosted** system that turns the week's AI news into a
+**branded, marketing-grade Turkish newsletter** for customers and prospects. Its ingestion is
+modular, so beyond curated RSS feeds and neural search it **can optionally** pull from a
+deterministic news radar — such as the
+[On-Prem AI Adoption Radar](https://github.com/ekaynac/onprem-ai-adoption-radar), whose
+adopt/pilot/watch/avoid ring changes become newsletter candidates — but no radar is required to
+run. It follows the **Mega design standard** (Process Blue, Buka dot-dissolve motif, light + dark),
+so when paired with such a radar the two stay visually consistent.
 
 Claude agents pick the 2–3 most important items each week, write Turkish copy in Mega's brand voice,
 fact-check it against the sources, and render a branded HTML email. A dashboard owns the archive,
