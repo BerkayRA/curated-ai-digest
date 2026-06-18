@@ -1,0 +1,70 @@
+/* Curation pipeline trigger — a dashed-edge "alternative path" panel that sits
+   below the manual draft form. Tokens only → dark mode is automatic. */
+
+.panel {
+  position: relative;
+  background: var(--color-bg);
+  border: 1px dashed var(--color-border-mid);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.title {
+  font-size: var(--text-lg);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--color-ink);
+  margin: 0;
+}
+
+.hint {
+  font-size: var(--text-sm);
+  color: var(--color-ink-muted);
+  margin: 0;
+  max-width: 60ch;
+}
+
+.error {
+  background: var(--ring-watch-bg);
+  border: 1px solid var(--ring-watch-border);
+  color: var(--ring-watch-text);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  margin: 0;
+}
+
+.success {
+  background: var(--ring-adopt-bg);
+  border: 1px solid var(--ring-adopt-border);
+  color: var(--ring-adopt-text);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  margin: 0;
+}
+
+.openLink {
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-weight: 800;
+  color: var(--color-brand-dark);
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.runBtn {
+  align-self: flex-start;
+}

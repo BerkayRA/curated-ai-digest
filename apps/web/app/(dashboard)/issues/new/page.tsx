@@ -1,28 +1,36 @@
 import Link from 'next/link';
 import { PageHeader } from '@/components/ui/PageHeader';
-import { EmptyState } from '@/components/ui/EmptyState';
+import { NewIssueForm } from '@/components/issues/NewIssueForm';
+import { nextIsoWeek } from '@/lib/iso-week';
 import issuesStyles from '../issues.module.css';
+
+export const dynamic = 'force-dynamic';
 
 export const metadata = {
   title: 'Yeni Sayı — Mega Bülten',
 };
 
-// Drafts are produced by the Claude curation pipeline; this page surfaces that
-// flow and links back to the archive. Kept minimal — issue editing happens in
-// /issues/[id]. The archive's "Yeni Sayı" action points here.
+/**
+ * "Yeni Sayı" — the manual drafting flow. Editors hand-author a weekly issue
+ * (1–3 items) here, or hand off to the Claude curation pipeline via the panel
+ * at the bottom of the form. The default ISO week is computed server-side so
+ * the field is pre-filled with the upcoming week.
+ */
 export default function NewIssuePage() {
+  const defaultIsoWeek = nextIsoWeek();
+
   return (
     <section aria-label="Yeni sayı">
-      <PageHeader title="Yeni Sayı" description="Yeni bir bülten taslağı başlat." />
-      <EmptyState
-        title="Taslaklar curation pipeline ile oluşturulur"
-        description="Haftalık curation pipeline çalıştığında yeni taslak otomatik olarak arşive eklenir ve düzenlemeye açılır."
-        action={
+      <PageHeader
+        title="Yeni Sayı"
+        description="Yeni bir bülten taslağı oluştur — elle yaz veya curation pipeline'a bırak."
+        actions={
           <Link href="/issues" className={issuesStyles.newLink}>
             ← Arşive dön
           </Link>
         }
       />
+      <NewIssueForm defaultIsoWeek={defaultIsoWeek} />
     </section>
   );
 }

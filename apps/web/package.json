@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@mega-bulten/brand": "workspace:*",
+    "@mega-bulten/curation": "workspace:*",
     "@mega-bulten/db": "workspace:*",
     "@mega-bulten/delivery": "workspace:*",
     "@mega-bulten/email": "workspace:*",
