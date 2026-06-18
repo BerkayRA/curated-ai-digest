@@ -1,0 +1,642 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mega Bülten — Yönetim Paneli</title>
+<link rel="icon" href="mega-logo-white.svg">
+<style>
+/* ============================================================
+   Mega standard — shared tokens (mirror of packages/brand tokens.css)
+   Sibling of "On-Prem AI Adoption Radar" — one system, two products.
+   ============================================================ */
+:root{
+  --blue:#009FDA;            /* Process Blue — constant across themes */
+  --blue-dark:#0082B3;
+  --blue-darker:#005F85;
+  --blue-tint:#E6F6FC;
+  --cool-gray:#BCBEC0;
+
+  --page:#F0F0F0;            /* body */
+  --card:#FFFFFF;            /* panels */
+  --surface-2:#E8E8E9;       /* subtle fills */
+  --ink:#1A1A1A;
+  --muted:#6B7280;
+  --border:#E8E8E9;
+
+  /* ring/status — adopt=blue, pilot=deeper blue, watch=amber, avoid=red */
+  --adopt-bg:rgba(0,159,218,.12);  --adopt-bd:rgba(0,159,218,.35);  --adopt-tx:#0082B3;
+  --pilot-bg:rgba(0,95,133,.10);   --pilot-bd:rgba(0,95,133,.30);   --pilot-tx:#005F85;
+  --watch-bg:rgba(200,145,0,.12);  --watch-bd:rgba(200,145,0,.35);  --watch-tx:#8C6200;
+  --avoid-bg:rgba(185,48,37,.10);  --avoid-bd:rgba(185,48,37,.30);  --avoid-tx:#B93025;
+
+  --pos:#0082B3; --neg:#B93025;
+
+  --font:"Centrale Sans","Hanken Grotesk",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,monospace;
+
+  --r-s:0.3rem; --r-m:0.4rem; --r-l:0.5rem;
+  --shadow:0 1px 3px rgba(0,0,0,.06), 0 14px 34px -18px rgba(0,0,0,.18);
+  --focus:0 0 0 3px rgba(0,159,218,.16);
+
+  --dot-hero:radial-gradient(circle, rgba(255,255,255,.18) 1.5px, transparent 1.5px);
+  --dot-foot:radial-gradient(circle, rgba(188,190,192,.45) 1.5px, transparent 1.5px);
+  --dot-size:20px 20px;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --page:#0C1118; --card:#181E2A; --surface-2:#10151E;
+    --ink:#DDE4EF; --muted:#8499B5; --border:#232B3A;
+    --blue-tint:rgba(0,159,218,.10);
+    --adopt-tx:#5FC8EF; --pilot-tx:#7FB4D8; --watch-tx:#E0B23C; --avoid-tx:#E2776B;
+    --pos:#5FC8EF; --neg:#E2776B;
+    --shadow:0 1px 3px rgba(0,0,0,.5), 0 18px 40px -20px rgba(0,0,0,.7);
+  }
+}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--page); color:var(--ink);
+  font-family:var(--font); font-size:16px; line-height:1.55;
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+}
+a{color:inherit}
+:focus-visible{outline:none; box-shadow:var(--focus); border-radius:var(--r-s)}
+.wrap{max-width:1180px; margin:0 auto; padding:0 24px}
+
+.eyebrow{
+  font-size:.7rem; text-transform:uppercase; letter-spacing:.07em;
+  font-weight:700; color:var(--muted); margin:0;
+}
+.mono{font-family:var(--mono)}
+
+/* ---------- ring/status pill ---------- */
+.pill{
+  display:inline-flex; align-items:center; gap:.4em;
+  font-size:.66rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em;
+  padding:.34em .7em; border-radius:999px; border:1px solid; white-space:nowrap;
+}
+.pill::before{content:""; width:.46em; height:.46em; border-radius:999px; background:currentColor}
+.pill.adopt{background:var(--adopt-bg); border-color:var(--adopt-bd); color:var(--adopt-tx)}
+.pill.pilot{background:var(--pilot-bg); border-color:var(--pilot-bd); color:var(--pilot-tx)}
+.pill.watch{background:var(--watch-bg); border-color:var(--watch-bd); color:var(--watch-tx)}
+.pill.avoid{background:var(--avoid-bg); border-color:var(--avoid-bd); color:var(--avoid-tx)}
+
+/* ============================================================
+   Top bar
+   ============================================================ */
+.topbar{background:var(--card); border-bottom:1px solid var(--border)}
+.topbar .wrap{display:flex; align-items:center; gap:24px; height:60px}
+.brandmark{display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:-.02em}
+.brandmark .dot{width:22px; height:22px; border-radius:6px; background:var(--blue);
+  display:grid; place-items:center; box-shadow:0 1px 0 rgba(0,0,0,.06) inset}
+.brandmark .dot::after{content:""; width:8px; height:8px; border-radius:999px; background:#fff}
+.brandmark b{font-size:1rem}
+.brandmark span{font-size:.62rem; letter-spacing:.18em; color:var(--muted); text-transform:uppercase; font-weight:700}
+.nav{display:flex; gap:4px; margin-left:8px}
+.nav a{
+  font-size:.86rem; font-weight:600; color:var(--muted); text-decoration:none;
+  padding:.45em .7em; border-radius:var(--r-s);
+}
+.nav a.active{color:var(--ink); background:var(--surface-2)}
+.nav a:hover{color:var(--ink)}
+.spacer{flex:1}
+.btn{
+  font:inherit; font-size:.86rem; font-weight:700; cursor:pointer;
+  border-radius:var(--r-m); padding:.6em 1em; border:1px solid var(--blue);
+  background:var(--blue); color:#fff; transition:transform .12s, filter .12s;
+}
+.btn:hover{filter:brightness(1.06)} .btn:active{transform:translateY(1px)}
+.btn.ghost{background:transparent; color:var(--ink); border-color:var(--border)}
+.btn.ghost:hover{border-color:var(--cool-gray)}
+
+/* ============================================================
+   Hero band — Process Blue + white Buka dots
+   ============================================================ */
+.hero{
+  position:relative; color:#fff; overflow:hidden;
+  background:
+    var(--dot-hero),
+    linear-gradient(118deg, var(--blue) 0%, var(--blue-dark) 58%, var(--blue-darker) 100%);
+  background-size:var(--dot-size), 100% 100%;
+}
+.hero::after{ /* soft light bloom, restrained depth */
+  content:""; position:absolute; right:-12%; top:-60%; width:60%; height:240%;
+  background:radial-gradient(closest-side, rgba(255,255,255,.16), transparent 70%);
+  pointer-events:none;
+}
+.hero .wrap{position:relative; padding:44px 24px 50px}
+.hero-logo{height:44px; width:auto; display:block; margin-bottom:26px}
+.hero-grid{display:flex; align-items:flex-end; justify-content:space-between; gap:32px; flex-wrap:wrap}
+.hero h1{
+  font-size:clamp(2.6rem,1.6rem + 3.4vw,4.2rem); line-height:.98; margin:.1em 0 .25em;
+  font-weight:800; letter-spacing:-.025em; text-wrap:balance;
+}
+.hero .tagline{font-size:clamp(1rem,.95rem + .4vw,1.2rem); max-width:34ch; margin:0; color:rgba(255,255,255,.9)}
+.hero .kicker{color:rgba(255,255,255,.78); font-weight:700}
+.issue-tag{
+  display:inline-flex; align-items:baseline; gap:.5em; margin-bottom:.2em;
+}
+.issue-tag .no{font-family:var(--mono); font-size:1rem; font-weight:700; color:#fff}
+.hero-meta{
+  display:grid; grid-template-columns:repeat(2,auto); gap:18px 40px;
+  padding:18px 22px; border-radius:var(--r-l);
+  background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.22);
+  backdrop-filter:blur(2px);
+}
+.hero-meta .lbl{font-size:.66rem; text-transform:uppercase; letter-spacing:.08em; color:rgba(255,255,255,.72); font-weight:700}
+.hero-meta .val{font-family:var(--mono); font-size:1.55rem; font-weight:700; line-height:1.1}
+.hero-meta .val small{font-size:.8rem; opacity:.8}
+
+/* ============================================================
+   Section frame
+   ============================================================ */
+section{padding:38px 0}
+.sec-head{display:flex; align-items:baseline; justify-content:space-between; gap:16px; margin-bottom:20px}
+.sec-head h2{font-size:1.35rem; font-weight:800; letter-spacing:-.02em; margin:.2em 0 0;
+  position:relative; padding-top:12px}
+.sec-head h2::before{content:""; position:absolute; top:0; left:0; width:34px; height:3px; background:var(--blue); border-radius:2px}
+.sec-head .meta{font-size:.82rem; color:var(--muted)}
+
+/* ---------- ring stat cards ---------- */
+.stats{display:grid; grid-template-columns:repeat(4,1fr); gap:16px}
+.stat{
+  background:var(--card); border:1px solid var(--border); border-radius:var(--r-l);
+  padding:20px; box-shadow:var(--shadow); display:flex; gap:16px; align-items:center;
+}
+.ring{
+  --val:50; --col:var(--blue);
+  width:78px; height:78px; flex:0 0 78px; border-radius:999px; display:grid; place-items:center;
+  background:conic-gradient(var(--col) calc(var(--val)*1%), var(--surface-2) 0);
+}
+.ring i{
+  width:58px; height:58px; border-radius:999px; background:var(--card);
+  display:grid; place-items:center; font-style:normal;
+  font-family:var(--mono); font-weight:700; font-size:1.12rem;
+}
+.ring i small{font-size:.62rem; color:var(--muted); font-weight:700}
+.stat .body .lbl{font-size:.7rem; text-transform:uppercase; letter-spacing:.07em; font-weight:700; color:var(--muted); margin:0}
+.stat .body .big{font-family:var(--mono); font-size:1.5rem; font-weight:700; line-height:1.1; margin:.1em 0}
+.trend{display:inline-flex; align-items:center; gap:.25em; font-size:.78rem; font-weight:700; font-family:var(--mono)}
+.trend.up{color:var(--pos)} .trend.flat{color:var(--muted)} .trend.down{color:var(--neg)}
+
+/* ============================================================
+   Sticky filter bar
+   ============================================================ */
+.filterbar{
+  position:sticky; top:0; z-index:20;
+  background:color-mix(in srgb, var(--page) 86%, transparent);
+  -webkit-backdrop-filter:saturate(160%) blur(10px); backdrop-filter:saturate(160%) blur(10px);
+  border-top:1px solid var(--border); border-bottom:1px solid var(--border);
+}
+.filterbar .wrap{display:flex; align-items:center; gap:14px; height:60px; flex-wrap:wrap}
+.chips{display:flex; gap:6px; flex-wrap:wrap}
+.chip{
+  font:inherit; font-size:.8rem; font-weight:600; cursor:pointer; color:var(--muted);
+  background:transparent; border:1px solid transparent; padding:.42em .8em; border-radius:999px;
+  display:inline-flex; align-items:center; gap:.45em;
+}
+.chip .ct{font-family:var(--mono); font-size:.72rem; opacity:.75}
+.chip:hover{color:var(--ink)}
+.chip.on{color:var(--ink); background:var(--card); border-color:var(--border); box-shadow:var(--shadow)}
+.chip.on .ct{color:var(--blue); opacity:1}
+.search{flex:1; min-width:180px; display:flex; align-items:center; gap:8px;
+  background:var(--card); border:1px solid var(--border); border-radius:var(--r-m); padding:.5em .8em}
+.search input{flex:1; border:0; background:transparent; color:inherit; font:inherit; font-size:.86rem}
+.search input:focus{outline:none}
+.search svg{flex:0 0 16px; color:var(--muted)}
+
+/* ============================================================
+   Issues archive — editorial cards
+   ============================================================ */
+.archive{display:grid; grid-template-columns:repeat(2,1fr); gap:18px}
+.issue{
+  position:relative; background:var(--card); border:1px solid var(--border);
+  border-radius:var(--r-l); padding:24px 24px 20px; box-shadow:var(--shadow);
+  overflow:hidden; transition:transform .14s, border-color .14s;
+}
+.issue::before{ /* 3px Process-Blue top bar */
+  content:""; position:absolute; inset:0 0 auto 0; height:3px; background:var(--blue);
+}
+.issue:hover{transform:translateY(-2px); border-color:var(--cool-gray)}
+.issue .row1{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px}
+.issue .no{font-family:var(--mono); font-size:.78rem; font-weight:700; color:var(--blue-dark)}
+.issue h3{font-size:1.45rem; line-height:1.15; font-weight:800; letter-spacing:-.02em; margin:0 0 6px; text-wrap:balance}
+.issue h3 a{text-decoration:none}
+.issue h3 a:hover{color:var(--blue-dark)}
+.issue .date{font-size:.78rem; color:var(--muted); margin:0 0 12px; font-family:var(--mono)}
+.issue .lede{font-size:.92rem; color:var(--ink); margin:0 0 18px; opacity:.85}
+.issue .stories{display:flex; flex-direction:column; gap:2px; margin:0 0 18px; padding:0; list-style:none;
+  border-left:3px solid var(--blue); padding-left:12px}
+.issue .stories li{font-size:.84rem; color:var(--muted); display:flex; gap:.5em}
+.issue .stories li b{color:var(--ink); font-weight:600}
+.issue .foot{display:flex; align-items:center; gap:18px; padding-top:14px; border-top:1px solid var(--border)}
+.issue .metric{display:flex; flex-direction:column}
+.issue .metric .k{font-size:.62rem; text-transform:uppercase; letter-spacing:.07em; color:var(--muted); font-weight:700}
+.issue .metric .v{font-family:var(--mono); font-weight:700; font-size:1.02rem}
+.issue .foot .spacer{flex:1}
+.issue .link{font-size:.82rem; font-weight:700; color:var(--blue-dark); text-decoration:none}
+.issue .link:hover{text-decoration:underline}
+.issue.draft{border-style:dashed; background:linear-gradient(180deg, color-mix(in srgb,var(--watch-bg) 40%, var(--card)), var(--card) 60%)}
+.issue.draft::before{background:var(--watch-tx); opacity:.55}
+
+/* ============================================================
+   Draft editor preview
+   ============================================================ */
+.editor{
+  background:var(--card); border:1px solid var(--border); border-radius:var(--r-l);
+  box-shadow:var(--shadow); overflow:hidden;
+}
+.editor .ed-bar{display:flex; align-items:center; gap:10px; padding:14px 22px; border-bottom:1px solid var(--border);
+  background:var(--surface-2)}
+.editor .ed-bar .dots{display:flex; gap:6px} .editor .ed-bar .dots i{width:10px;height:10px;border-radius:999px;background:var(--cool-gray);display:block}
+.editor .ed-bar .name{font-size:.82rem; font-weight:700; font-family:var(--mono)}
+.editor .ed-bar .spacer{flex:1}
+.editor .ed-body{display:grid; grid-template-columns:1.3fr 1fr; gap:0}
+.editor .canvas{padding:30px 32px; border-right:1px solid var(--border)}
+.editor .canvas .ek{font-family:var(--mono); color:var(--blue-dark); font-weight:700; font-size:.75rem}
+.editor .canvas h3{font-size:1.9rem; font-weight:800; letter-spacing:-.025em; line-height:1.05; margin:.3em 0 .4em; text-wrap:balance}
+.editor .canvas h3 .caret{display:inline-block; width:2px; height:.95em; background:var(--blue); margin-left:2px; vertical-align:-3px; animation:blink 1.1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.story-block{padding:16px 0 16px 16px; border-left:3px solid var(--blue); margin-top:6px}
+.story-block + .story-block{border-top:1px dashed var(--border); padding-top:18px}
+.story-block .src{font-size:.66rem; text-transform:uppercase; letter-spacing:.07em; font-weight:700; color:var(--muted)}
+.story-block .num{font-family:var(--mono); color:var(--blue); font-weight:700; margin-right:.4em}
+.story-block h4{font-size:1.02rem; font-weight:700; margin:.25em 0 .3em; line-height:1.25}
+.story-block p{font-size:.84rem; color:var(--muted); margin:0}
+.editor .side{padding:26px 26px; background:var(--surface-2)}
+.editor .side .grp{margin-bottom:22px}
+.editor .side .gl{font-size:.66rem; text-transform:uppercase; letter-spacing:.07em; font-weight:700; color:var(--muted); margin:0 0 10px}
+.field{background:var(--card); border:1px solid var(--border); border-radius:var(--r-m); padding:.6em .8em; font-size:.84rem; margin-bottom:8px}
+.field.foc{border-color:var(--blue); box-shadow:var(--focus)}
+.field .fl{font-size:.6rem; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); display:block; margin-bottom:2px}
+.swatches{display:flex; gap:8px; flex-wrap:wrap}
+.swatches span{width:26px;height:26px;border-radius:var(--r-s); border:1px solid rgba(0,0,0,.12); display:block}
+.toggle{display:flex; align-items:center; justify-content:space-between; background:var(--card);
+  border:1px solid var(--border); border-radius:var(--r-m); padding:.55em .8em; font-size:.82rem; margin-bottom:8px}
+.toggle .sw{width:34px; height:20px; border-radius:999px; background:var(--blue); position:relative}
+.toggle .sw::after{content:""; position:absolute; top:2px; right:2px; width:16px; height:16px; border-radius:999px; background:#fff}
+.toggle.off .sw{background:var(--cool-gray)} .toggle.off .sw::after{right:auto; left:2px}
+
+/* ============================================================
+   Footer — Cool Gray band + gray Buka dots + chip links
+   ============================================================ */
+.foot{
+  margin-top:24px; color:var(--ink);
+  background:var(--dot-foot), var(--cool-gray);
+  background-size:var(--dot-size), 100% 100%;
+  border-top:1px solid var(--border);
+}
+@media (prefers-color-scheme:dark){
+  .foot{background:var(--dot-foot), #1B2230; color:var(--ink)}
+}
+.foot .wrap{padding:40px 24px 30px; display:grid; grid-template-columns:1.4fr 1fr 1fr; gap:30px}
+.foot .lead h4{font-size:1.1rem; font-weight:800; letter-spacing:-.02em; margin:0 0 6px}
+.foot .lead p{font-size:.84rem; color:#3a3f47; margin:0; max-width:32ch}
+@media (prefers-color-scheme:dark){ .foot .lead p{color:var(--muted)} }
+.foot .col .ct{font-size:.66rem; text-transform:uppercase; letter-spacing:.08em; font-weight:700; margin:0 0 12px; color:#3a3f47}
+@media (prefers-color-scheme:dark){ .foot .col .ct{color:var(--muted)} }
+.dlchips{display:flex; flex-direction:column; gap:8px; align-items:flex-start}
+.dlchip{display:inline-flex; align-items:center; gap:.5em; font-size:.8rem; font-weight:600; text-decoration:none;
+  background:rgba(255,255,255,.55); border:1px solid rgba(0,0,0,.12); color:#1A1A1A;
+  padding:.42em .8em; border-radius:999px}
+.dlchip:hover{background:#fff}
+@media (prefers-color-scheme:dark){
+  .dlchip{background:rgba(255,255,255,.06); border-color:var(--border); color:var(--ink)}
+  .dlchip:hover{background:rgba(255,255,255,.12)}
+}
+.foot .base{border-top:1px solid rgba(0,0,0,.12)}
+@media (prefers-color-scheme:dark){ .foot .base{border-color:var(--border)} }
+.foot .base .wrap{display:flex; justify-content:space-between; padding:16px 24px; font-size:.76rem; color:#3a3f47}
+@media (prefers-color-scheme:dark){ .foot .base .wrap{color:var(--muted)} }
+
+/* ============================================================
+   Responsive
+   ============================================================ */
+@media (max-width:880px){
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .archive{grid-template-columns:1fr}
+  .editor .ed-body{grid-template-columns:1fr}
+  .editor .canvas{border-right:0; border-bottom:1px solid var(--border)}
+  .foot .wrap{grid-template-columns:1fr 1fr}
+  .nav{display:none}
+}
+@media (max-width:560px){
+  .stats{grid-template-columns:1fr}
+  .hero-meta{grid-template-columns:1fr 1fr}
+  .foot .wrap{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ===================== TOP BAR ===================== -->
+<header class="topbar">
+  <div class="wrap">
+    <a class="brandmark" href="#" aria-label="Mega Bülten">
+      <span class="dot" aria-hidden="true"></span>
+      <span><b>Mega&nbsp;Bülten</b><br><span>Yönetim Paneli</span></span>
+    </a>
+    <nav class="nav" aria-label="Ana gezinme">
+      <a href="#" class="active">Arşiv</a>
+      <a href="#">Aboneler</a>
+      <a href="#">Ayarlar</a>
+    </nav>
+    <span class="spacer"></span>
+    <button class="btn ghost" type="button">Önizleme gönder</button>
+    <button class="btn" type="button">+ Yeni sayı</button>
+  </div>
+</header>
+
+<!-- ===================== HERO ===================== -->
+<section class="hero" aria-labelledby="hero-h">
+  <div class="wrap">
+    <img class="hero-logo" src="mega-logo-white.svg" alt="mega bilişim teknolojileri">
+    <div class="hero-grid">
+      <div>
+        <div class="issue-tag">
+          <span class="eyebrow" style="color:rgba(255,255,255,.78)">Aktif sayı</span>
+          <span class="no">№ 24 · 18.06.2026</span>
+        </div>
+        <h1 id="hero-h">Mega Bülten</h1>
+        <p class="tagline">Yapay zeka dünyasından haftalık, özenle seçilmiş haberler.</p>
+      </div>
+      <div class="hero-meta">
+        <div><div class="lbl">Aboneler</div><div class="val">12.480</div></div>
+        <div><div class="lbl">Bu hafta</div><div class="val">3 <small>haber</small></div></div>
+        <div><div class="lbl">Ort. açılma</div><div class="val">58<small>%</small></div></div>
+        <div><div class="lbl">Sonraki gönderim</div><div class="val" style="font-size:1.05rem">Per&nbsp;09:00</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== STATS ===================== -->
+<section aria-labelledby="stat-h">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2 id="stat-h">Dağıtım performansı</h2>
+      <span class="meta">Son 8 sayının ortalaması · güncellendi 2 sa önce</span>
+    </div>
+    <div class="stats">
+      <div class="stat">
+        <div class="ring" style="--val:58; --col:var(--blue)"><i>58<small>%</small></i></div>
+        <div class="body">
+          <p class="lbl">Açılma oranı</p>
+          <div class="big">58%</div>
+          <span class="trend up">↑ 4.2 pp</span>
+        </div>
+      </div>
+      <div class="stat">
+        <div class="ring" style="--val:24; --col:var(--blue-darker)"><i>24<small>%</small></i></div>
+        <div class="body">
+          <p class="lbl">Tıklama oranı</p>
+          <div class="big">24%</div>
+          <span class="trend flat">→ 0.3 pp</span>
+        </div>
+      </div>
+      <div class="stat">
+        <div class="ring" style="--val:99; --col:var(--blue-dark)"><i>99<small>%</small></i></div>
+        <div class="body">
+          <p class="lbl">Teslim oranı</p>
+          <div class="big">99.2%</div>
+          <span class="trend up">↑ 0.4 pp</span>
+        </div>
+      </div>
+      <div class="stat">
+        <div class="ring" style="--val:12; --col:var(--watch-tx)"><i>+12<small>%</small></i></div>
+        <div class="body">
+          <p class="lbl">Abone artışı</p>
+          <div class="big">+1.340</div>
+          <span class="trend up">↑ 30 gün</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== STICKY FILTER BAR ===================== -->
+<div class="filterbar">
+  <div class="wrap">
+    <div class="chips" role="tablist" aria-label="Sayı filtresi">
+      <button class="chip on" role="tab" aria-selected="true">Tümü <span class="ct">24</span></button>
+      <button class="chip" role="tab">Yayında <span class="ct">21</span></button>
+      <button class="chip" role="tab">Zamanlandı <span class="ct">1</span></button>
+      <button class="chip" role="tab">Taslak <span class="ct">2</span></button>
+    </div>
+    <label class="search">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <input type="search" placeholder="Sayı, başlık veya kaynak ara…" aria-label="Ara">
+    </label>
+  </div>
+</div>
+
+<!-- ===================== ARCHIVE ===================== -->
+<section aria-labelledby="arc-h">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2 id="arc-h">Sayı arşivi</h2>
+      <span class="meta">24 sayı · her perşembe 09:00</span>
+    </div>
+    <div class="archive">
+
+      <!-- Draft -->
+      <article class="issue draft">
+        <div class="row1">
+          <span class="no">№ 25 · TASLAK</span>
+          <span class="pill watch">Taslak</span>
+        </div>
+        <h3><a href="#">Akıl yürüten modeller yılı</a></h3>
+        <p class="date">25.06.2026 · planlanan gönderim · 2 / 3 haber hazır</p>
+        <p class="lede">Bu haftanın ön hazırlığı: muhakeme modelleri, ajan güvenliği ve Türkçe değerlendirme setleri.</p>
+        <ul class="stories">
+          <li><b>01</b> OpenAI o4 muhakeme önizlemesi</li>
+          <li><b>02</b> Anthropic ajan güvenlik çerçevesi</li>
+          <li><span style="opacity:.6">03 — başlık bekleniyor</span></li>
+        </ul>
+        <div class="foot">
+          <div class="metric"><span class="k">Durum</span><span class="v" style="color:var(--watch-tx)">%66 hazır</span></div>
+          <div class="metric"><span class="k">Son düzenleme</span><span class="v">14:20</span></div>
+          <span class="spacer"></span>
+          <a class="link" href="#">Düzenle →</a>
+        </div>
+      </article>
+
+      <!-- Scheduled -->
+      <article class="issue">
+        <div class="row1">
+          <span class="no">№ 24 · BU HAFTA</span>
+          <span class="pill pilot">Zamanlandı</span>
+        </div>
+        <h3><a href="#">Gemini Ultra 2.0 sahneye çıktı</a></h3>
+        <p class="date">18.06.2026 · perşembe 09:00 · 3 haber</p>
+        <p class="lede">Google’ın yeni amiral modeli, Apple Intelligence Türkçe desteği ve Llama 4’ün açık kaynak sürümü.</p>
+        <ul class="stories">
+          <li><b>01</b> Gemini Ultra 2.0 duyuruldu</li>
+          <li><b>02</b> Apple Intelligence Türkçe konuşuyor</li>
+          <li><b>03</b> Meta, Llama 4’ü açtı</li>
+        </ul>
+        <div class="foot">
+          <div class="metric"><span class="k">Alıcı</span><span class="v">12.480</span></div>
+          <div class="metric"><span class="k">Gönderime</span><span class="v" style="color:var(--pilot-tx)">14 sa</span></div>
+          <span class="spacer"></span>
+          <a class="link" href="#">Önizle →</a>
+        </div>
+      </article>
+
+      <!-- Published -->
+      <article class="issue">
+        <div class="row1">
+          <span class="no">№ 23</span>
+          <span class="pill adopt">Yayında</span>
+        </div>
+        <h3><a href="#">Sora 2 ve video üretiminde sıçrama</a></h3>
+        <p class="date">11.06.2026 · gönderildi · 3 haber</p>
+        <p class="lede">Uzun formatlı video sentezi, NVIDIA’nın yeni çıkarım çipi ve AB yapay zeka yasasında son durum.</p>
+        <ul class="stories">
+          <li><b>01</b> Sora 2 ile dakikalık video</li>
+          <li><b>02</b> NVIDIA Rubin çıkarım çipi</li>
+          <li><b>03</b> AB YZ Yasası uygulama takvimi</li>
+        </ul>
+        <div class="foot">
+          <div class="metric"><span class="k">Açılma</span><span class="v">61%</span></div>
+          <div class="metric"><span class="k">Tıklama</span><span class="v">27% <span class="trend up">↑</span></span></div>
+          <span class="spacer"></span>
+          <a class="link" href="#">Raporu aç →</a>
+        </div>
+      </article>
+
+      <!-- Published -->
+      <article class="issue">
+        <div class="row1">
+          <span class="no">№ 22</span>
+          <span class="pill adopt">Yayında</span>
+        </div>
+        <h3><a href="#">Açık kaynak modeller kapanışı yakaladı</a></h3>
+        <p class="date">04.06.2026 · gönderildi · 3 haber</p>
+        <p class="lede">DeepSeek’in yeni sürümü, kurumsal RAG mimarileri ve yapay zeka maliyetlerinde düşüş trendi.</p>
+        <ul class="stories">
+          <li><b>01</b> DeepSeek V4 kıyaslamaları</li>
+          <li><b>02</b> Kurumsal RAG için referans mimari</li>
+          <li><b>03</b> Token maliyetleri %40 düştü</li>
+        </ul>
+        <div class="foot">
+          <div class="metric"><span class="k">Açılma</span><span class="v">57%</span></div>
+          <div class="metric"><span class="k">Tıklama</span><span class="v">22% <span class="trend down">↓</span></span></div>
+          <span class="spacer"></span>
+          <a class="link" href="#">Raporu aç →</a>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- ===================== DRAFT EDITOR PREVIEW ===================== -->
+<section aria-labelledby="ed-h">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2 id="ed-h">Taslak düzenleyici</h2>
+      <span class="meta">№ 25 — “Akıl yürüten modeller yılı” · otomatik kayıt açık</span>
+    </div>
+    <div class="editor">
+      <div class="ed-bar">
+        <span class="dots"><i></i><i></i><i></i></span>
+        <span class="name">bülten-no-25.draft</span>
+        <span class="spacer"></span>
+        <span class="pill watch">Kaydedildi 14:20</span>
+      </div>
+      <div class="ed-body">
+        <!-- canvas -->
+        <div class="canvas" aria-label="İçerik önizleme">
+          <span class="ek">№ 25 · HAFTALIK YZ BÜLTENİ</span>
+          <h3>Akıl yürüten modeller yılı<span class="caret" aria-hidden="true"></span></h3>
+
+          <div class="story-block">
+            <div class="src">KAYNAK · OPENAI</div>
+            <h4><span class="num">01</span>OpenAI o4 muhakeme önizlemesini açtı</h4>
+            <p>Yeni nesil model, çok adımlı problem çözümünde insan uzman seviyesine yaklaşıyor; geliştirici önizlemesi sınırlı erişimle başladı.</p>
+          </div>
+          <div class="story-block">
+            <div class="src">KAYNAK · ANTHROPIC</div>
+            <h4><span class="num">02</span>Ajan güvenliği için yeni çerçeve</h4>
+            <p>Otonom ajanların eylem alanını sınırlandıran, denetlenebilir bir güvenlik standardı yayımlandı.</p>
+          </div>
+        </div>
+        <!-- side controls -->
+        <div class="side" aria-label="Sayı ayarları">
+          <div class="grp">
+            <p class="gl">Üst bilgi</p>
+            <div class="field foc"><span class="fl">Başlık</span>Akıl yürüten modeller yılı</div>
+            <div class="field"><span class="fl">Etiket</span>№ 25 · Haftalık YZ Bülteni</div>
+          </div>
+          <div class="grp">
+            <p class="gl">Marka</p>
+            <div class="swatches" aria-hidden="true">
+              <span style="background:#009FDA"></span>
+              <span style="background:#0082B3"></span>
+              <span style="background:#005F85"></span>
+              <span style="background:#BCBEC0"></span>
+              <span style="background:#1A1A1A"></span>
+            </div>
+          </div>
+          <div class="grp">
+            <p class="gl">Gönderim</p>
+            <div class="toggle"><span>Zamanla — Per 09:00</span><span class="sw"></span></div>
+            <div class="toggle off"><span>Buka nokta deseni</span><span class="sw"></span></div>
+            <div class="toggle"><span>Koyu tema önizleme</span><span class="sw"></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== FOOTER ===================== -->
+<footer class="foot">
+  <div class="wrap">
+    <div class="lead">
+      <h4>Mega Bülten</h4>
+      <p>Mega Bilişim Teknolojileri’nin haftalık yapay zeka digesti. “On-Prem AI Adoption Radar” ile aynı tasarım sistemini paylaşır.</p>
+    </div>
+    <div class="col">
+      <p class="ct">Dışa aktar</p>
+      <div class="dlchips">
+        <a class="dlchip" href="#">⬇ Bu sayı (HTML)</a>
+        <a class="dlchip" href="#">⬇ Abone listesi (CSV)</a>
+        <a class="dlchip" href="#">⬇ Performans (PDF)</a>
+      </div>
+    </div>
+    <div class="col">
+      <p class="ct">Hızlı erişim</p>
+      <div class="dlchips">
+        <a class="dlchip" href="#">⬇ E-posta şablonu</a>
+        <a class="dlchip" href="#">⬇ Marka kiti</a>
+        <a class="dlchip" href="#">⬇ API anahtarı</a>
+      </div>
+    </div>
+  </div>
+  <div class="base">
+    <div class="wrap">
+      <span>© 2026 Mega Bilişim Teknolojileri</span>
+      <span class="mono">v1.0 · radar sistemi ile eşlenik</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Lightweight filter-chip + search demo state (no deps). Persists selection.
+  (function(){
+    var chips = document.querySelectorAll('.filterbar .chip');
+    var KEY = 'mega-bulten-filter';
+    function select(i){
+      chips.forEach(function(c,j){ c.classList.toggle('on', i===j); c.setAttribute('aria-selected', i===j); });
+      try{ localStorage.setItem(KEY, String(i)); }catch(e){}
+    }
+    chips.forEach(function(c,i){ c.addEventListener('click', function(){ select(i); }); });
+    try{ var saved = localStorage.getItem(KEY); if(saved!==null) select(parseInt(saved,10)||0); }catch(e){}
+  })();
+</script>
+</body>
+</html>
