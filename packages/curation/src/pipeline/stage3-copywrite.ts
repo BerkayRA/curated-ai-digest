@@ -37,7 +37,7 @@ export interface CopywriteStageResult {
   readonly pipelineRun: PipelineRunRecord;
 }
 
-const SYSTEM_PROMPT = `You are a senior Turkish copywriter for Mega Bilişim's weekly AI newsletter.
+const SYSTEM_PROMPT = `You are a senior Turkish copywriter for Mega Bilgisayar's weekly AI newsletter.
 
 Brand voice:
 - Language: Turkish (TR)

@@ -48,7 +48,7 @@ export interface EditorQaStageResult {
   readonly allFlags: readonly QaFlag[];
 }
 
-const SYSTEM_PROMPT = `You are a senior editor and fact-checker for Mega Bilişim's Turkish AI newsletter.
+const SYSTEM_PROMPT = `You are a senior editor and fact-checker for Mega Bilgisayar's Turkish AI newsletter.
 
 Your tasks:
 1. FACT-CHECK: Verify every specific claim, number, date, or statistic in the Turkish copy against the provided source excerpts.

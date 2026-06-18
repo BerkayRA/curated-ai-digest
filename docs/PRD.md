@@ -2,7 +2,7 @@
 
 ## Problem
 
-Mega Bilişim wants to position itself as an AI-savvy IT company to its customers and
+Mega Bilgisayar wants to position itself as an AI-savvy IT company to its customers and
 prospects via a **weekly AI-news digest newsletter**, without a person manually hunting and
 writing it each week.
 
