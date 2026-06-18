@@ -54,7 +54,7 @@ export async function POST(request: Request, { params: _params }: RouteParams) {
         ? [digestItems[0]!, digestItems[1]!, digestItems[2]!]
         : [digestItems[0]!, digestItems[1]!]) as DigestEmailData['items'],
       unsubscribeUrl: '#',
-      senderAddress: 'Mega Bilişim Teknolojileri A.Ş., Ankara, Türkiye',
+      senderAddress: 'Mega Bilgisayar Tic. Ltd. Şti, Ankara, Türkiye',
     };
 
     const rendered = await renderDigestEmail(data);

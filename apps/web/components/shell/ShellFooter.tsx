@@ -29,7 +29,7 @@ export function ShellFooter() {
         <div className={styles.footerLead}>
           <h2 className={styles.footerHeading}>Mega Bülten</h2>
           <p className={styles.footerText}>
-            Mega Bilişim Teknolojileri&apos;nin haftalık yapay zeka digesti. &ldquo;On-Prem AI
+            Mega Bilgisayar Tic. Ltd. Şti&apos;nin haftalık yapay zeka digesti. &ldquo;On-Prem AI
             Adoption Radar&rdquo; ile aynı tasarım sistemini paylaşır.
           </p>
         </div>
@@ -63,7 +63,7 @@ export function ShellFooter() {
 
       <div className={styles.footerBase}>
         <div className={styles.footerBaseInner}>
-          <span>© {CURRENT_YEAR} Mega Bilişim Teknolojileri</span>
+          <span>© {CURRENT_YEAR} Mega Bilgisayar Tic. Ltd. Şti</span>
           <span className={styles.footerVersion}>radar sistemi ile eşlenik</span>
         </div>
       </div>

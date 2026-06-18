@@ -591,7 +591,7 @@ export function DigestEmail(props: DigestEmailData) {
                             margin: '0 0 18px 0',
                           }}
                         >
-                          Mega Bülten — Mega Bilişim Teknolojileri&rsquo;nin haftalık yapay zeka
+                          Mega Bülten — Mega Bilgisayar Tic. Ltd. Şti&rsquo;nin haftalık yapay zeka
                           digesti.
                         </Text>
                       </Column>
