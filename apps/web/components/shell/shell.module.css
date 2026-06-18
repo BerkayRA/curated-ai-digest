@@ -16,24 +16,48 @@
 
 /* ── Hero band ───────────────────────────────────────────── */
 
+/*
+ * Hero band. Deeper Process-Blue gradient scoped here only — the global
+ * --color-brand token (#009FDA) stays untouched for pills/links/email.
+ * Brand-guide deep blue (#0083C4) → #0082B3 → #005F85, less bright/cyan than
+ * the previous #009FDA start, so it harmonizes with the surface body.
+ */
 .hero {
+  --hero-blue: #0083c4;
+  --hero-blue-mid: #0082b3;
+  --hero-blue-deep: #005f85;
+  /* Faint Buka atmosphere: sparser tile, low-opacity white dots. */
+  --hero-dot: radial-gradient(circle, rgba(255, 255, 255, 0.06) 1.5px, transparent 1.5px);
+  --hero-dot-size: 28px 28px;
+
   position: relative;
   overflow: hidden;
   color: #fff;
-  background:
-    var(--dot-hero),
-    linear-gradient(
-      118deg,
-      var(--color-brand) 0%,
-      var(--color-brand-dark) 58%,
-      var(--color-brand-darker) 100%
-    );
-  background-size:
-    var(--dot-size),
-    100% 100%;
+  background: linear-gradient(
+    118deg,
+    var(--hero-blue) 0%,
+    var(--hero-blue-mid) 58%,
+    var(--hero-blue-deep) 100%
+  );
 }
 
-/* Soft light bloom — restrained depth, decorative only. */
+/*
+ * Dot field as its own layer so it can fade out behind the title/tagline/nav.
+ * The mask confines the texture to the top/edge band and dissolves it before
+ * it reaches the editorial content, keeping text crisp (legibility first).
+ */
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: var(--hero-dot);
+  background-size: var(--hero-dot-size);
+  pointer-events: none;
+  mask-image: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0.35) 38%, transparent 72%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0.35) 38%, transparent 72%);
+}
+
+/* Soft light bloom — restrained depth, decorative only; toned down to avoid glare. */
 .hero::after {
   content: '';
   position: absolute;
@@ -41,12 +65,13 @@
   top: -60%;
   width: 60%;
   height: 240%;
-  background: radial-gradient(closest-side, rgba(255, 255, 255, 0.16), transparent 70%);
+  background: radial-gradient(closest-side, rgba(255, 255, 255, 0.08), transparent 70%);
   pointer-events: none;
 }
 
 .heroInner {
   position: relative;
+  z-index: 1; /* sit above the dot/bloom layers so text stays crisp */
   max-width: 1060px;
   margin: 0 auto;
   padding: var(--space-xl) var(--space-lg) calc(var(--space-xl) + var(--space-sm));
@@ -133,7 +158,8 @@
   font-size: clamp(1rem, 0.95rem + 0.4vw, 1.15rem);
   max-width: 40ch;
   margin: 0;
-  color: rgba(255, 255, 255, 0.9);
+  /* near-white so the normal-size tagline keeps AA-level contrast on the band */
+  color: rgba(255, 255, 255, 0.95);
 }
 
 /* ── Horizontal nav ──────────────────────────────────────── */
@@ -192,12 +218,20 @@
 
 /* ── Footer band — Cool-Gray surface + gray Buka dots ────── */
 
+/*
+ * Footer. Faint Buka atmosphere: same sparser 28px tile, gray dots dropped
+ * from 0.45 → 0.17 opacity so footer headings and chip links stay legible.
+ * Scoped here; the global --dot-footer token is left untouched.
+ */
 .footer {
+  --footer-dot: radial-gradient(circle, rgba(188, 190, 192, 0.17) 1.5px, transparent 1.5px);
+  --footer-dot-size: 28px 28px;
+
   margin-top: var(--space-xl);
   color: var(--color-ink);
-  background: var(--dot-footer), var(--color-surface-20);
+  background: var(--footer-dot), var(--color-surface-20);
   background-size:
-    var(--dot-size),
+    var(--footer-dot-size),
     100% 100%;
   border-top: 1px solid var(--color-border);
 }
@@ -313,5 +347,30 @@
   .footerBaseInner {
     flex-direction: column;
     gap: var(--space-xs);
+  }
+}
+
+/* ── Dark mode ───────────────────────────────────────────────
+   The hero blue glows against the #0C1118 navy body in dark mode, so deepen
+   it to a calm teal-navy gradient that recedes instead of shouting. White
+   text stays well above AA (lightest stop #0A5E86 → #fff ≈ 6.4:1). Scoped to
+   the hero band; --color-brand and the email design are untouched. */
+@media (prefers-color-scheme: dark) {
+  .hero {
+    --hero-blue: #0a5e86;
+    --hero-blue-mid: #073f5c;
+    --hero-blue-deep: #05293c;
+    /* even fainter dots over the darker band */
+    --hero-dot: radial-gradient(circle, rgba(255, 255, 255, 0.05) 1.5px, transparent 1.5px);
+  }
+
+  /* keep the bloom from glowing against the dark body */
+  .hero::after {
+    background: radial-gradient(closest-side, rgba(255, 255, 255, 0.05), transparent 70%);
+  }
+
+  .footer {
+    /* lighter dots read against the navy footer surface */
+    --footer-dot: radial-gradient(circle, rgba(132, 153, 181, 0.14) 1.5px, transparent 1.5px);
   }
 }
