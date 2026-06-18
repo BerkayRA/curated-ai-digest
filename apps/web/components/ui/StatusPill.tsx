@@ -1,4 +1,4 @@
-import type { IssueStatus } from '@mega-bulten/db';
+import type { IssueStatus, SubscriberStatus } from '@mega-bulten/db';
 import styles from './StatusPill.module.css';
 
 /**
@@ -49,6 +49,23 @@ export function issueStatusTone(status: IssueStatus): RingTone {
     case 'cancelled':
     case 'failed':
       return 'avoid';
+    default:
+      return 'watch';
+  }
+}
+
+/**
+ * Maps a subscriber status onto a ring tone:
+ *   active → adopt · unsubscribed → avoid · bounced → watch.
+ */
+export function subscriberStatusTone(status: SubscriberStatus): RingTone {
+  switch (status) {
+    case 'active':
+      return 'adopt';
+    case 'unsubscribed':
+      return 'avoid';
+    case 'bounced':
+      return 'watch';
     default:
       return 'watch';
   }

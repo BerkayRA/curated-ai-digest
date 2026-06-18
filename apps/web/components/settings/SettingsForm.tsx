@@ -4,6 +4,7 @@ import { useState } from 'react';
 import type { Settings } from '@mega-bulten/db';
 import type { UpdateSettingsDto } from '@mega-bulten/shared';
 import { Button } from '@/components/ui/Button';
+import { EyebrowLabel } from '@/components/ui/EyebrowLabel';
 import type { ApiResponse } from '@/lib/api-response';
 import styles from './settings.module.css';
 
@@ -110,9 +111,12 @@ export function SettingsForm({ settings }: SettingsFormProps) {
 
       {/* Auto-send section */}
       <section className={styles.section} aria-labelledby="autosend-heading">
-        <h2 id="autosend-heading" className={styles.sectionTitle}>
-          Otomatik Gönderim
-        </h2>
+        <div className={styles.sectionHead}>
+          <EyebrowLabel as="span">Otomatik gönderim</EyebrowLabel>
+          <h2 id="autosend-heading" className={styles.sectionTitle}>
+            Otomatik Gönderim
+          </h2>
+        </div>
         <div className={styles.toggleRow}>
           <label htmlFor="auto-send" className={styles.toggleLabel}>
             <span className={styles.toggleLabelText}>Otomatik Gönderim Aktif</span>
@@ -129,18 +133,19 @@ export function SettingsForm({ settings }: SettingsFormProps) {
             onClick={() => setAutoSendEnabled((v) => !v)}
           >
             <span className={styles.toggleThumb} />
-            <span className="sr-only">
-              {autoSendEnabled ? 'Aktif' : 'Devre Dışı'}
-            </span>
+            <span className="sr-only">{autoSendEnabled ? 'Aktif' : 'Devre Dışı'}</span>
           </button>
         </div>
       </section>
 
       {/* Schedule section */}
       <section className={styles.section} aria-labelledby="schedule-heading">
-        <h2 id="schedule-heading" className={styles.sectionTitle}>
-          Gönderim Planı
-        </h2>
+        <div className={styles.sectionHead}>
+          <EyebrowLabel as="span">Gönderim</EyebrowLabel>
+          <h2 id="schedule-heading" className={styles.sectionTitle}>
+            Gönderim Planı
+          </h2>
+        </div>
         <div className={styles.fieldGrid}>
           <div className={styles.field}>
             <label htmlFor="send-day" className={styles.label}>
@@ -206,9 +211,12 @@ export function SettingsForm({ settings }: SettingsFormProps) {
 
       {/* Email provider section */}
       <section className={styles.section} aria-labelledby="provider-heading">
-        <h2 id="provider-heading" className={styles.sectionTitle}>
-          E-posta Sağlayıcısı
-        </h2>
+        <div className={styles.sectionHead}>
+          <EyebrowLabel as="span">Sağlayıcı</EyebrowLabel>
+          <h2 id="provider-heading" className={styles.sectionTitle}>
+            E-posta Sağlayıcısı
+          </h2>
+        </div>
         <div className={styles.fieldGrid}>
           <div className={styles.field}>
             <label htmlFor="provider" className={styles.label}>

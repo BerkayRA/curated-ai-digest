@@ -3,7 +3,7 @@
 import { useState, useCallback } from 'react';
 import type { Subscriber, SubscriberStatus } from '@mega-bulten/db';
 import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
+import { StatusPill, subscriberStatusTone } from '@/components/ui/StatusPill';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { SubscriberFormModal } from './SubscriberFormModal';
 import { CsvImportModal } from './CsvImportModal';
@@ -39,9 +39,8 @@ export function SubscribersClient({ initialSubscribers }: SubscribersClientProps
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const filtered = statusFilter === 'all'
-    ? subscribers
-    : subscribers.filter((s) => s.status === statusFilter);
+  const filtered =
+    statusFilter === 'all' ? subscribers : subscribers.filter((s) => s.status === statusFilter);
 
   const handleCreated = useCallback((created: Subscriber) => {
     setSubscribers((prev) => [created, ...prev]);
@@ -116,11 +115,7 @@ export function SubscribersClient({ initialSubscribers }: SubscribersClientProps
       {filtered.length === 0 ? (
         <EmptyState
           title="Abone bulunamadı"
-          description={
-            statusFilter === 'all'
-              ? 'Henüz abone eklenmemiş.'
-              : 'Bu durumda abone yok.'
-          }
+          description={statusFilter === 'all' ? 'Henüz abone eklenmemiş.' : 'Bu durumda abone yok.'}
           action={
             statusFilter === 'all' ? (
               <Button size="sm" onClick={() => setIsCreating(true)}>
@@ -134,11 +129,21 @@ export function SubscribersClient({ initialSubscribers }: SubscribersClientProps
           <table className={styles.table} aria-label="Abone listesi">
             <thead>
               <tr>
-                <th scope="col" className={styles.th}>Ad / E-posta</th>
-                <th scope="col" className={styles.th}>Firma</th>
-                <th scope="col" className={styles.th}>Durum</th>
-                <th scope="col" className={styles.th}>Kaynak</th>
-                <th scope="col" className={styles.th}>Eklenme</th>
+                <th scope="col" className={styles.th}>
+                  Ad / E-posta
+                </th>
+                <th scope="col" className={styles.th}>
+                  Firma
+                </th>
+                <th scope="col" className={styles.th}>
+                  Durum
+                </th>
+                <th scope="col" className={styles.th}>
+                  Kaynak
+                </th>
+                <th scope="col" className={styles.th}>
+                  Eklenme
+                </th>
                 <th scope="col" className={styles.th}>
                   <span className="sr-only">İşlemler</span>
                 </th>
@@ -148,14 +153,15 @@ export function SubscribersClient({ initialSubscribers }: SubscribersClientProps
               {filtered.map((sub) => (
                 <tr key={sub.id} className={styles.row}>
                   <td className={styles.td}>
-                    {sub.displayName && (
-                      <p className={styles.displayName}>{sub.displayName}</p>
-                    )}
+                    {sub.displayName && <p className={styles.displayName}>{sub.displayName}</p>}
                     <p className={styles.email}>{sub.email}</p>
                   </td>
                   <td className={styles.td}>{sub.company ?? '—'}</td>
                   <td className={styles.td}>
-                    <Badge variant={sub.status} label={STATUS_LABELS[sub.status]} />
+                    <StatusPill
+                      tone={subscriberStatusTone(sub.status)}
+                      label={STATUS_LABELS[sub.status]}
+                    />
                   </td>
                   <td className={styles.td}>
                     <span className={styles.source}>{sub.source}</span>
@@ -163,11 +169,7 @@ export function SubscribersClient({ initialSubscribers }: SubscribersClientProps
                   <td className={styles.td}>{formatDate(sub.createdAt)}</td>
                   <td className={styles.td}>
                     <div className={styles.rowActions}>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setEditingSubscriber(sub)}
-                      >
+                      <Button variant="ghost" size="sm" onClick={() => setEditingSubscriber(sub)}>
                         Düzenle
                       </Button>
                       {deleteConfirmId === sub.id ? (
@@ -224,10 +226,7 @@ export function SubscribersClient({ initialSubscribers }: SubscribersClientProps
       )}
 
       {isImporting && (
-        <CsvImportModal
-          onImported={handleImported}
-          onClose={() => setIsImporting(false)}
-        />
+        <CsvImportModal onImported={handleImported} onClose={() => setIsImporting(false)} />
       )}
     </div>
   );

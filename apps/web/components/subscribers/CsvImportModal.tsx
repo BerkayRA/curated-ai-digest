@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
+import { EyebrowLabel } from '@/components/ui/EyebrowLabel';
 import type { ApiResponse } from '@/lib/api-response';
 import type { ImportResult } from '@/app/api/subscribers/import/route';
 import styles from './subscribers.module.css';
@@ -48,18 +49,21 @@ export function CsvImportModal({ onImported, onClose }: CsvImportModalProps) {
   const rowErrorEntries = result ? Object.entries(result.rowErrors) : [];
 
   return (
-    <div className={styles.modalOverlay} role="dialog" aria-modal="true" aria-labelledby="import-modal-title">
+    <div
+      className={styles.modalOverlay}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="import-modal-title"
+    >
       <div className={styles.modal}>
         <div className={styles.modalHeader}>
-          <h2 id="import-modal-title" className={styles.modalTitle}>
-            CSV İçe Aktar
-          </h2>
-          <button
-            className={styles.modalClose}
-            onClick={onClose}
-            aria-label="Kapat"
-            type="button"
-          >
+          <div className={styles.modalHeading}>
+            <EyebrowLabel as="span">Toplu içe aktarma</EyebrowLabel>
+            <h2 id="import-modal-title" className={styles.modalTitle}>
+              CSV İçe Aktar
+            </h2>
+          </div>
+          <button className={styles.modalClose} onClick={onClose} aria-label="Kapat" type="button">
             ×
           </button>
         </div>
@@ -67,8 +71,7 @@ export function CsvImportModal({ onImported, onClose }: CsvImportModalProps) {
         {!result ? (
           <form onSubmit={handleSubmit} className={styles.form}>
             <p className={styles.importHint}>
-              CSV dosyası{' '}
-              <code className={styles.code}>email</code> sütunu içermeli;{' '}
+              CSV dosyası <code className={styles.code}>email</code> sütunu içermeli;{' '}
               <code className={styles.code}>displayName</code> ve{' '}
               <code className={styles.code}>company</code> isteğe bağlıdır.
             </p>
@@ -121,9 +124,7 @@ export function CsvImportModal({ onImported, onClose }: CsvImportModalProps) {
 
             {rowErrorEntries.length > 0 && (
               <div className={styles.rowErrors}>
-                <p className={styles.rowErrorsTitle}>
-                  {rowErrorEntries.length} satırda hata:
-                </p>
+                <p className={styles.rowErrorsTitle}>{rowErrorEntries.length} satırda hata:</p>
                 <ul className={styles.rowErrorList}>
                   {rowErrorEntries.map(([row, msg]) => (
                     <li key={row} className={styles.rowErrorItem}>
