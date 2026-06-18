@@ -1,4 +1,11 @@
-import type { RawCandidate, SourceError, Logger } from './types.js';
+import type {
+  RawCandidate,
+  SourceError,
+  Logger,
+  SourceContext,
+  SourceFetchResult,
+  SourceProvider,
+} from './types.js';
 import { EXA_QUERIES } from './sources.js';
 
 // ---------------------------------------------------------------------------
@@ -16,6 +23,20 @@ function isoDateDaysAgo(days: number): string {
 }
 
 /**
+ * Tune the base query intents toward the run's topic so Exa surfaces results
+ * relevant to the configured focus (e.g. "on-prem & enterprise AI workflows").
+ * When topic is blank/whitespace the base queries are returned unchanged.
+ */
+export function topicTunedQueries(
+  topic: string,
+  queries: readonly string[] = EXA_QUERIES,
+): readonly string[] {
+  const trimmed = topic.trim();
+  if (!trimmed) return queries;
+  return queries.map((q) => `${q} (focus: ${trimmed})`);
+}
+
+/**
  * Fetch recent AI-news candidates from Exa neural search.
  *
  * - Reads `EXA_API_KEY` from the environment only when invoked (not at import
@@ -28,7 +49,7 @@ function isoDateDaysAgo(days: number): string {
 export async function fetchExaCandidates(
   logger: Logger,
   queries: readonly string[] = EXA_QUERIES,
-): Promise<{ candidates: readonly RawCandidate[]; errors: readonly SourceError[] }> {
+): Promise<SourceFetchResult> {
   const apiKey = process.env['EXA_API_KEY'];
 
   if (!apiKey) {
@@ -41,7 +62,8 @@ export async function fetchExaCandidates(
   // esModuleInterop ambiguity with { default: ... }.
   const exaModule = await import('exa-js');
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const ExaClass: new (key: string) => import('exa-js').default = (exaModule as any).Exa ?? exaModule.default;
+  const ExaClass: new (key: string) => import('exa-js').default =
+    (exaModule as any).Exa ?? exaModule.default;
   const client = new ExaClass(apiKey);
 
   const startPublishedDate = isoDateDaysAgo(LOOKBACK_DAYS);
@@ -90,3 +112,23 @@ export async function fetchExaCandidates(
 
   return { candidates, errors };
 }
+
+// ---------------------------------------------------------------------------
+// SourceProvider adapter
+// ---------------------------------------------------------------------------
+
+/**
+ * Exa neural-search source as a pluggable {@link SourceProvider}.
+ *
+ * Incorporates `ctx.topic` into every query (see {@link topicTunedQueries}) so
+ * the configured focus tunes what Exa surfaces. Preserves the existing no-op +
+ * warning behavior when `EXA_API_KEY` is absent.
+ */
+export const exaProvider: SourceProvider = {
+  id: 'exa',
+  label: 'Exa Neural Search',
+  async fetch(ctx: SourceContext): Promise<SourceFetchResult> {
+    const queries = topicTunedQueries(ctx.topic);
+    return fetchExaCandidates(ctx.logger, queries);
+  },
+};

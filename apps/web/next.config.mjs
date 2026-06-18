@@ -7,13 +7,14 @@ const nextConfig = {
     '@mega-bulten/db',
     '@mega-bulten/email',
     '@mega-bulten/delivery',
+    '@mega-bulten/curation',
   ],
   // argon2 uses native Node.js addons (node:crypto) and must never be bundled
   // by webpack. Mark it as external so Next.js requires it at runtime instead.
   // Note: Next.js 14 uses the experimental key; this moves to a top-level key
   // in Next.js 15.
   experimental: {
-    serverComponentsExternalPackages: ['argon2'],
+    serverComponentsExternalPackages: ['argon2', 'exa-js', 'rss-parser'],
   },
   async headers() {
     return [

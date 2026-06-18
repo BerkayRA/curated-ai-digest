@@ -12,11 +12,8 @@ export default async function SettingsPage() {
   const settings = await prisma.settings.findFirst();
 
   return (
-    <section aria-labelledby="settings-heading">
-      <PageHeader
-        title="Ayarlar"
-        description="Bülten gönderim ve sağlayıcı yapılandırması"
-      />
+    <section aria-label="Ayarlar">
+      <PageHeader title="Ayarlar" description="Bülten gönderim ve sağlayıcı yapılandırması" />
       <SettingsForm settings={settings} />
     </section>
   );

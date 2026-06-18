@@ -4,7 +4,7 @@
 
 ## Context
 
-Greenfield weekly AI-news digest newsletter for Mega Bilişim's customers. Needs a curation
+Greenfield weekly AI-news digest newsletter for Mega Bilgisayar's customers. Needs a curation
 pipeline, a branded email, and an approval dashboard. Self-hosted on Mega's own infra. The
 team's reference project (`berkaymakes-cms`) uses pnpm + Turborepo, Prisma 6, Zod
 `packages/shared`, NestJS + Next, Vitest/Playwright.

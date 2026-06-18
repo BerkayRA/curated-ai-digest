@@ -13,11 +13,25 @@
 }
 
 .title {
+  position: relative;
+  padding-top: 12px;
   font-size: var(--text-xl);
-  font-weight: 700;
+  font-weight: 800;
   color: var(--color-ink);
   letter-spacing: -0.02em;
   line-height: 1.2;
+}
+
+/* 3px Process-Blue accent rail under the section head — the shared Mega tell. */
+.title::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 34px;
+  height: 3px;
+  background: var(--color-brand);
+  border-radius: 2px;
 }
 
 .description {

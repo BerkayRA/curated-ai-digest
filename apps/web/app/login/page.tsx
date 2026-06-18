@@ -109,7 +109,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             src="/brand/mega-wordmark-blue.png"
             width={200}
             height={73}
-            alt="Mega Bilişim Teknolojileri"
+            alt="Mega Bilgisayar Tic. Ltd. Şti"
             priority
           />
           <span className={styles.productLabel}>Bülten · Yönetim Paneli</span>
@@ -118,7 +118,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         <h1 className={styles.heading}>Hoş Geldiniz</h1>
         <p className={styles.subheading}>
           {authMode === 'entra'
-            ? 'Mega Bilişim kurumsal hesabınızla giriş yapın.'
+            ? 'Mega Bilgisayar kurumsal hesabınızla giriş yapın.'
             : 'Yönetici hesabınızla giriş yapın.'}
         </p>
 

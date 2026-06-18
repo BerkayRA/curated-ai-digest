@@ -1,6 +1,6 @@
 # ADR-0002 — Typography (Centrale Sans licensing)
 
-**Status:** Accepted · **Date:** 2026-06-16
+**Status:** Accepted · **Date:** 2026-06-16 · **Revised:** 2026-06-18 (ADR-0003 alignment)
 
 ## Context
 
@@ -9,15 +9,20 @@ a licensed font requires the proper webfont license; shipping it unlicensed is n
 
 ## Decision
 
-- **v1 ships with Nunito Sans** as the web + email typeface — a close rounded-geometric
-  humanist sans consistent with Centrale Sans's character.
-- Self-host/subset Nunito Sans for web; `font-display: swap`.
+- **Bundled fallback = Hanken Grotesk** (OFL). Revised from the original Nunito Sans choice to
+  match the sibling **onprem-ai-adoption-radar**, which self-hosts Hanken Grotesk as its
+  Centrale Sans fallback. Using the same fallback makes the two products read as one system
+  (ADR-0003). Self-hosted `woff2` (weights 400/700) in `packages/brand/fonts` +
+  `apps/web/public/fonts`, wired via `@font-face` in `tokens.css`, `font-display: swap`.
+- Font stack: `'Centrale Sans', 'Hanken Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif`
+  — Centrale Sans loads only via `local()` when the visitor has it installed.
 - Email always carries a web-safe fallback (`Arial, Helvetica, sans-serif`).
-- The **`mega` wordmark stays an image asset** regardless (brand rule: never re-typeset).
-- If/when Mega provides licensed Centrale Sans webfont files, swap them into
-  `packages/brand` behind the same `--font-sans` token — no consumer changes needed.
+- The **`mega` wordmark stays an image/SVG asset** (brand rule: never re-typeset). We use the
+  radar's vector chameleon lockup (`mega-logo-{white,blue}.svg`).
+- If/when Mega provides licensed Centrale Sans webfont files, swap them in behind the same
+  `--font-sans` token — no consumer changes.
 
 ## Consequences
 
-- Unblocks the build immediately; no licensing dependency on the critical path.
-- Token-based font wiring makes the later swap a one-file change.
+- Shared fallback font + shared vector logos with the radar → visual unity.
+- Token-based font wiring keeps the later Centrale Sans swap a one-file change.

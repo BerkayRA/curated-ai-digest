@@ -1,10 +1,14 @@
 /* ============================================================
-   Settings form — sectioned card layout
+   Settings form — editorial sectioned cards
+   Each section is a card with a 3px Process-Blue top-rail, an
+   eyebrow kicker + headline, 1px borders, --shadow-sm, radius-md.
+   Tokens only → automatic light/dark.
    ============================================================ */
 
 .noSettings {
   padding: var(--space-xl);
-  background: var(--color-gray-light);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   color: var(--color-ink-muted);
   font-size: var(--text-sm);
@@ -18,18 +22,18 @@
 }
 
 .formError {
-  background: #fef2f2;
-  border: 1px solid #fca5a5;
-  color: #991b1b;
+  background: var(--ring-avoid-bg);
+  border: 1px solid var(--ring-avoid-border);
+  color: var(--ring-avoid-text);
   padding: var(--space-sm) var(--space-md);
   border-radius: var(--radius-sm);
   font-size: var(--text-sm);
 }
 
 .formSuccess {
-  background: #f0fdf4;
-  border: 1px solid #86efac;
-  color: #166534;
+  background: var(--ring-adopt-bg);
+  border: 1px solid var(--ring-adopt-border);
+  color: var(--ring-adopt-text);
   padding: var(--space-sm) var(--space-md);
   border-radius: var(--radius-sm);
   font-size: var(--text-sm);
@@ -38,21 +42,40 @@
 /* ── Section card ─────────────────────────────────────── */
 
 .section {
+  position: relative;
   background: var(--color-surface);
-  border: 1px solid var(--color-gray-light);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
   padding: var(--space-lg);
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
+  overflow: hidden;
+}
+
+/* 3px Process-Blue top-rail — the shared Mega card tell. */
+.section::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: var(--color-brand);
+}
+
+.sectionHead {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .sectionTitle {
-  font-size: var(--text-base);
-  font-weight: 700;
+  font-size: var(--text-lg);
+  font-weight: 800;
+  letter-spacing: -0.01em;
   color: var(--color-ink);
-  padding-bottom: var(--space-sm);
-  border-bottom: 1px solid var(--color-gray-light);
 }
 
 /* ── Fields ───────────────────────────────────────────── */
@@ -79,12 +102,15 @@
 .select {
   height: 40px;
   padding: 0 var(--space-sm);
-  border: 1px solid var(--color-gray);
-  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border-mid);
+  border-radius: var(--radius-input);
   font-size: var(--text-sm);
+  font-family: var(--font-sans);
   color: var(--color-ink);
   background: var(--color-surface);
-  transition: border-color var(--duration-fast), box-shadow var(--duration-fast);
+  transition:
+    border-color var(--duration-fast),
+    box-shadow var(--duration-fast);
   width: 100%;
 }
 
@@ -92,7 +118,7 @@
 .select:focus {
   outline: none;
   border-color: var(--color-brand);
-  box-shadow: 0 0 0 3px var(--color-brand-tint);
+  box-shadow: 0 0 0 3px rgba(0, 159, 218, 0.16);
 }
 
 /* ── Toggle switch ────────────────────────────────────── */
@@ -128,7 +154,7 @@
   width: 48px;
   height: 28px;
   border-radius: var(--radius-pill);
-  background: var(--color-gray);
+  background: var(--color-border-mid);
   border: none;
   cursor: pointer;
   transition: background-color var(--duration-normal) var(--ease-out-expo);
@@ -136,8 +162,8 @@
 }
 
 .toggle:focus-visible {
-  outline: 2px solid var(--color-brand);
-  outline-offset: 2px;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 159, 218, 0.16);
 }
 
 .toggleOn {
@@ -151,9 +177,9 @@
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: var(--color-surface);
+  background: #fff;
   transition: transform var(--duration-normal) var(--ease-out-expo);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
 }
 
 .toggleOn .toggleThumb {

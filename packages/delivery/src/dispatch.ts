@@ -195,7 +195,7 @@ export async function dispatchIssue(
     );
   }
 
-  const senderAddress = 'Mega Bilişim Teknolojileri A.Ş., Ankara, Türkiye';
+  const senderAddress = 'Mega Bilgisayar Tic. Ltd. Şti, Ankara, Türkiye';
 
   // 3. Build per-subscriber messages
   const messages: Array<{ message: EmailMessage; subscriberId: string }> = await Promise.all(

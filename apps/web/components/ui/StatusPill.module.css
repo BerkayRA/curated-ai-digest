@@ -1,0 +1,48 @@
+/* Ring/status pill — shared recipe from the Mega/radar design language.
+   999px, uppercase, leading status dot, tint bg + colored border + solid text.
+   Colors come entirely from the --ring-* tokens so dark mode is automatic. */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  font-size: 0.66rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.34em 0.7em;
+  border-radius: var(--radius-pill);
+  border: 1px solid;
+  white-space: nowrap;
+}
+
+.pill::before {
+  content: '';
+  width: 0.46em;
+  height: 0.46em;
+  border-radius: var(--radius-pill);
+  background: currentColor;
+}
+
+.adopt {
+  background: var(--ring-adopt-bg);
+  border-color: var(--ring-adopt-border);
+  color: var(--ring-adopt-text);
+}
+
+.pilot {
+  background: var(--ring-pilot-bg);
+  border-color: var(--ring-pilot-border);
+  color: var(--ring-pilot-text);
+}
+
+.watch {
+  background: var(--ring-watch-bg);
+  border-color: var(--ring-watch-border);
+  color: var(--ring-watch-text);
+}
+
+.avoid {
+  background: var(--ring-avoid-bg);
+  border-color: var(--ring-avoid-border);
+  color: var(--ring-avoid-text);
+}

@@ -3,6 +3,16 @@
 // Edit FEEDS and EXA_QUERIES to add / remove sources without touching logic.
 // ---------------------------------------------------------------------------
 
+/**
+ * Default ingestion topic (ADR-0003, decision 3). Mega Bülten stays a general
+ * AI digest but ships tuned toward enterprise / on-prem so it pairs with the
+ * radar out of the box. Threaded into provider queries via SourceContext.topic.
+ *
+ * TODO: this constant is the fallback only — the topic will later be read from
+ * Settings and passed into `runIngest({ topic })` by the worker/caller.
+ */
+export const DEFAULT_TOPIC = 'on-prem & enterprise AI workflows';
+
 export interface FeedDefinition {
   /** Human-readable source name stored in candidateArticle.sourceName. */
   readonly name: string;

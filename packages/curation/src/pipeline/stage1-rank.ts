@@ -37,7 +37,7 @@ export interface RankStageResult {
   readonly pipelineRun: PipelineRunRecord;
 }
 
-const SYSTEM_PROMPT = `You are an editorial AI assistant for Mega Bilişim, a Turkish B2B IT company.
+const SYSTEM_PROMPT = `You are an editorial AI assistant for Mega Bilgisayar, a Turkish B2B IT company.
 Your task is to score AI-news articles for two dimensions:
 
 1. importanceScore (0.0–1.0): Global significance of the development.
@@ -45,7 +45,7 @@ Your task is to score AI-news articles for two dimensions:
    - 0.5 = solid industry news with moderate impact
    - 0.0 = minor update, opinion piece, low-signal rumour
 
-2. relevanceScore (0.0–1.0): Relevance to Mega Bilişim's Turkish customer/prospect audience.
+2. relevanceScore (0.0–1.0): Relevance to Mega Bilgisayar's Turkish customer/prospect audience.
    - These are Turkish IT professionals, CIOs, and business decision-makers at mid-to-large companies.
    - High relevance: enterprise AI tools, productivity AI, security AI, cloud AI services, AI regulation affecting EU/TR businesses.
    - Low relevance: consumer apps, highly academic papers, US-specific policy with no TR impact.
