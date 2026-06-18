@@ -36,7 +36,7 @@ RUN pnpm install --frozen-lockfile
 # Generate Prisma client — only needs schema, not a live database.
 COPY packages/db/prisma packages/db/prisma
 RUN DATABASE_URL="postgresql://x:x@localhost:5432/x" \
-    pnpm --filter @mega-bulten/db generate
+    pnpm --filter @digest/db generate
 
 
 # ─── Stage 2: builder ────────────────────────────────────────────────────────
@@ -62,7 +62,7 @@ COPY --from=deps /repo/node_modules/.pnpm   ./node_modules/.pnpm
 # deterministic and avoid needing the full turbo cache in CI.
 # NEXT_TELEMETRY_DISABLED avoids network calls during build.
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN pnpm --filter @mega-bulten/web build
+RUN pnpm --filter @digest/web build
 
 
 # ─── Stage 3: runner ─────────────────────────────────────────────────────────

@@ -1,12 +1,12 @@
 /**
  * Curation job — triggers the weekly curation pipeline for the current ISO week.
  *
- * Resolves the Phase 7 wiring TODO: passes renderDigestEmail from @mega-bulten/email
+ * Resolves the Phase 7 wiring TODO: passes renderDigestEmail from @digest/email
  * as renderFn so the pipeline produces real HTML output.
  */
 
-import { runWeeklyPipeline } from '@mega-bulten/curation';
-import { renderDigestEmail } from '@mega-bulten/email';
+import { runWeeklyPipeline } from '@digest/curation';
+import { renderDigestEmail } from '@digest/email';
 import type { Logger } from '../logger.js';
 
 export interface CurationJobOptions {

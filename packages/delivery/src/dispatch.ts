@@ -6,12 +6,12 @@
  * mock all I/O without hitting real DB or email infrastructure.
  */
 
-import { prisma } from '@mega-bulten/db';
-import type { EmailProvider, EmailMessage } from '@mega-bulten/email';
-import { createEmailProvider, renderDigestEmail } from '@mega-bulten/email';
-import type { DigestEmailData, DigestItem } from '@mega-bulten/email';
-import type { IssueStatus } from '@mega-bulten/shared';
-import type { Issue, IssueItem, Subscriber, Settings } from '@mega-bulten/db';
+import { prisma } from '@digest/db';
+import type { EmailProvider, EmailMessage } from '@digest/email';
+import { createEmailProvider, renderDigestEmail } from '@digest/email';
+import type { DigestEmailData, DigestItem } from '@digest/email';
+import type { IssueStatus } from '@digest/shared';
+import type { Issue, IssueItem, Subscriber, Settings } from '@digest/db';
 import { transitionIssue } from './issue-transition.js';
 import type { TransitionOptions, TransitionResult } from './issue-transition.js';
 
@@ -211,7 +211,7 @@ export async function dispatchIssue(
         },
         from: {
           email: settings.fromAddress,
-          name: 'Mega Bülten',
+          name: 'Curated AI Digest',
         },
         subject: issue.subject,
         html: rendered.html,

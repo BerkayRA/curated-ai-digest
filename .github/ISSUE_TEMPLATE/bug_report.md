@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Report a defect in Mega Bülten
+about: Report a defect in Curated AI Digest
 title: 'bug: '
 labels: bug
 assignees: ''
@@ -31,7 +31,7 @@ What actually happened. Include error messages / logs (redact secrets).
 
 ## Environment
 
-- Mega Bülten version / commit:
+- Curated AI Digest version / commit:
 - Node / pnpm version:
 - Running via: `pnpm dev` | Docker Compose | other
 - OS / browser (for dashboard issues):

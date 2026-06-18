@@ -21,7 +21,7 @@ import type { EmailMessage } from '../../providers/provider.js';
 
 const msg: EmailMessage = {
   to: { email: 'subscriber@example.com', name: 'Test User' },
-  from: { email: 'bulten@mega.com.tr', name: 'Mega Bülten' },
+  from: { email: 'digest@mega.com.tr', name: 'Curated AI Digest' },
   subject: 'Haftalık özet',
   html: '<p>İçerik</p>',
   text: 'İçerik',
@@ -87,7 +87,7 @@ describe('ResendEmailProvider', () => {
       const provider = new ResendEmailProvider({ config: { apiKey: 're_test' } });
       await provider.send(msg);
       const payload = mockEmailsSend.mock.calls[0]?.[0] as { from: string };
-      expect(payload.from).toBe('Mega Bülten <bulten@mega.com.tr>');
+      expect(payload.from).toBe('Curated AI Digest <digest@mega.com.tr>');
     });
   });
 

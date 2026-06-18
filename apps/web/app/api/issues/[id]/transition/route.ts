@@ -6,7 +6,7 @@
 
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { IssueStatusSchema } from '@mega-bulten/shared';
+import { IssueStatusSchema } from '@digest/shared';
 import { ok, err } from '@/lib/api-response';
 import { getErrorMessage } from '@/lib/error';
 import { transitionIssue } from '@/lib/issue-transition';
@@ -44,7 +44,7 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     // If scheduling, persist scheduledAt alongside the transition
     if (to === 'scheduled' && scheduledAt) {
-      const { prisma } = await import('@mega-bulten/db');
+      const { prisma } = await import('@digest/db');
       await prisma.issue.update({
         where: { id: params.id },
         data: { scheduledAt },

@@ -1,9 +1,9 @@
 // ---------------------------------------------------------------------------
-// @mega-bulten/radar — emit (history.jsonl + changes.json)
+// @digest/radar — emit (history.jsonl + changes.json)
 //
 // Serializes RadarEvent[] into the EXACT machine-readable shapes defined in
 // docs/RADAR-DATA-CONTRACT.md so the existing `radar` SourceProvider in
-// @mega-bulten/curation can consume our radar's output with no code changes.
+// @digest/curation can consume our radar's output with no code changes.
 //
 // These serializers are simple and FULLY IMPLEMENTED (and tested) — they are
 // the contract surface that makes Mega Radar consumable today. See

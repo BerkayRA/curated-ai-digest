@@ -2,7 +2,7 @@
  * Shared types for the issue editor components.
  */
 
-import type { IssueStatus } from '@mega-bulten/shared';
+import type { IssueStatus } from '@digest/shared';
 
 export interface EditableItem {
   readonly id: string;

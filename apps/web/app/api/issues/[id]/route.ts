@@ -6,7 +6,7 @@
 
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { prisma } from '@mega-bulten/db';
+import { prisma } from '@digest/db';
 import { ok, err } from '@/lib/api-response';
 import { getErrorMessage } from '@/lib/error';
 

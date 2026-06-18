@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import type { Subscriber, SubscriberStatus } from '@mega-bulten/db';
+import type { Subscriber, SubscriberStatus } from '@digest/db';
 import { Button } from '@/components/ui/Button';
 import { StatusPill, subscriberStatusTone } from '@/components/ui/StatusPill';
 import { EmptyState } from '@/components/ui/EmptyState';

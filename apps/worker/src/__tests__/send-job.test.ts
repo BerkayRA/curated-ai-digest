@@ -20,7 +20,7 @@ import type { Logger } from '../logger.js';
 // Mocks
 // ---------------------------------------------------------------------------
 
-vi.mock('@mega-bulten/delivery', () => ({
+vi.mock('@digest/delivery', () => ({
   dispatchIssue: vi.fn().mockResolvedValue({
     totalRecipients: 5,
     successCount: 5,
@@ -30,15 +30,15 @@ vi.mock('@mega-bulten/delivery', () => ({
   evaluateAutoSend: vi.fn().mockReturnValue({ canSend: true, reasons: [] }),
 }));
 
-vi.mock('@mega-bulten/email', () => ({
+vi.mock('@digest/email', () => ({
   createEmailProvider: vi.fn().mockReturnValue({
     verifyConfig: vi.fn().mockResolvedValue({ ok: true }),
   }),
 }));
 
 const { runSendJob } = await import('../jobs/send.js');
-const { dispatchIssue, evaluateAutoSend } = await import('@mega-bulten/delivery');
-const { createEmailProvider } = await import('@mega-bulten/email');
+const { dispatchIssue, evaluateAutoSend } = await import('@digest/delivery');
+const { createEmailProvider } = await import('@digest/email');
 
 // ---------------------------------------------------------------------------
 // Fixtures

@@ -6,7 +6,7 @@
 // ---------------------------------------------------------------------------
 
 import { z } from 'zod';
-import type { CandidateArticle } from '@mega-bulten/db';
+import type { CandidateArticle } from '@digest/db';
 import { MODEL_MAP, calcCostUsd } from './config.js';
 import { callWithValidatedTool } from './llm-utils.js';
 import type { ScoredCandidate, StageOptions, PipelineRunRecord } from './types.js';

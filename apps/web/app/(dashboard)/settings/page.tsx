@@ -1,11 +1,11 @@
-import { prisma } from '@mega-bulten/db';
+import { prisma } from '@digest/db';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { SettingsForm } from '@/components/settings/SettingsForm';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  title: 'Ayarlar — Mega Bülten',
+  title: 'Ayarlar — Curated AI Digest',
 };
 
 export default async function SettingsPage() {
@@ -13,7 +13,7 @@ export default async function SettingsPage() {
 
   return (
     <section aria-label="Ayarlar">
-      <PageHeader title="Ayarlar" description="Bülten gönderim ve sağlayıcı yapılandırması" />
+      <PageHeader title="Ayarlar" description="Gönderim ve sağlayıcı yapılandırması" />
       <SettingsForm settings={settings} />
     </section>
   );

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import type { Subscriber } from '@mega-bulten/db';
+import type { Subscriber } from '@digest/db';
 import { Button } from '@/components/ui/Button';
 import { EyebrowLabel } from '@/components/ui/EyebrowLabel';
 import type { ApiResponse } from '@/lib/api-response';

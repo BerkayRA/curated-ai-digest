@@ -4,12 +4,12 @@
 
 ## Context
 
-Mega Bülten's news ingestion hard-wires two sources (RSS + Exa) inside `runIngest()`.
+Curated AI Digest's news ingestion hard-wires two sources (RSS + Exa) inside `runIngest()`.
 We want it **modular** so we can plug in additional source providers — in particular a
 **"radar"** source like [`ekaynac/onprem-ai-adoption-radar`](https://github.com/ekaynac/onprem-ai-adoption-radar),
 a deterministic (rule-based, LLM-optional) topic radar that already wears the Mega brand
 and publishes machine-readable outputs (`data/history.jsonl`, JSON + Atom change feeds,
-ring decision-cards). The radar and Mega Bülten are meant to read as **two parts of one
+ring decision-cards). The radar and Curated AI Digest are meant to read as **two parts of one
 system**.
 
 ## Decisions
@@ -26,11 +26,11 @@ system**.
    Configured by a base URL + topic; deterministic, no LLM.
 
 3. **Topic is configurable; default = "on-prem & enterprise AI workflows."** Stored in
-   Settings; threaded into curation prompts + provider queries. Mega Bülten stays a general
+   Settings; threaded into curation prompts + provider queries. Curated AI Digest stays a general
    AI digest but ships tuned toward enterprise/on-prem to pair with the radar out of the box.
 
 4. **Brand blue aligns to the radar's `#009FDA`.** Adopt the radar's exact Process Blue as
-   our primary token so Mega Bülten stays visually consistent with a paired radar (was
+   our primary token so Curated AI Digest stays visually consistent with a paired radar (was
    `#0089CF`). Re-key the logo PNGs to match if the hue drift is visible. Cool Gray / Black /
    Buka dot-pattern unchanged.
 
@@ -59,5 +59,5 @@ system**.
 ## Consequences
 
 - Adding a source = implement one `SourceProvider`; no orchestrator changes.
-- Mega Bülten can consume the radar today and our own radar later via the same contract.
+- Curated AI Digest can consume the radar today and our own radar later via the same contract.
 - Visual unity with the radar; brand-guide hue shifts slightly (`#0089CF`→`#009FDA`).

@@ -1,5 +1,5 @@
 {
-  "name": "@mega-bulten/worker",
+  "name": "@digest/worker",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -12,11 +12,11 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@mega-bulten/db": "workspace:*",
-    "@mega-bulten/shared": "workspace:*",
-    "@mega-bulten/curation": "workspace:*",
-    "@mega-bulten/email": "workspace:*",
-    "@mega-bulten/delivery": "workspace:*",
+    "@digest/db": "workspace:*",
+    "@digest/shared": "workspace:*",
+    "@digest/curation": "workspace:*",
+    "@digest/email": "workspace:*",
+    "@digest/delivery": "workspace:*",
     "croner": "^9.0.0"
   },
   "devDependencies": {

@@ -10,7 +10,7 @@
 
 const { expect } = require('@playwright/test');
 
-const TEST_EMAIL = 'e2e-admin@mega-bulten.test';
+const TEST_EMAIL = 'e2e-admin@curated-ai-digest.test';
 const TEST_PASSWORD = 'Test1234!';
 
 /**

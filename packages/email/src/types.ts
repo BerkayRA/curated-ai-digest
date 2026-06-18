@@ -1,8 +1,8 @@
 /**
- * Email template prop types for @mega-bulten/email.
+ * Email template prop types for @digest/email.
  *
  * DigestEmailData is the top-level data contract for the weekly digest template.
- * Item shapes are intentionally aligned with CreateIssueItemDto from @mega-bulten/shared,
+ * Item shapes are intentionally aligned with CreateIssueItemDto from @digest/shared,
  * but kept independent so email rendering has no runtime dep on Zod or Prisma.
  */
 

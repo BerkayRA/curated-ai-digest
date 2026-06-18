@@ -1,4 +1,4 @@
-import type { IssueStatus, SubscriberStatus } from '@mega-bulten/db';
+import type { IssueStatus, SubscriberStatus } from '@digest/db';
 import styles from './StatusPill.module.css';
 
 /**

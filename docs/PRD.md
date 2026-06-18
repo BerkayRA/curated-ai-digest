@@ -1,4 +1,4 @@
-# PRD — Mega Bülten
+# PRD — Curated AI Digest
 
 ## Problem
 

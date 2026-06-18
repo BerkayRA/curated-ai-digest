@@ -1,5 +1,5 @@
 // ---------------------------------------------------------------------------
-// @mega-bulten/radar — core types
+// @digest/radar — core types
 //
 // The Mega Radar is an LLM-optional, topic-configurable deterministic news
 // radar. These types describe the deterministic pipeline:
@@ -8,7 +8,7 @@
 //
 // Enums (categories, rings, change types) and the emitted RadarEvent shape are
 // VERBATIM from docs/RADAR-DATA-CONTRACT.md so our radar's output is consumable
-// by the existing `radar` SourceProvider in @mega-bulten/curation with no code
+// by the existing `radar` SourceProvider in @digest/curation with no code
 // changes. See docs/RFC-001-mega-radar.md for the full design.
 // ---------------------------------------------------------------------------
 

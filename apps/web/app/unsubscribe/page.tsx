@@ -4,13 +4,13 @@
  * 'unsubscribed', and renders a branded confirmation.
  */
 
-import { prisma } from '@mega-bulten/db';
+import { prisma } from '@digest/db';
 import styles from './unsubscribe.module.css';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  title: 'Abonelik İptal — Mega Bülten',
+  title: 'Abonelik İptal — Curated AI Digest',
 };
 
 interface UnsubscribePageProps {
@@ -68,7 +68,7 @@ export default async function UnsubscribePage({ searchParams }: UnsubscribePageP
   const content = {
     ok: {
       heading: 'Aboneliğiniz İptal Edildi',
-      body: 'Mega Bülten listesinden başarıyla çıkarıldınız. Bir daha bülten almayacaksınız.',
+      body: 'Curated AI Digest listesinden başarıyla çıkarıldınız. Bir daha digest almayacaksınız.',
     },
     already: {
       heading: 'Zaten Abonelik İptal',
@@ -92,7 +92,7 @@ export default async function UnsubscribePage({ searchParams }: UnsubscribePageP
         {result === 'ok' && (
           <p className={styles.footer}>
             Tekrar abone olmak isterseniz{' '}
-            <a href="mailto:bulten@mega.com.tr" className={styles.link}>
+            <a href="mailto:digest@mega.com.tr" className={styles.link}>
               bizimle iletişime geçin
             </a>
             .

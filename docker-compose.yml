@@ -1,25 +1,25 @@
 services:
   db:
     image: postgres:16-alpine
-    container_name: bulten_db
+    container_name: digest_db
     restart: unless-stopped
     environment:
-      POSTGRES_USER: bulten
-      POSTGRES_PASSWORD: bulten
-      POSTGRES_DB: mega_bulten
+      POSTGRES_USER: digest
+      POSTGRES_PASSWORD: digest
+      POSTGRES_DB: curated_ai_digest
     ports:
       - "5433:5432"
     volumes:
-      - bulten_pgdata:/var/lib/postgresql/data
+      - digest_pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U bulten -d mega_bulten"]
+      test: ["CMD-SHELL", "pg_isready -U digest -d curated_ai_digest"]
       interval: 5s
       timeout: 5s
       retries: 5
 
   adminer:
     image: adminer
-    container_name: bulten_adminer
+    container_name: digest_adminer
     restart: unless-stopped
     profiles: ["dev"]
     ports:
@@ -31,7 +31,7 @@ services:
     build:
       context: .
       dockerfile: apps/web/Dockerfile
-    container_name: bulten_web
+    container_name: digest_web
     restart: unless-stopped
     ports:
       - "3100:3100"
@@ -51,7 +51,7 @@ services:
     build:
       context: .
       dockerfile: apps/worker/Dockerfile
-    container_name: bulten_worker
+    container_name: digest_worker
     restart: unless-stopped
     env_file:
       - .env
@@ -60,4 +60,4 @@ services:
         condition: service_healthy
 
 volumes:
-  bulten_pgdata:
+  digest_pgdata:

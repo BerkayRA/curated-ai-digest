@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import type { Settings } from '@mega-bulten/db';
-import type { UpdateSettingsDto } from '@mega-bulten/shared';
+import type { Settings } from '@digest/db';
+import type { UpdateSettingsDto } from '@digest/shared';
 import { Button } from '@/components/ui/Button';
 import { EyebrowLabel } from '@/components/ui/EyebrowLabel';
 import type { ApiResponse } from '@/lib/api-response';
@@ -246,7 +246,7 @@ export function SettingsForm({ settings }: SettingsFormProps) {
               className={styles.input}
               value={fromAddress}
               onChange={(e) => setFromAddress(e.target.value)}
-              placeholder="bulten@mega.com.tr"
+              placeholder="digest@mega.com.tr"
               autoComplete="email"
             />
           </div>

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { prisma } from '@mega-bulten/db';
+import { prisma } from '@digest/db';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { IssueArchiveTable } from '@/components/issues/IssueArchiveTable';
 import styles from './issues.module.css';
@@ -7,7 +7,7 @@ import styles from './issues.module.css';
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  title: 'Arşiv — Mega Bülten',
+  title: 'Arşiv — Curated AI Digest',
 };
 
 export default async function IssuesPage() {
@@ -31,7 +31,7 @@ export default async function IssuesPage() {
     <section aria-label="Sayı arşivi">
       <PageHeader
         title="Sayı arşivi"
-        description="Tüm bülten sayıları — en yeniden eskiye."
+        description="Tüm digest sayıları — en yeniden eskiye."
         actions={
           <Link href="/issues/new" className={styles.newLink}>
             + Yeni Sayı

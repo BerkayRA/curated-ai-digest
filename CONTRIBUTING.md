@@ -1,16 +1,16 @@
-# Contributing to Mega Bülten
+# Contributing to Curated AI Digest
 
-Thanks for your interest in improving Mega Bülten. This guide covers local setup, the workspace
+Thanks for your interest in improving Curated AI Digest. This guide covers local setup, the workspace
 layout, coding conventions, how to run the checks, and what we expect on a pull request.
 
 ## Setup requirements
 
-Mega Bülten is a **pnpm + Turborepo monorepo** targeting **Node ≥ 20** and **pnpm 10**. You also need
+Curated AI Digest is a **pnpm + Turborepo monorepo** targeting **Node ≥ 20** and **pnpm 10**. You also need
 **Docker** to run the local Postgres instance.
 
 ```bash
-git clone https://github.com/megabilgisayar/mega-bulten.git
-cd mega-bulten
+git clone https://github.com/megabilgisayar/curated-ai-digest.git
+cd curated-ai-digest
 
 pnpm install
 pnpm db:up          # Postgres (+ Adminer under the dev profile) on host port 5433
@@ -38,9 +38,9 @@ external keys (with the argon2 local-auth fallback), but the curation pipeline n
 | `packages/email` | React Email templates + the pluggable `EmailProvider` interface (ACS / Graph / Resend). |
 | `packages/delivery` | Dispatch service: rate-limit + retry/backoff, batch send, PII-scrubbed send records. |
 | `packages/brand` | Design tokens (CSS custom properties), Buka/logo assets, font wiring. |
-| `packages/radar` | `@mega-bulten/radar` — the RFC-001 scaffold for an LLM-optional, topic-configurable radar. |
+| `packages/radar` | `@digest/radar` — the RFC-001 scaffold for an LLM-optional, topic-configurable radar. |
 
-Workspace packages are referenced as `@mega-bulten/<name>`.
+Workspace packages are referenced as `@digest/<name>`.
 
 ## Coding conventions
 
@@ -65,7 +65,7 @@ Workspace packages are referenced as `@mega-bulten/<name>`.
 ## Running the checks
 
 Turborepo fans these out across the affected workspaces; you can also target one package with
-`pnpm --filter @mega-bulten/<name> <script>`.
+`pnpm --filter @digest/<name> <script>`.
 
 ```bash
 pnpm type-check     # tsc --noEmit across every workspace

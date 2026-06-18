@@ -20,17 +20,17 @@ const mockPipelineResult = {
   costUsd: 0.05,
 };
 
-vi.mock('@mega-bulten/curation', () => ({
+vi.mock('@digest/curation', () => ({
   runWeeklyPipeline: vi.fn().mockResolvedValue(mockPipelineResult),
 }));
 
-vi.mock('@mega-bulten/email', () => ({
+vi.mock('@digest/email', () => ({
   renderDigestEmail: vi.fn().mockResolvedValue({ html: '<html/>', text: '' }),
 }));
 
 const { runCurationJob } = await import('../jobs/curate.js');
-const { runWeeklyPipeline } = await import('@mega-bulten/curation');
-const { renderDigestEmail } = await import('@mega-bulten/email');
+const { runWeeklyPipeline } = await import('@digest/curation');
+const { renderDigestEmail } = await import('@digest/email');
 
 // ---------------------------------------------------------------------------
 // Helpers

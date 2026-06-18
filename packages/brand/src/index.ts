@@ -1,2 +1,2 @@
 export * from './tokens.js';
-// tokens.css is imported directly by the web app: `@mega-bulten/brand/tokens.css`
+// tokens.css is imported directly by the web app: `@digest/brand/tokens.css`

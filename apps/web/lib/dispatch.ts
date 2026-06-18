@@ -1,5 +1,5 @@
 /**
- * Dispatch service — re-exported from @mega-bulten/delivery.
+ * Dispatch service — re-exported from @digest/delivery.
  *
  * This thin re-export keeps existing web imports working while the
  * canonical implementation lives in the shared delivery package
@@ -9,10 +9,10 @@
 export {
   dispatchIssue,
   defaultDispatchRepo,
-} from '@mega-bulten/delivery';
+} from '@digest/delivery';
 
 export type {
   DispatchRepo,
   DispatchOptions,
   DispatchResult,
-} from '@mega-bulten/delivery';
+} from '@digest/delivery';

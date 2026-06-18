@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { canTransition, assertTransition, ALLOWED_TRANSITIONS } from '../lib/issue-status';
-import type { IssueStatus } from '@mega-bulten/shared';
+import type { IssueStatus } from '@digest/shared';
 
 // ---------------------------------------------------------------------------
 // Allowed transitions table-driven test

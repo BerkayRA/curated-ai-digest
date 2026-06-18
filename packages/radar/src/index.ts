@@ -1,5 +1,5 @@
 // ---------------------------------------------------------------------------
-// @mega-bulten/radar — public API
+// @digest/radar — public API
 //
 // Mega Radar: an LLM-optional, topic-configurable deterministic news radar.
 // This is a SCAFFOLD (see docs/RFC-001-mega-radar.md). The config schema, types,

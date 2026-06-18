@@ -3,7 +3,7 @@
 ## Our pledge
 
 We as members, contributors, and maintainers pledge to make participation in the
-Mega Bülten project a respectful, harassment-free experience for everyone, regardless of
+Curated AI Digest project a respectful, harassment-free experience for everyone, regardless of
 background, identity, or level of experience.
 
 This project adopts the **[Contributor Covenant, version 2.1](https://www.contributor-covenant.org/version/2/1/code_of_conduct/)**

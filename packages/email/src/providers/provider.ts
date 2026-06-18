@@ -1,11 +1,11 @@
 /**
- * Core provider interface and shared message types for @mega-bulten/email delivery.
+ * Core provider interface and shared message types for @digest/email delivery.
  *
  * All concrete providers implement EmailProvider. The factory selects an
  * implementation at runtime; consumers interact only with this interface.
  */
 
-import type { EmailProviderKind } from '@mega-bulten/shared';
+import type { EmailProviderKind } from '@digest/shared';
 
 // ---------------------------------------------------------------------------
 // Shared message types

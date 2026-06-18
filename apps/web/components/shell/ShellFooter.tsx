@@ -27,7 +27,7 @@ export function ShellFooter() {
     <footer className={styles.footer}>
       <div className={styles.footerInner}>
         <div className={styles.footerLead}>
-          <h2 className={styles.footerHeading}>Mega Bülten</h2>
+          <h2 className={styles.footerHeading}>Curated AI Digest</h2>
           <p className={styles.footerText}>
             Mega Bilgisayar Tic. Ltd. Şti&apos;nin haftalık yapay zeka digesti. &ldquo;On-Prem AI
             Adoption Radar&rdquo; ile aynı tasarım sistemini paylaşır.

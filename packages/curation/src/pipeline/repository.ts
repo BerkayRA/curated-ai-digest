@@ -2,9 +2,9 @@
 // Prisma-backed PipelineRepository implementation
 // ---------------------------------------------------------------------------
 
-import { prisma } from '@mega-bulten/db';
+import { prisma } from '@digest/db';
 import type { PipelineRepository, PipelineRunRecord } from './types.js';
-import type { CandidateArticle } from '@mega-bulten/db';
+import type { CandidateArticle } from '@digest/db';
 
 /**
  * Returns a PipelineRepository backed by the singleton PrismaClient.

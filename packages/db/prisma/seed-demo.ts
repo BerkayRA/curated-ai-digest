@@ -3,7 +3,7 @@
  * dashboard archive, draft editor, and email preview are populated without needing
  * the live curation pipeline (Anthropic/Exa). Idempotent on isoWeek.
  *
- * Run: pnpm --filter @mega-bulten/db exec tsx prisma/seed-demo.ts
+ * Run: pnpm --filter @digest/db exec tsx prisma/seed-demo.ts
  */
 
 import { PrismaClient, IssueStatus } from '@prisma/client';
@@ -51,7 +51,7 @@ async function main(): Promise<void> {
       isoWeek: ISO_WEEK,
       status: IssueStatus.draft,
       subject: 'Yapay Zeka Haftası: Gemini Ultra 2.0, Apple Intelligence ve Açık Kaynak Savaşı',
-      preheader: "Bu hafta yapay zeka dünyasında öne çıkan 3 gelişmeyi Mega Bülten için derledik.",
+      preheader: "Bu hafta yapay zeka dünyasında öne çıkan 3 gelişmeyi Curated AI Digest için derledik.",
       items: { create: ITEMS },
     },
     include: { items: true },

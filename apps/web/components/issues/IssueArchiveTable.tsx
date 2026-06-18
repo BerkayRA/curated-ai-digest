@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { EyebrowLabel } from '@/components/ui/EyebrowLabel';
 import { StatusPill, issueStatusTone } from '@/components/ui/StatusPill';
-import type { IssueStatus } from '@mega-bulten/db';
+import type { IssueStatus } from '@digest/db';
 import styles from './IssueArchiveTable.module.css';
 
 interface IssueRow {
@@ -56,14 +56,14 @@ export function IssueArchiveTable({ issues }: IssueArchiveTableProps) {
   if (issues.length === 0) {
     return (
       <EmptyState
-        title="Henüz bülten sayısı yok"
+        title="Henüz digest sayısı yok"
         description="Curation pipeline çalıştığında taslaklar burada görünecek."
       />
     );
   }
 
   return (
-    <ul className={styles.archive} aria-label="Bülten arşivi">
+    <ul className={styles.archive} aria-label="Digest arşivi">
       {issues.map((issue) => {
         const date = primaryDate(issue);
         return (

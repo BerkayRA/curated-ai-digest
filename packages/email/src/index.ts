@@ -1,5 +1,5 @@
 /**
- * @mega-bulten/email — public API
+ * @digest/email — public API
  *
  * Email rendering pipeline entry point.
  */

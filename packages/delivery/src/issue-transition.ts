@@ -5,8 +5,8 @@
  * The state machine assertion runs before any DB writes.
  */
 
-import { prisma } from '@mega-bulten/db';
-import type { IssueStatus } from '@mega-bulten/shared';
+import { prisma } from '@digest/db';
+import type { IssueStatus } from '@digest/shared';
 import { assertTransition } from './issue-status.js';
 
 export interface TransitionOptions {

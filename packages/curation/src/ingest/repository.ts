@@ -1,4 +1,4 @@
-import { prisma } from '@mega-bulten/db';
+import { prisma } from '@digest/db';
 import type { IngestRepository, PersistRunOpts } from './types.js';
 import type { EnrichedCandidate } from './types.js';
 

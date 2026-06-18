@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to Mega Bülten are documented here.
+All notable changes to Curated AI Digest are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -19,7 +19,7 @@ Initial build of the weekly AI-news digest system.
   `packages/{shared,db,email,curation,delivery,brand,radar}`; Docker Compose (Postgres + web +
   worker); strict TypeScript, Vitest, Playwright.
 - **Data model** — PostgreSQL + Prisma schema (Issue, IssueItem, CandidateArticle, Subscriber,
-  Settings, Send, IngestRun, PipelineRun, AuditLog) with Zod contracts in `@mega-bulten/shared`.
+  Settings, Send, IngestRun, PipelineRun, AuditLog) with Zod contracts in `@digest/shared`.
 - **Modular ingestion** — a pluggable `SourceProvider` interface; built-in **RSS** and **Exa**
   providers; a configurable `topic` (default _on-prem & enterprise AI workflows_); per-provider
   failure isolation.
@@ -44,7 +44,7 @@ Initial build of the weekly AI-news digest system.
   `AuthProvider` seam, with an argon2 local fallback for development.
 - **Editorial design system** — hero-led UI sharing the Mega standard with the radar (Process Blue,
   Buka dot-dissolve, Hanken Grotesk fallback, vector chameleon logo), automatic light/dark mode.
-- **`@mega-bulten/radar` scaffold** — RFC-001 design + a typed scaffold for an LLM-optional,
+- **`@digest/radar` scaffold** — RFC-001 design + a typed scaffold for an LLM-optional,
   topic-configurable deterministic radar that emits the same feed contract the radar provider reads.
 - **Docs** — PRD, Architecture, Brand, Runbook, Security audit, ADR-0001/0002/0003, RFC-001, and the
   radar data-contract / design-language findings.
@@ -55,5 +55,5 @@ Initial build of the weekly AI-news digest system.
   argon2 credential hashing, signed unsubscribe tokens, PII scrubbing in send records, and static-
   asset allowlisting in the auth middleware. See [`docs/SECURITY.md`](docs/SECURITY.md).
 
-[Unreleased]: https://github.com/megabilgisayar/mega-bulten/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/megabilgisayar/mega-bulten/releases/tag/v0.1.0
+[Unreleased]: https://github.com/megabilgisayar/curated-ai-digest/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/megabilgisayar/curated-ai-digest/releases/tag/v0.1.0

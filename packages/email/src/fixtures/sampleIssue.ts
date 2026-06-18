@@ -2,7 +2,7 @@ import type { DigestEmailData } from '../types.js';
 
 /**
  * Realistic Turkish-language sample issue for dev preview and vitest tests.
- * Content focuses on AI industry news — the core editorial topic of Mega Bülten.
+ * Content focuses on AI industry news — the core editorial topic of Curated AI Digest.
  */
 export const sampleIssue: DigestEmailData = {
   subject: 'Yapay Zeka Haftası: Gemini Ultra 2.0, Apple Intelligence ve Açık Kaynak Savaşı',
@@ -35,7 +35,7 @@ export const sampleIssue: DigestEmailData = {
   ],
   unsubscribeUrl: '{{unsubscribeUrl}}',
   senderAddress: 'Mega Bilgisayar Tic. Ltd. Şti, Ankara, Türkiye',
-  assetBaseUrl: 'https://bulten.megabilgisayar.com.tr',
+  assetBaseUrl: 'https://digest.megabilgisayar.com.tr',
 };
 
 /** Two-item variant for test coverage of the 2-item render path. */

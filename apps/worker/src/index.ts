@@ -1,11 +1,11 @@
 /**
- * Mega Bülten worker — entrypoint.
+ * Curated AI Digest worker — entrypoint.
  *
  * Bootstraps the scheduler after loading Settings from the database.
  * Handles SIGTERM / SIGINT for graceful shutdown.
  */
 
-import { prisma } from '@mega-bulten/db';
+import { prisma } from '@digest/db';
 import { logger } from './logger.js';
 import { startScheduler } from './scheduler.js';
 

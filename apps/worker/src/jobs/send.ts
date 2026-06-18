@@ -12,10 +12,10 @@
  *   5. If no issue exists for the week → log a warning and return.
  */
 
-import { prisma } from '@mega-bulten/db';
-import type { IssueStatus } from '@mega-bulten/shared';
-import { dispatchIssue, evaluateAutoSend } from '@mega-bulten/delivery';
-import { createEmailProvider } from '@mega-bulten/email';
+import { prisma } from '@digest/db';
+import type { IssueStatus } from '@digest/shared';
+import { dispatchIssue, evaluateAutoSend } from '@digest/delivery';
+import { createEmailProvider } from '@digest/email';
 import type { Logger } from '../logger.js';
 
 // ---------------------------------------------------------------------------

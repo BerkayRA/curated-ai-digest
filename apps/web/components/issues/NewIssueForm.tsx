@@ -108,7 +108,7 @@ export function NewIssueForm({ defaultIsoWeek }: NewIssueFormProps) {
           <div className={styles.sectionHeadText}>
             <EyebrowLabel as="span">Sayı bilgisi</EyebrowLabel>
             <h2 id="meta-heading" className={styles.sectionTitle}>
-              Bülten Künyesi
+              Sayı Künyesi
             </h2>
           </div>
         </div>

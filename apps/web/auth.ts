@@ -1,5 +1,5 @@
 /**
- * Auth.js v5 (next-auth@5) — Node-runtime config for Mega Bülten.
+ * Auth.js v5 (next-auth@5) — Node-runtime config for Curated AI Digest.
  *
  * This file consumes the edge-safe `authConfig` and ADDS the argon2-based local
  * Credentials provider. It is imported ONLY by Node-runtime code (the

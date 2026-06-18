@@ -1,5 +1,5 @@
 /**
- * Dispatch service unit tests — imports re-exported from @mega-bulten/delivery.
+ * Dispatch service unit tests — imports re-exported from @digest/delivery.
  * Uses injected mock provider + mock repo + mock transitionFn.
  * No real DB or email calls.
  */
@@ -7,8 +7,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { dispatchIssue } from '../lib/dispatch';
 import type { DispatchRepo } from '../lib/dispatch';
-import type { EmailProvider, EmailMessage, SendResult } from '@mega-bulten/email';
-import type { IssueStatus } from '@mega-bulten/shared';
+import type { EmailProvider, EmailMessage, SendResult } from '@digest/email';
+import type { IssueStatus } from '@digest/shared';
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -21,7 +21,7 @@ const mockSettings = {
   sendTime: '09:00',
   timezone: 'Europe/Istanbul',
   activeProvider: 'resend' as const,
-  fromAddress: 'bulten@mega.com.tr',
+  fromAddress: 'digest@mega.com.tr',
   replyTo: null,
   pipelineLeadDays: 2,
   updatedAt: new Date(),
@@ -58,7 +58,7 @@ const mockIssue = {
   id: 'issue-1',
   isoWeek: '2026-W25',
   status: 'approved' as IssueStatus,
-  subject: 'Test Bülten Konusu',
+  subject: 'Test Digest Konusu',
   preheader: 'Test ön izleme',
   bodyHtml: null,
   bodyJson: null,
@@ -271,6 +271,6 @@ describe('dispatchIssue', () => {
     expect(mockCall).toBeDefined();
     const messages: readonly EmailMessage[] = (mockCall as [readonly EmailMessage[]])[0];
 
-    expect(messages[0]!.from.email).toBe('bulten@mega.com.tr');
+    expect(messages[0]!.from.email).toBe('digest@mega.com.tr');
   });
 });

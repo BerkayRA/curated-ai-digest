@@ -1,33 +1,33 @@
 # RFC-001 — Mega Radar: an LLM-optional, topic-configurable deterministic news radar
 
-**Status:** Draft (scaffold-only this round) · **Date:** 2026-06-18 · **Owner:** Mega Bülten
+**Status:** Draft (scaffold-only this round) · **Date:** 2026-06-18 · **Owner:** Curated AI Digest
 **Relates to:** [ADR-0003](adr/ADR-0003-modular-ingestion-radar-and-editorial.md) decision 6,
 [RADAR-DATA-CONTRACT.md](RADAR-DATA-CONTRACT.md), `packages/curation/src/ingest/radar-source.ts`
 
-> This RFC documents the design of **Mega Radar** (`@mega-bulten/radar`). This round delivers
+> This RFC documents the design of **Mega Radar** (`@digest/radar`). This round delivers
 > the **design doc + a compiling package scaffold** only. The reference implementation is
 > [`ekaynac/onprem-ai-adoption-radar`](https://github.com/ekaynac/onprem-ai-adoption-radar); we
 > mirror its concepts and **exactly** its machine-readable output contract so the rest of Mega
-> Bülten can consume our radar with no code changes (see "Plugging back in").
+> Curated AI Digest can consume our radar with no code changes (see "Plugging back in").
 
 ---
 
 ## 1. Motivation
 
-Mega Bülten already integrates with an **external** radar (the on-prem AI adoption radar) via the
+Curated AI Digest already integrates with an **external** radar (the on-prem AI adoption radar) via the
 `radar` `SourceProvider` (ADR-0003 decisions 1–2). That radar is great, but it is:
 
 - **Single-topic** — hard-wired to "on-prem & enterprise AI workflows."
 - **Externally owned** — we do not control its cadence, scope, or hosting.
 - **Not ours to brand or re-point** at adjacent topics (e.g. "data engineering tooling",
-  "Turkish public-sector IT", "security tooling") that future Mega Bülten editions may want.
+  "Turkish public-sector IT", "security tooling") that future Curated AI Digest editions may want.
 
 We want to **own a radar** that is:
 
 1. **Deterministic by default.** Rule-based collection → normalization → scoring → ring
    classification. No LLM in the hot path. Reproducible: same inputs → same `history.jsonl`.
 2. **Self-hostable.** Runs as a cron/worker job inside our own infra (the same Docker topology
-   as the rest of Mega Bülten). No third-party runtime dependency.
+   as the rest of Curated AI Digest). No third-party runtime dependency.
 3. **Topic-configurable.** One `radar.config.yaml` defines the topic, the seed sources, the
    category set, quotas, and scoring weights. Spinning up a second radar for a new topic is a
    config file, not a fork.
@@ -36,7 +36,7 @@ We want to **own a radar** that is:
    cost-sensitive customers — with the LLM disabled.
 5. **Contract-compatible with what we already consume.** It emits the **same** `history.jsonl`
    and `changes.json` shapes defined in [RADAR-DATA-CONTRACT.md](RADAR-DATA-CONTRACT.md), so the
-   existing `radarProvider` in `@mega-bulten/curation` ingests our radar by **only** changing a
+   existing `radarProvider` in `@digest/curation` ingests our radar by **only** changing a
    feed URL.
 
 Non-goals (this round): a real collector network, a real scoring model, a UI, or hosting. Those
@@ -212,7 +212,7 @@ consumable today).
 |---|---|---|
 | `GithubReleasesCollector` | `github_repo` | GitHub REST; pin to a tag/sha window; cache by ETag |
 | `PackageRegistryCollector` | `package` | PyPI/npm/crates JSON APIs; download counts are point-in-time → snapshot in the run record |
-| `RssCollector` | `rss` (+ `firehose`) | reuse `@mega-bulten/curation`'s `parseFeedXml`; reclassify firehose items via `aliases`/`tags` |
+| `RssCollector` | `rss` (+ `firehose`) | reuse `@digest/curation`'s `parseFeedXml`; reclassify firehose items via `aliases`/`tags` |
 
 All collectors implement the `Collector` interface (scaffolded in `types.ts`). They never call an
 LLM and never throw out of `collect()` — per-item failures become `SourceError`s.
@@ -237,15 +237,15 @@ cost-sensitive deployments.
 
 ---
 
-## 6. Plugging back into Mega Bülten
+## 6. Plugging back into Curated AI Digest
 
-Mega Bülten **already** has a `radar` `SourceProvider`
+Curated AI Digest **already** has a `radar` `SourceProvider`
 (`packages/curation/src/ingest/radar-source.ts`) that reads the `history.jsonl` / `changes.json`
 contract. Because Mega Radar emits the **same** contract:
 
 ```ts
 // No code change — just re-point the feed URL at our own radar's output.
-import { createRadarProvider } from '@mega-bulten/curation';
+import { createRadarProvider } from '@digest/curation';
 
 const megaRadar = createRadarProvider({
   feedUrl: 'https://radar.mega.internal/data/history.jsonl', // our radar
@@ -253,7 +253,7 @@ const megaRadar = createRadarProvider({
 });
 ```
 
-`@mega-bulten/radar` itself depends on **nothing** from `curation`; the coupling is one-directional
+`@digest/radar` itself depends on **nothing** from `curation`; the coupling is one-directional
 and purely through the on-disk/HTTP contract. The radar can be hosted independently, and
 `curation` consumes it like any other radar. (Field-name parity is enforced by the emit round-trip
 test in this scaffold.)
@@ -270,7 +270,7 @@ test in this scaffold.)
 | **P3** | Real `classifyRing` with gates + relative promotion + quotas + change detection; golden-file tests over `history.jsonl` | — |
 | **P4** | Persistence (previous-run state), `runRadar` orchestrator wired, cron/worker + Docker hosting | — |
 | **P5** | Optional LLM second pass behind `llm.enabled`; cost ceiling + eval | — |
-| **P6** | Re-point a Mega Bülten edition at our own radar in staging; visual/feed parity check | — |
+| **P6** | Re-point a Curated AI Digest edition at our own radar in staging; visual/feed parity check | — |
 
 ---
 

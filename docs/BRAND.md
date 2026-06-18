@@ -1,4 +1,4 @@
-# Mega Brand System — Mega Bülten
+# Mega Brand System — Curated AI Digest
 
 Source of truth for all visual work (email + dashboard). Derived from Mega's official
 *kurumsal kimlik rehberi* and the *Buka figür* asset sheet.

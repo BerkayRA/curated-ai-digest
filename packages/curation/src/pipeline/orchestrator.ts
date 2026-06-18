@@ -75,7 +75,7 @@ export interface RunWeeklyPipelineOptions {
 
   /**
    * Email render function — receives DigestEmailData and returns { html, text }.
-   * In production, pass renderDigestEmail from @mega-bulten/email.
+   * In production, pass renderDigestEmail from @digest/email.
    * In tests, pass a stub.
    * Defaults to a no-op stub that returns placeholder HTML (for development/testing only).
    */
@@ -144,7 +144,7 @@ export async function runWeeklyPipeline(
     maxQaRetries = MAX_QA_RETRIES,
     candidateLimit = 30,
     renderFn = async (_data: import('./stage5-render.js').DigestEmailData) => ({
-      html: '<!-- pipeline render stub — wire up renderDigestEmail from @mega-bulten/email in production -->',
+      html: '<!-- pipeline render stub — wire up renderDigestEmail from @digest/email in production -->',
       text: '',
     }),
   } = opts;

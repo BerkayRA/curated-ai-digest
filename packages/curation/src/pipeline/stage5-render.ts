@@ -4,7 +4,7 @@
 // produce bodyHtml, then upserts the Issue(draft) + its IssueItems.
 // Idempotent on isoWeek.
 //
-// The renderFn is injected (not imported directly) so @mega-bulten/email
+// The renderFn is injected (not imported directly) so @digest/email
 // does not need to be a compile-time dependency of this module — allowing
 // consumers (apps/worker) to wire up the real renderer, while tests can
 // pass a lightweight stub.
@@ -14,7 +14,7 @@ import type { CopywriteOutput, RenderOutput, StageOptions, PipelineRunRecord, Qa
 import { calcCostUsd } from './config.js';
 
 // ---------------------------------------------------------------------------
-// Injected render function type — matches renderDigestEmail from @mega-bulten/email
+// Injected render function type — matches renderDigestEmail from @digest/email
 // ---------------------------------------------------------------------------
 
 export interface DigestItem {
@@ -39,7 +39,7 @@ export interface RenderedEmail {
   readonly text: string;
 }
 
-/** Injectable render function — pass renderDigestEmail from @mega-bulten/email in production. */
+/** Injectable render function — pass renderDigestEmail from @digest/email in production. */
 export type RenderFn = (data: DigestEmailData) => Promise<RenderedEmail>;
 
 // ---------------------------------------------------------------------------

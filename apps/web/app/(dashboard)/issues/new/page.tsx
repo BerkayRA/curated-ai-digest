@@ -7,7 +7,7 @@ import issuesStyles from '../issues.module.css';
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  title: 'Yeni Sayı — Mega Bülten',
+  title: 'Yeni Sayı — Curated AI Digest',
 };
 
 /**
@@ -23,7 +23,7 @@ export default function NewIssuePage() {
     <section aria-label="Yeni sayı">
       <PageHeader
         title="Yeni Sayı"
-        description="Yeni bir bülten taslağı oluştur — elle yaz veya curation pipeline'a bırak."
+        description="Yeni bir digest taslağı oluştur — elle yaz veya curation pipeline'a bırak."
         actions={
           <Link href="/issues" className={issuesStyles.newLink}>
             ← Arşive dön

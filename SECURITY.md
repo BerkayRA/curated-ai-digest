@@ -2,7 +2,7 @@
 
 ## Supported versions
 
-Mega Bülten is pre-1.0; only the latest `main` is supported with security fixes.
+Curated AI Digest is pre-1.0; only the latest `main` is supported with security fixes.
 
 | Version | Supported |
 | --- | --- |

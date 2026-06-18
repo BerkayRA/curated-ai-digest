@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@mega-bulten/db';
+import { prisma } from '@digest/db';
 import { ok, err } from '@/lib/api-response';
 import { getErrorMessage } from '@/lib/error';
 // CreateIssueDraftSchema is defined in ./schema (not inline) because Next.js

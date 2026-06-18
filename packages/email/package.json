@@ -1,5 +1,5 @@
 {
-  "name": "@mega-bulten/email",
+  "name": "@digest/email",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -15,8 +15,8 @@
     "preview": "email dev --dir ./src/templates"
   },
   "dependencies": {
-    "@mega-bulten/brand": "workspace:*",
-    "@mega-bulten/shared": "workspace:*",
+    "@digest/brand": "workspace:*",
+    "@digest/shared": "workspace:*",
     "@react-email/components": "^0.0.32",
     "@react-email/render": "^1.0.3",
     "@azure/communication-email": "^1.0.0",

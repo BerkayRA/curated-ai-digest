@@ -40,7 +40,7 @@ import { runRenderStage } from '../pipeline/stage5-render.js';
 import { runWeeklyPipeline } from '../pipeline/orchestrator.js';
 import type { PipelineRepository, PipelineRunRecord } from '../pipeline/types.js';
 import type { Logger } from '../ingest/types.js';
-import type { CandidateArticle } from '@mega-bulten/db';
+import type { CandidateArticle } from '@digest/db';
 
 // ---------------------------------------------------------------------------
 // Helpers
