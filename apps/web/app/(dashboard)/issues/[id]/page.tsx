@@ -64,7 +64,7 @@ export default async function IssueDetailPage({ params }: IssueDetailPageProps) 
   };
 
   return (
-    <section aria-labelledby="issue-detail-heading" className={styles.page}>
+    <section aria-label="Sayı düzenleme" className={styles.page}>
       <PageHeader
         title={issue.isoWeek}
         description={issue.subject}

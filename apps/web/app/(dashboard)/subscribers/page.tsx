@@ -14,11 +14,8 @@ export default async function SubscribersPage() {
   });
 
   return (
-    <section aria-labelledby="subscribers-heading">
-      <PageHeader
-        title="Aboneler"
-        description="Bülten alıcılarını yönetin"
-      />
+    <section aria-label="Aboneler">
+      <PageHeader title="Aboneler" description="Bülten alıcılarını yönetin" />
       <SubscribersClient initialSubscribers={subscribers} />
     </section>
   );
