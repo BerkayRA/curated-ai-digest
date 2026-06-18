@@ -23,6 +23,9 @@ importers:
       '@mega-bulten/brand':
         specifier: workspace:*
         version: link:../../packages/brand
+      '@mega-bulten/curation':
+        specifier: workspace:*
+        version: link:../../packages/curation
       '@mega-bulten/db':
         specifier: workspace:*
         version: link:../../packages/db
