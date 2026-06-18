@@ -104,7 +104,7 @@ Ingest (SourceProviders: RSS + Exa + radar; canonicalize + dedup by contentHash)
 Requires **Node ≥ 20**, **pnpm 10**, and **Docker** (for Postgres).
 
 ```bash
-git clone https://github.com/megabilgisayar/curated-ai-digest.git
+git clone https://github.com/BerkayRA/curated-ai-digest.git
 cd curated-ai-digest
 
 pnpm install
