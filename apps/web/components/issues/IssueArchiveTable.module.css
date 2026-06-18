@@ -1,98 +1,133 @@
-.wrapper {
+/* Editorial issue archive — cards (not a plain table). Each card carries a 3px
+   Process-Blue top-rail, a mono isoWeek eyebrow, an editorial subject headline,
+   a ring StatusPill, and one meaningful date. Tokens only → dark mode is free. */
+
+.archive {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-lg);
+}
+
+.card {
+  position: relative;
+  height: 100%;
   background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  border: 1px solid var(--color-gray-light);
+  padding: var(--space-lg);
+  box-shadow: var(--shadow-sm);
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition:
+    transform var(--duration-fast) var(--ease-out-expo),
+    border-color var(--duration-fast) var(--ease-out-expo);
 }
 
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: var(--text-sm);
+/* 3px Process-Blue top-rail */
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: var(--color-brand);
 }
 
-.th {
-  text-align: left;
-  padding: var(--space-sm) var(--space-md);
-  font-size: var(--text-xs);
-  font-weight: 600;
-  color: var(--color-ink-muted);
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  background-color: var(--color-gray-light);
-  border-bottom: 1px solid var(--color-gray);
-  white-space: nowrap;
+.card:hover {
+  transform: translateY(-2px);
+  border-color: var(--color-border-mid);
 }
 
-.row {
-  border-bottom: 1px solid var(--color-gray-light);
-  transition: background-color var(--duration-fast);
-}
-
-.row:last-child {
-  border-bottom: none;
-}
-
-.row:hover {
-  background-color: var(--color-brand-tint);
-}
-
-.td {
-  padding: var(--space-sm) var(--space-md);
-  color: var(--color-ink);
-  vertical-align: middle;
+.cardHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-sm);
 }
 
 .isoWeek {
-  font-weight: 600;
-  color: var(--color-brand);
-  font-size: var(--text-xs);
-  letter-spacing: 0.03em;
+  color: var(--color-brand-dark);
+  letter-spacing: 0.05em;
   font-variant-numeric: tabular-nums;
 }
 
+.subject {
+  font-size: var(--text-lg);
+  line-height: 1.2;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 0 0 var(--space-xs);
+  text-wrap: balance;
+}
+
 .subjectLink {
-  font-weight: 600;
   color: var(--color-ink);
   text-decoration: none;
-  display: block;
 }
 
 .subjectLink:hover {
-  color: var(--color-brand);
-  text-decoration: underline;
+  color: var(--color-brand-dark);
+  text-decoration: none;
 }
 
 .preheader {
-  font-size: var(--text-xs);
+  font-size: var(--text-sm);
   color: var(--color-ink-muted);
-  margin-top: 2px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 320px;
+  margin: 0 0 var(--space-md);
 }
 
-.itemCount {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: var(--color-brand-tint);
-  color: var(--color-brand-dark);
-  font-size: var(--text-xs);
+.cardFoot {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-lg);
+  margin-top: auto;
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--color-border);
+}
+
+.metric {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.metricKey {
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--color-ink-muted);
   font-weight: 700;
 }
 
-.autoSentBadge {
-  display: inline-block;
-  margin-left: var(--space-xs);
-  font-size: 10px;
-  background: var(--color-accent-teal);
-  color: white;
-  padding: 1px 5px;
-  border-radius: var(--radius-pill);
-  font-weight: 600;
+.metricValue {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: var(--text-sm);
+  color: var(--color-ink);
+}
+
+.footSpacer {
+  flex: 1;
+}
+
+.cardLink {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--color-brand-dark);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.cardLink:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .archive {
+    grid-template-columns: 1fr;
+  }
 }

@@ -7,7 +7,8 @@
 import { notFound } from 'next/navigation';
 import { prisma } from '@mega-bulten/db';
 import { PageHeader } from '@/components/ui/PageHeader';
-import { Badge } from '@/components/ui/Badge';
+import { issueStatusLabel } from '@/components/ui/Badge';
+import { StatusPill, issueStatusTone } from '@/components/ui/StatusPill';
 import { IssueEditor } from '@/components/issue-editor/IssueEditor';
 import { AuditPanel } from '@/components/issue-editor/AuditPanel';
 import type { IssueStatus } from '@mega-bulten/shared';
@@ -67,7 +68,12 @@ export default async function IssueDetailPage({ params }: IssueDetailPageProps) 
       <PageHeader
         title={issue.isoWeek}
         description={issue.subject}
-        actions={<Badge variant={issue.status as IssueStatus} label={issue.status} />}
+        actions={
+          <StatusPill
+            tone={issueStatusTone(issue.status as IssueStatus)}
+            label={issueStatusLabel(issue.status)}
+          />
+        }
       />
 
       <IssueEditor issue={issueData} />
