@@ -2,7 +2,7 @@
   "name": "mega-bulten",
   "version": "0.1.0",
   "private": true,
-  "description": "Mega Bülten — weekly AI-news digest newsletter system. Claude-powered curation agents + branded email + approval dashboard for Mega Bilişim Teknolojileri.",
+  "description": "Mega Bülten — weekly AI-news digest newsletter system. Claude-powered curation agents + branded email + approval dashboard for Mega Bilgisayar Tic. Ltd. Şti.",
   "packageManager": "pnpm@10.33.0",
   "engines": {
     "node": ">=20"

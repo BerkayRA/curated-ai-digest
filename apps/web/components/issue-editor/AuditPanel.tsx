@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useState } from 'react';
+import { EyebrowLabel } from '@/components/ui/EyebrowLabel';
 import styles from './editor.module.css';
 
 interface AuditEntry {
@@ -37,7 +38,9 @@ export function AuditPanel({ issueId }: AuditPanelProps) {
     let cancelled = false;
 
     fetch(`/api/issues/${issueId}/audit`)
-      .then((res) => res.json() as Promise<{ success: boolean; data?: AuditEntry[]; error?: string }>)
+      .then(
+        (res) => res.json() as Promise<{ success: boolean; data?: AuditEntry[]; error?: string }>,
+      )
       .then((data) => {
         if (cancelled) return;
         if (data.success && data.data) {
@@ -68,10 +71,19 @@ export function AuditPanel({ issueId }: AuditPanelProps) {
 
   return (
     <section className={styles.auditSection} aria-labelledby="audit-heading">
-      <h2 id="audit-heading" className={styles.sectionTitle}>Geçmiş</h2>
+      <div className={styles.sectionHead}>
+        <EyebrowLabel as="span">Denetim günlüğü</EyebrowLabel>
+        <h2 id="audit-heading" className={styles.sectionTitle}>
+          Geçmiş
+        </h2>
+      </div>
 
       {isLoading && <p className={styles.auditLoading}>Yükleniyor…</p>}
-      {error && <p className={styles.auditError} role="alert">{error}</p>}
+      {error && (
+        <p className={styles.auditError} role="alert">
+          {error}
+        </p>
+      )}
 
       {!isLoading && entries.length === 0 && !error && (
         <p className={styles.auditEmpty}>Henüz kayıt yok.</p>

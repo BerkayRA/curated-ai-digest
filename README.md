@@ -1,6 +1,6 @@
 # Mega Bülten
 
-Weekly **AI-news digest newsletter** system for **Mega Bilişim Teknolojileri**.
+Weekly **AI-news digest newsletter** system for **Mega Bilgisayar Tic. Ltd. Şti**.
 
 Claude-powered agents curate 2–3 important AI-news items each week, write Turkish
 marketing-grade copy in Mega's brand voice, and render a branded HTML email featuring the

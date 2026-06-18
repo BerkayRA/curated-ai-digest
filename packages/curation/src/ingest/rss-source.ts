@@ -1,5 +1,11 @@
 import Parser from 'rss-parser';
-import type { RawCandidate, SourceError } from './types.js';
+import type {
+  RawCandidate,
+  SourceError,
+  SourceContext,
+  SourceFetchResult,
+  SourceProvider,
+} from './types.js';
 import type { FeedDefinition } from './sources.js';
 import { FEEDS } from './sources.js';
 
@@ -23,10 +29,7 @@ export interface FeedResult {
  * Map a single parsed feed item to a RawCandidate.
  * Returns undefined when the item is missing a usable link or a non-empty title.
  */
-function mapItem(
-  item: Parser.Item,
-  sourceName: string,
-): RawCandidate | undefined {
+function mapItem(item: Parser.Item, sourceName: string): RawCandidate | undefined {
   // Prefer explicit <link>; fall back to <guid> only if it looks like a URL.
   const rawUrl = item.link ?? (item.guid?.startsWith('http') ? item.guid : undefined);
   const rawTitle = item.title?.trim();
@@ -88,7 +91,7 @@ export async function parseFeedXml(
 /** Fetch all configured RSS feeds, collecting per-feed errors non-fatally. */
 export async function fetchAllFeeds(
   feeds: readonly FeedDefinition[] = FEEDS,
-): Promise<{ candidates: readonly RawCandidate[]; errors: readonly SourceError[] }> {
+): Promise<SourceFetchResult> {
   const results = await Promise.allSettled(feeds.map((f) => fetchFeed(f)));
 
   const candidates: RawCandidate[] = [];
@@ -111,3 +114,23 @@ export async function fetchAllFeeds(
 
   return { candidates, errors };
 }
+
+// ---------------------------------------------------------------------------
+// SourceProvider adapter
+// ---------------------------------------------------------------------------
+
+/**
+ * RSS source as a pluggable {@link SourceProvider}. Wraps {@link fetchAllFeeds}
+ * over the curated {@link FEEDS} list. RSS feeds are topic-agnostic, so
+ * `ctx.topic` is not used to filter feed selection here.
+ */
+export const rssProvider: SourceProvider = {
+  id: 'rss',
+  label: 'RSS Feeds',
+  async fetch(ctx: SourceContext): Promise<SourceFetchResult> {
+    ctx.logger.info('rss.fetch.start', { feeds: FEEDS.length });
+    const result = await fetchAllFeeds();
+    ctx.logger.info('rss.fetch.done', { candidates: result.candidates.length });
+    return result;
+  },
+};

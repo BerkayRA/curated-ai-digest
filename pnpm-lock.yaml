@@ -23,6 +23,9 @@ importers:
       '@mega-bulten/brand':
         specifier: workspace:*
         version: link:../../packages/brand
+      '@mega-bulten/curation':
+        specifier: workspace:*
+        version: link:../../packages/curation
       '@mega-bulten/db':
         specifier: workspace:*
         version: link:../../packages/db
@@ -232,6 +235,19 @@ importers:
       react-email:
         specifier: ^3.0.6
         version: 3.0.7(@playwright/test@1.61.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@22.19.21)
+
+  packages/radar:
+    dependencies:
+      zod:
+        specifier: ^3.24.1
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: ^22.10.5
+        version: 22.19.21
       vitest:
         specifier: ^2.1.8
         version: 2.1.9(@types/node@22.19.21)

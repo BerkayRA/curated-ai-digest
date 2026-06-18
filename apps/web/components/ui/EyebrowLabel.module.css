@@ -1,0 +1,14 @@
+/* Eyebrow label — the signature Mega tell: small uppercase muted kicker.
+   Shared with the sibling radar's design language (0.7rem / .07em / 700). */
+.eyebrow {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-weight: 700;
+  color: var(--color-ink-muted);
+  margin: 0;
+}
+
+.mono {
+  font-family: var(--font-mono);
+}

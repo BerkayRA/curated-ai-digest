@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import type { Subscriber } from '@mega-bulten/db';
 import { Button } from '@/components/ui/Button';
+import { EyebrowLabel } from '@/components/ui/EyebrowLabel';
 import type { ApiResponse } from '@/lib/api-response';
 import styles from './subscribers.module.css';
 
@@ -58,18 +59,21 @@ export function SubscriberFormModal({
   };
 
   return (
-    <div className={styles.modalOverlay} role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div
+      className={styles.modalOverlay}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-title"
+    >
       <div className={styles.modal}>
         <div className={styles.modalHeader}>
-          <h2 id="modal-title" className={styles.modalTitle}>
-            {mode === 'create' ? 'Yeni Abone' : 'Aboneyi Düzenle'}
-          </h2>
-          <button
-            className={styles.modalClose}
-            onClick={onClose}
-            aria-label="Kapat"
-            type="button"
-          >
+          <div className={styles.modalHeading}>
+            <EyebrowLabel as="span">Abone</EyebrowLabel>
+            <h2 id="modal-title" className={styles.modalTitle}>
+              {mode === 'create' ? 'Yeni Abone' : 'Aboneyi Düzenle'}
+            </h2>
+          </div>
+          <button className={styles.modalClose} onClick={onClose} aria-label="Kapat" type="button">
             ×
           </button>
         </div>

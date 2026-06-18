@@ -16,10 +16,39 @@ export type {
   Logger,
   IngestRepository,
   PersistRunOpts,
+  SourceContext,
+  SourceFetchResult,
+  SourceProvider,
 } from './ingest/types.js';
 
+// Source providers (pluggable ingestion — ADR-0003)
+export { defaultProviders, isRadarEnabled } from './ingest/providers.js';
+export { rssProvider } from './ingest/rss-source.js';
+export { exaProvider } from './ingest/exa-source.js';
+export {
+  radarProvider,
+  createRadarProvider,
+  fetchRadarCandidates,
+  parseRadarBody,
+  mapEventToCandidate,
+  slug,
+  RADAR_CATEGORIES,
+  RADAR_RINGS,
+  RADAR_CHANGE_TYPES,
+  DEFAULT_RADAR_FEED_URL,
+  DEFAULT_RADAR_REPO_URL,
+} from './ingest/radar-source.js';
+export type {
+  RadarProviderConfig,
+  RadarCategory,
+  RadarRing,
+  RadarChangeType,
+  RadarEvent,
+  FetchImpl,
+} from './ingest/radar-source.js';
+
 // Feed source catalogue (consumers may want to read the list)
-export { FEEDS, EXA_QUERIES } from './ingest/sources.js';
+export { FEEDS, EXA_QUERIES, DEFAULT_TOPIC } from './ingest/sources.js';
 export type { FeedDefinition } from './ingest/sources.js';
 
 // Low-level utilities (useful for downstream stages)
@@ -41,7 +70,12 @@ export { runCurateStage } from './pipeline/stage2-curate.js';
 export { runCopywriteStage } from './pipeline/stage3-copywrite.js';
 export { runEditorQaStage } from './pipeline/stage4-editor-qa.js';
 export { runRenderStage } from './pipeline/stage5-render.js';
-export type { RenderFn, DigestItem as PipelineDigestItem, DigestEmailData as PipelineDigestEmailData, RenderedEmail as PipelineRenderedEmail } from './pipeline/stage5-render.js';
+export type {
+  RenderFn,
+  DigestItem as PipelineDigestItem,
+  DigestEmailData as PipelineDigestEmailData,
+  RenderedEmail as PipelineRenderedEmail,
+} from './pipeline/stage5-render.js';
 
 // Config (model map + pricing — consumers may inspect or override)
 export { MODEL_MAP, PRICING, calcCostUsd, MAX_QA_RETRIES } from './pipeline/config.js';

@@ -7,7 +7,9 @@
 
 import { useState, useCallback, useTransition } from 'react';
 import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
+import { issueStatusLabel } from '@/components/ui/Badge';
+import { EyebrowLabel } from '@/components/ui/EyebrowLabel';
+import { StatusPill, issueStatusTone } from '@/components/ui/StatusPill';
 import type { IssueStatus } from '@mega-bulten/shared';
 import type { IssueEditorData, EditableItem } from './types';
 import { IssueItemCard } from './IssueItemCard';
@@ -34,9 +36,7 @@ export function IssueEditor({ issue }: IssueEditorProps) {
 
   const [subject, setSubject] = useState(issue.subject);
   const [preheader, setPreheader] = useState(issue.preheader ?? '');
-  const [items, setItems] = useState<EditableItem[]>(
-    issue.items.map((item) => ({ ...item })),
-  );
+  const [items, setItems] = useState<EditableItem[]>(issue.items.map((item) => ({ ...item })));
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [saveError, setSaveError] = useState<string | null>(null);
   const [transitionError, setTransitionError] = useState<string | null>(null);
@@ -171,7 +171,10 @@ export function IssueEditor({ issue }: IssueEditorProps) {
         {/* Header row */}
         <div className={styles.formHeader}>
           <div className={styles.statusRow}>
-            <Badge variant={currentStatus} label={currentStatus} />
+            <StatusPill
+              tone={issueStatusTone(currentStatus)}
+              label={issueStatusLabel(currentStatus)}
+            />
             <span className={styles.isoWeek}>{issue.isoWeek}</span>
           </div>
 
@@ -188,8 +191,16 @@ export function IssueEditor({ issue }: IssueEditorProps) {
           )}
         </div>
 
-        {saveError && <p className={styles.errorBanner} role="alert">{saveError}</p>}
-        {transitionError && <p className={styles.errorBanner} role="alert">{transitionError}</p>}
+        {saveError && (
+          <p className={styles.errorBanner} role="alert">
+            {saveError}
+          </p>
+        )}
+        {transitionError && (
+          <p className={styles.errorBanner} role="alert">
+            {transitionError}
+          </p>
+        )}
 
         {!isEditable && (
           <div className={styles.readOnlyBanner} role="status">
@@ -199,10 +210,17 @@ export function IssueEditor({ issue }: IssueEditorProps) {
 
         {/* Issue fields */}
         <section className={styles.section} aria-labelledby="issue-fields-heading">
-          <h2 id="issue-fields-heading" className={styles.sectionTitle}>Sayı Bilgileri</h2>
+          <div className={styles.sectionHead}>
+            <EyebrowLabel as="span">Künye</EyebrowLabel>
+            <h2 id="issue-fields-heading" className={styles.sectionTitle}>
+              Sayı Bilgileri
+            </h2>
+          </div>
 
           <div className={styles.fieldGroup}>
-            <label htmlFor="subject" className={styles.label}>Konu Satırı</label>
+            <label htmlFor="subject" className={styles.label}>
+              Konu Satırı
+            </label>
             <input
               id="subject"
               className={styles.input}
@@ -214,7 +232,9 @@ export function IssueEditor({ issue }: IssueEditorProps) {
           </div>
 
           <div className={styles.fieldGroup}>
-            <label htmlFor="preheader" className={styles.label}>Ön İzleme Metni</label>
+            <label htmlFor="preheader" className={styles.label}>
+              Ön İzleme Metni
+            </label>
             <input
               id="preheader"
               className={styles.input}
@@ -228,7 +248,12 @@ export function IssueEditor({ issue }: IssueEditorProps) {
 
         {/* Items */}
         <section className={styles.section} aria-labelledby="items-heading">
-          <h2 id="items-heading" className={styles.sectionTitle}>Haberler</h2>
+          <div className={styles.sectionHead}>
+            <EyebrowLabel as="span">İçerik</EyebrowLabel>
+            <h2 id="items-heading" className={styles.sectionTitle}>
+              Haberler
+            </h2>
+          </div>
           <ol className={styles.itemList} aria-label="Haber öğeleri">
             {items.map((item, index) => (
               <li key={item.id}>
@@ -249,7 +274,12 @@ export function IssueEditor({ issue }: IssueEditorProps) {
         {/* Transition actions */}
         {allowedNext.length > 0 && (
           <section className={styles.section} aria-labelledby="actions-heading">
-            <h2 id="actions-heading" className={styles.sectionTitle}>İşlemler</h2>
+            <div className={styles.sectionHead}>
+              <EyebrowLabel as="span">Durum geçişi</EyebrowLabel>
+              <h2 id="actions-heading" className={styles.sectionTitle}>
+                İşlemler
+              </h2>
+            </div>
             <div className={styles.actionRow}>
               {allowedNext.map((to) => {
                 if (to === 'sent') {

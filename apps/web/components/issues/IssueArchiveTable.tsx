@@ -1,6 +1,7 @@
 import Link from 'next/link';
-import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { EyebrowLabel } from '@/components/ui/EyebrowLabel';
+import { StatusPill, issueStatusTone } from '@/components/ui/StatusPill';
 import type { IssueStatus } from '@mega-bulten/db';
 import styles from './IssueArchiveTable.module.css';
 
@@ -40,6 +41,17 @@ function formatDate(date: Date | null): string {
   }).format(new Date(date));
 }
 
+/**
+ * The most relevant date + its label for a given issue, so each card surfaces
+ * one meaningful timestamp instead of a row of identical columns.
+ */
+function primaryDate(issue: IssueRow): { label: string; value: string } {
+  if (issue.sentAt) return { label: 'Gönderildi', value: formatDate(issue.sentAt) };
+  if (issue.scheduledAt)
+    return { label: 'Planlanan gönderim', value: formatDate(issue.scheduledAt) };
+  return { label: 'Oluşturuldu', value: formatDate(issue.createdAt) };
+}
+
 export function IssueArchiveTable({ issues }: IssueArchiveTableProps) {
   if (issues.length === 0) {
     return (
@@ -51,51 +63,54 @@ export function IssueArchiveTable({ issues }: IssueArchiveTableProps) {
   }
 
   return (
-    <div className={styles.wrapper}>
-      <table className={styles.table} aria-label="Bülten arşivi">
-        <thead>
-          <tr>
-            <th scope="col" className={styles.th}>ISO Haftası</th>
-            <th scope="col" className={styles.th}>Konu</th>
-            <th scope="col" className={styles.th}>Durum</th>
-            <th scope="col" className={styles.th}>Öğe</th>
-            <th scope="col" className={styles.th}>Planlanma</th>
-            <th scope="col" className={styles.th}>Gönderim</th>
-            <th scope="col" className={styles.th}>Oluşturulma</th>
-          </tr>
-        </thead>
-        <tbody>
-          {issues.map((issue) => (
-            <tr key={issue.id} className={styles.row}>
-              <td className={styles.td}>
-                <span className={styles.isoWeek}>{issue.isoWeek}</span>
-              </td>
-              <td className={styles.td}>
+    <ul className={styles.archive} aria-label="Bülten arşivi">
+      {issues.map((issue) => {
+        const date = primaryDate(issue);
+        return (
+          <li key={issue.id}>
+            <article className={styles.card}>
+              <div className={styles.cardHead}>
+                <EyebrowLabel as="span" mono className={styles.isoWeek}>
+                  {issue.isoWeek}
+                </EyebrowLabel>
+                <StatusPill
+                  tone={issueStatusTone(issue.status)}
+                  label={STATUS_LABELS[issue.status]}
+                />
+              </div>
+
+              <h2 className={styles.subject}>
                 <Link href={`/issues/${issue.id}`} className={styles.subjectLink}>
                   {issue.subject}
                 </Link>
-                {issue.preheader && (
-                  <p className={styles.preheader}>{issue.preheader}</p>
-                )}
-              </td>
-              <td className={styles.td}>
-                <Badge variant={issue.status} label={STATUS_LABELS[issue.status]} />
-              </td>
-              <td className={styles.td}>
-                <span className={styles.itemCount}>{issue._count.items}</span>
-              </td>
-              <td className={styles.td}>{formatDate(issue.scheduledAt)}</td>
-              <td className={styles.td}>
-                {formatDate(issue.sentAt)}
+              </h2>
+
+              {issue.preheader && <p className={styles.preheader}>{issue.preheader}</p>}
+
+              <div className={styles.cardFoot}>
+                <span className={styles.metric}>
+                  <span className={styles.metricKey}>{date.label}</span>
+                  <span className={styles.metricValue}>{date.value}</span>
+                </span>
+                <span className={styles.metric}>
+                  <span className={styles.metricKey}>Haber</span>
+                  <span className={styles.metricValue}>{issue._count.items}</span>
+                </span>
                 {issue.autoSent && (
-                  <span className={styles.autoSentBadge} title="Otomatik gönderildi">Oto</span>
+                  <span className={styles.metric}>
+                    <span className={styles.metricKey}>Gönderim</span>
+                    <span className={styles.metricValue}>Otomatik</span>
+                  </span>
                 )}
-              </td>
-              <td className={styles.td}>{formatDate(issue.createdAt)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+                <span className={styles.footSpacer} />
+                <Link href={`/issues/${issue.id}`} className={styles.cardLink}>
+                  Aç →
+                </Link>
+              </div>
+            </article>
+          </li>
+        );
+      })}
+    </ul>
   );
 }

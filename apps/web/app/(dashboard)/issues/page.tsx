@@ -1,6 +1,8 @@
+import Link from 'next/link';
 import { prisma } from '@mega-bulten/db';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { IssueArchiveTable } from '@/components/issues/IssueArchiveTable';
+import styles from './issues.module.css';
 
 export const dynamic = 'force-dynamic';
 
@@ -26,10 +28,15 @@ export default async function IssuesPage() {
   });
 
   return (
-    <section aria-labelledby="issues-heading">
+    <section aria-label="Sayı arşivi">
       <PageHeader
-        title="Arşiv"
-        description="Tüm bülten sayıları"
+        title="Sayı arşivi"
+        description="Tüm bülten sayıları — en yeniden eskiye."
+        actions={
+          <Link href="/issues/new" className={styles.newLink}>
+            + Yeni Sayı
+          </Link>
+        }
       />
       <IssueArchiveTable issues={issues} />
     </section>

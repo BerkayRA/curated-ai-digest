@@ -45,10 +45,10 @@ describe('renderDigestEmail', () => {
       }
     });
 
-    it('renders the white wordmark from the asset base URL', async () => {
+    it('renders the white Buka chameleon logo from the asset base URL', async () => {
       const { html } = await renderDigestEmail(sampleIssue);
-      expect(html).toContain('/brand/mega-wordmark-white.png');
-      expect(html).toContain('https://bulten.megabilgisayar.com.tr/brand/mega-wordmark-white.png');
+      expect(html).toContain('/brand/mega-logo-white.png');
+      expect(html).toContain('https://bulten.megabilgisayar.com.tr/brand/mega-logo-white.png');
     });
 
     it('html contains the unsubscribe URL placeholder', async () => {
@@ -115,20 +115,24 @@ describe('renderDigestEmail', () => {
   });
 
   describe('Brand markup assertions', () => {
-    it('html contains the wordmark image alt text', async () => {
+    it('html contains the chameleon logo image alt text', async () => {
       const { html } = await renderDigestEmail(sampleIssue);
-      expect(html).toContain('mega Bilişim Teknolojileri');
+      expect(html).toContain('Mega Bilgisayar');
     });
 
-    it('html contains the dot-dissolve SVG motif with circle elements', async () => {
+    it('html contains the Buka dot motif (baked dot grid + SVG circle field)', async () => {
       const { html } = await renderDigestEmail(sampleIssue);
+      // Baked tiled dot grid on the Process-Blue band.
+      expect(html).toContain('radial-gradient');
+      // Inline SVG dot strip for clients that honor SVG.
       expect(html).toContain('<svg');
       expect(html).toContain('<circle');
     });
 
     it('html uses Process Blue brand color as inline style', async () => {
       const { html } = await renderDigestEmail(sampleIssue);
-      expect(html.toLowerCase()).toContain('#0089cf');
+      // Aligned to the radar's Process Blue #009FDA (ADR-0003).
+      expect(html.toLowerCase()).toContain('#009fda');
     });
 
     it('html contains the issue label', async () => {

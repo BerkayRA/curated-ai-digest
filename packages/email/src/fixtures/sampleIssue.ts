@@ -34,7 +34,7 @@ export const sampleIssue: DigestEmailData = {
     },
   ],
   unsubscribeUrl: '{{unsubscribeUrl}}',
-  senderAddress: 'Mega Bilişim Teknolojileri A.Ş., Ankara, Türkiye',
+  senderAddress: 'Mega Bilgisayar Tic. Ltd. Şti, Ankara, Türkiye',
   assetBaseUrl: 'https://bulten.megabilgisayar.com.tr',
 };
 
