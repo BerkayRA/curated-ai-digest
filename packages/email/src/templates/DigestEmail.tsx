@@ -1,15 +1,24 @@
 /**
  * DigestEmail — Mega Bülten weekly AI-news digest template.
  *
+ * Bold editorial design that echoes the sibling on-prem AI radar (see
+ * docs/RADAR-DESIGN-LANGUAGE.md and docs/design/open-design/email.html):
+ *   - Process-Blue header band (gradient #009FDA → #0082B3) carrying the white
+ *     Buka chameleon logo + a baked dot-grid motif (the Buka particle texture).
+ *   - Bold masthead, numbered story blocks with a 3px Process-Blue accent rule,
+ *     and a compact overview band.
+ *   - Dark navy footer (the radar navy #0C1118) carrying the chameleon again.
+ *
  * Rendering target: React Email → bulletproof HTML for Outlook/Exchange,
  * Gmail, Apple Mail, and other major clients.
  *
- * Outlook compatibility notes:
+ * Outlook / bulletproof compatibility notes:
  * - Table-based layout; no flex/grid in structural divs.
- * - All styles inlined; no <style> block relied upon.
- * - MSO conditional comments used for VML fallback where needed.
- * - Max-width 600px; preview in Litmus/Email on Acid recommended.
- * - Word-break on long URLs in plain-text part only.
+ * - All styles inlined with literal hex values from @mega-bulten/brand tokens
+ *   (CSS custom properties are unreliable in Outlook — no `var(--x)`).
+ * - MSO conditional comments wrap the rounded container for Outlook.
+ * - Web-safe font fallback: clients fall back to Arial regardless of the stack.
+ * - Logo is a PNG (clients strip SVG <img>), referenced by absolute URL.
  *
  * List-Unsubscribe header (set on the outbound message object):
  *   List-Unsubscribe: <{{unsubscribeUrl}}>
@@ -30,198 +39,321 @@ import {
   Img,
   Text,
   Link,
-  Hr,
-  Font,
 } from '@react-email/components';
-import { color, font, space, fontSize, radius } from '@mega-bulten/brand';
+import { color } from '@mega-bulten/brand';
 import type { DigestEmailData, DigestItem } from '../types.js';
 
 // ---------------------------------------------------------------------------
 // Constants — inline token literals (CSS custom properties unsupported in Outlook)
 // ---------------------------------------------------------------------------
 
-const CONTAINER_BG = color.surface;
-const HEADER_BG = color.brand;
-const BODY_BG = '#F4F8FB'; // slightly tinted off-white — more editorial than pure white
-const FOOTER_BG = color.ink;
+/** Page background behind the 600px container (the radar's --surface-20). */
+const PAGE_BG = color.grayLight; // #F0F0F0
+/** White card surface for masthead + stories. */
+const CARD_BG = color.surface; // #FFFFFF
+/** Process-Blue header band + accents. */
+const BRAND = color.brand; // #009FDA
+const BRAND_DARK = color.brandDark; // #0082B3
+const BRAND_DARKER = color.brandDarker; // #005F85
+/** Radar navy footer. */
+const FOOTER_BG = '#0C1118';
+const FOOTER_RULE = '#232B3A';
+const FOOTER_TEXT = '#8499B5';
+const FOOTER_INK = '#DDE4EF';
+const FOOTER_LINK = '#5FC8EF';
+const INK = color.ink; // #1A1A1A
+const MUTED = color.inkMuted; // #6B7280
+const RULE_SOFT = color.surface30; // #E8E8E9
 
-const FONT_STACK = `'Nunito Sans', ${font.emailSafe}`;
-const NUNITO_URL =
-  'https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&display=swap';
+/**
+ * Brand font stack — Centrale Sans (commercial, local-only) → Hanken Grotesk
+ * (bundled OFL fallback) → web-safe. Email clients without the webfonts fall
+ * back to Arial/Helvetica regardless, which is the intended bulletproof path.
+ */
+const FONT_STACK = `'Centrale Sans','Hanken Grotesk',Arial,Helvetica,sans-serif`;
+/** Monospace stack for issue eyebrow + big story numbers (the radar's mono tell). */
+const MONO_STACK = `'SFMono-Regular',Consolas,Menlo,monospace`;
 
-// Wordmark image — hosted path in production. For development previews this
-// resolves to the brand assets directory. Replace with CDN URL when deploying.
-// The official white wordmark, served from the web app's public dir at
-// `${assetBaseUrl}/brand/mega-wordmark-white.png`. Email images are referenced by
-// absolute URL (not embedded), so the app must be reachable at assetBaseUrl.
-const WORDMARK_PATH = '/brand/mega-wordmark-white.png';
-const WORDMARK_WIDTH = 168;
-const WORDMARK_HEIGHT = 61;
+/**
+ * White Buka chameleon logo + Mega wordmark — a 440×143 PNG in the web app's
+ * public dir (clients strip SVG <img>, so a raster is required). Referenced by
+ * absolute URL: `${assetBaseUrl}/brand/mega-logo-white.png`.
+ */
+const LOGO_PATH = '/brand/mega-logo-white.png';
+const LOGO_NATURAL_RATIO = 143 / 440; // preserve aspect when scaling width
+const HEADER_LOGO_WIDTH = 176;
+const HEADER_LOGO_HEIGHT = Math.round(HEADER_LOGO_WIDTH * LOGO_NATURAL_RATIO); // 57
+const FOOTER_LOGO_WIDTH = 112;
+const FOOTER_LOGO_HEIGHT = Math.round(FOOTER_LOGO_WIDTH * LOGO_NATURAL_RATIO); // 36
+
+const CONTAINER_WIDTH = 600;
+const PX = '36px'; // horizontal padding inside the container
 
 // ---------------------------------------------------------------------------
 // Sub-components
 // ---------------------------------------------------------------------------
 
 /**
- * Inline SVG dot-dissolve header motif — the Buka particle field.
- * Rendered as a raw <td> inner HTML string via dangerouslySetInnerHTML is not
- * used here; instead we output React SVG directly inside a <Section>.
- * Outlook ignores SVG but falls back to the solid Process-Blue background.
+ * Baked Buka dot-grid for the Process-Blue header band. We tile a single
+ * radial-gradient dot over the gradient via background-image so the texture
+ * reads even where pseudo-elements (web `::before`) are stripped. An inline
+ * SVG <circle> field overlays it for clients that honor SVG, guaranteeing the
+ * dot motif is present in the markup (and the `<circle>` brand assertion holds).
  */
-function DotBand() {
-  // 56 dots across the 600px band — deterministic, stable SSR
-  const dots: Array<{ cx: number; cy: number; r: number; fill: string; opacity: number }> = [
-    // Dense core cluster — dissolves right
-    { cx: 16,  cy: 12, r: 3,   fill: color.brand,         opacity: 0.9  },
-    { cx: 26,  cy: 8,  r: 2.5, fill: color.brandDark,     opacity: 0.85 },
-    { cx: 36,  cy: 14, r: 3,   fill: color.accentTeal,    opacity: 0.8  },
-    { cx: 46,  cy: 8,  r: 2.5, fill: color.brand,         opacity: 0.88 },
-    { cx: 54,  cy: 16, r: 2,   fill: '#FFFFFF',            opacity: 0.55 },
-    { cx: 20,  cy: 20, r: 2.5, fill: color.accentTeal,    opacity: 0.75 },
-    { cx: 30,  cy: 16, r: 3,   fill: color.brand,         opacity: 0.82 },
-    { cx: 40,  cy: 22, r: 2,   fill: color.brandDark,     opacity: 0.7  },
-    { cx: 50,  cy: 14, r: 3.5, fill: '#FFFFFF',            opacity: 0.4  },
-    { cx: 60,  cy: 20, r: 2,   fill: color.brand,         opacity: 0.72 },
-    { cx: 12,  cy: 26, r: 2,   fill: '#FFFFFF',            opacity: 0.3  },
-    { cx: 24,  cy: 28, r: 2.5, fill: color.brandDark,     opacity: 0.65 },
-    { cx: 34,  cy: 24, r: 2,   fill: color.accentTeal,    opacity: 0.6  },
-    { cx: 44,  cy: 28, r: 3,   fill: color.brand,         opacity: 0.58 },
-    { cx: 56,  cy: 26, r: 2,   fill: '#FFFFFF',            opacity: 0.25 },
-    // Mid dissolve — particles scatter
-    { cx: 68,  cy: 12, r: 2.5, fill: color.accentOrange,  opacity: 0.55 },
-    { cx: 78,  cy: 18, r: 2,   fill: color.brand,         opacity: 0.5  },
-    { cx: 88,  cy: 10, r: 3,   fill: '#FFFFFF',            opacity: 0.2  },
-    { cx: 98,  cy: 22, r: 2,   fill: color.accentTeal,    opacity: 0.45 },
-    { cx: 108, cy: 14, r: 2.5, fill: color.accentMagenta, opacity: 0.4  },
-    { cx: 72,  cy: 26, r: 2,   fill: color.brandDark,     opacity: 0.4  },
-    { cx: 82,  cy: 30, r: 2.5, fill: color.accentOrange,  opacity: 0.35 },
-    { cx: 94,  cy: 24, r: 2,   fill: color.brand,         opacity: 0.38 },
-    { cx: 104, cy: 28, r: 3,   fill: '#FFFFFF',            opacity: 0.15 },
-    { cx: 116, cy: 20, r: 2,   fill: color.accentTeal,    opacity: 0.3  },
-    { cx: 76,  cy: 36, r: 2,   fill: color.accentMagenta, opacity: 0.3  },
-    { cx: 88,  cy: 38, r: 2.5, fill: '#FFFFFF',            opacity: 0.12 },
-    { cx: 100, cy: 34, r: 2,   fill: color.accentOrange,  opacity: 0.28 },
-    { cx: 112, cy: 30, r: 3,   fill: color.brand,         opacity: 0.25 },
-    { cx: 122, cy: 24, r: 2,   fill: '#FFFFFF',            opacity: 0.1  },
-    // Outer dissolve — sparse, fading
-    { cx: 132, cy: 16, r: 2,   fill: color.accentMagenta, opacity: 0.22 },
-    { cx: 142, cy: 22, r: 2.5, fill: color.accentTeal,    opacity: 0.18 },
-    { cx: 152, cy: 12, r: 2,   fill: '#FFFFFF',            opacity: 0.1  },
-    { cx: 160, cy: 28, r: 3,   fill: color.accentOrange,  opacity: 0.15 },
-    { cx: 170, cy: 18, r: 2,   fill: color.brand,         opacity: 0.12 },
-    { cx: 138, cy: 32, r: 2,   fill: color.brandDark,     opacity: 0.14 },
-    { cx: 150, cy: 36, r: 2.5, fill: '#FFFFFF',            opacity: 0.08 },
-    { cx: 162, cy: 30, r: 2,   fill: color.accentTeal,    opacity: 0.1  },
-    { cx: 172, cy: 38, r: 2.5, fill: color.accentMagenta, opacity: 0.1  },
-    { cx: 180, cy: 24, r: 2,   fill: '#FFFFFF',            opacity: 0.06 },
-    // Edge wisps
-    { cx: 186, cy: 16, r: 2,   fill: color.accentOrange,  opacity: 0.08 },
-    { cx: 192, cy: 32, r: 2.5, fill: color.brand,         opacity: 0.06 },
-    { cx: 196, cy: 22, r: 2,   fill: '#FFFFFF',            opacity: 0.05 },
-    { cx: 175, cy: 44, r: 2,   fill: color.accentTeal,    opacity: 0.08 },
-    { cx: 183, cy: 40, r: 3,   fill: color.brandDark,     opacity: 0.06 },
+function HeaderBand({
+  logoUrl,
+  issueLabel,
+  formattedDate,
+}: {
+  readonly logoUrl: string;
+  readonly issueLabel: string;
+  readonly formattedDate: string;
+}) {
+  return (
+    <Section
+      style={{
+        backgroundColor: BRAND_DARK,
+        // Tiled Buka dot grid over a Process-Blue gradient (baked into the band).
+        backgroundImage: `radial-gradient(circle at center, rgba(255,255,255,0.18) 1.5px, transparent 1.6px), linear-gradient(118deg, ${BRAND} 0%, ${BRAND_DARK} 60%, ${BRAND_DARKER} 100%)`,
+        backgroundSize: '20px 20px, 100% 100%',
+        backgroundRepeat: 'repeat, no-repeat',
+        padding: `30px ${PX} 26px`,
+      }}
+    >
+      {/* Logo + eyebrow row */}
+      <Row>
+        <Column valign="middle" style={{ verticalAlign: 'middle' }}>
+          <Img
+            src={logoUrl}
+            width={HEADER_LOGO_WIDTH}
+            height={HEADER_LOGO_HEIGHT}
+            alt="Mega Bilgisayar"
+            style={{ display: 'block', border: '0' }}
+          />
+        </Column>
+        <Column valign="middle" style={{ textAlign: 'right', verticalAlign: 'middle' }}>
+          <Text
+            style={{
+              fontFamily: FONT_STACK,
+              fontSize: '11px',
+              fontWeight: '700',
+              letterSpacing: '1.4px',
+              textTransform: 'uppercase',
+              color: '#FFFFFF',
+              margin: '0',
+              lineHeight: '1',
+            }}
+          >
+            Haftalık YZ Bülteni
+          </Text>
+        </Column>
+      </Row>
+
+      {/* Eyebrow issue label on the band */}
+      <Row>
+        <Column style={{ paddingTop: '20px' }}>
+          <Text
+            style={{
+              fontFamily: MONO_STACK,
+              fontSize: '12px',
+              fontWeight: '700',
+              letterSpacing: '1.4px',
+              textTransform: 'uppercase',
+              color: '#FFFFFF',
+              margin: '0',
+              lineHeight: '1',
+            }}
+          >
+            № {issueLabel}&nbsp;&nbsp;·&nbsp;&nbsp;{formattedDate}
+          </Text>
+        </Column>
+      </Row>
+
+      {/* Inline SVG dot strip — guarantees a <circle> motif in markup for
+          clients that honor SVG; degrades to the baked gradient otherwise. */}
+      <Row>
+        <Column style={{ paddingTop: '18px', lineHeight: '0', fontSize: '0' }}>
+          <DotStrip />
+        </Column>
+      </Row>
+    </Section>
+  );
+}
+
+/**
+ * A thin inline SVG dot strip (the Buka particle field) drawn over the band.
+ * Deterministic for stable SSR. Outlook ignores SVG and falls back to the
+ * solid Process-Blue band + tiled gradient dots above.
+ */
+function DotStrip() {
+  const dots: ReadonlyArray<{
+    readonly cx: number;
+    readonly cy: number;
+    readonly r: number;
+    readonly opacity: number;
+  }> = [
+    { cx: 4, cy: 8, r: 1.5, opacity: 0.9 },
+    { cx: 14, cy: 4, r: 1.5, opacity: 0.7 },
+    { cx: 24, cy: 9, r: 1.5, opacity: 0.85 },
+    { cx: 34, cy: 5, r: 1.5, opacity: 0.6 },
+    { cx: 44, cy: 8, r: 1.5, opacity: 0.8 },
+    { cx: 54, cy: 4, r: 1.5, opacity: 0.5 },
+    { cx: 64, cy: 9, r: 1.5, opacity: 0.7 },
+    { cx: 74, cy: 5, r: 1.5, opacity: 0.45 },
+    { cx: 84, cy: 8, r: 1.5, opacity: 0.6 },
+    { cx: 94, cy: 4, r: 1.5, opacity: 0.4 },
+    { cx: 104, cy: 9, r: 1.5, opacity: 0.5 },
+    { cx: 114, cy: 5, r: 1.5, opacity: 0.32 },
+    { cx: 124, cy: 8, r: 1.5, opacity: 0.4 },
+    { cx: 134, cy: 4, r: 1.5, opacity: 0.26 },
+    { cx: 144, cy: 9, r: 1.5, opacity: 0.32 },
+    { cx: 154, cy: 5, r: 1.5, opacity: 0.2 },
+    { cx: 164, cy: 8, r: 1.5, opacity: 0.24 },
+    { cx: 174, cy: 4, r: 1.5, opacity: 0.16 },
+    { cx: 184, cy: 9, r: 1.5, opacity: 0.18 },
+    { cx: 194, cy: 5, r: 1.5, opacity: 0.12 },
   ];
 
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width="600"
-      height="56"
-      viewBox="0 0 200 56"
+      width="200"
+      height="14"
+      viewBox="0 0 200 14"
       role="presentation"
       aria-hidden="true"
-      style={{ display: 'block', maxWidth: '100%' }}
+      style={{ display: 'block', width: '100%', maxWidth: '100%', height: 'auto' }}
     >
       {dots.map((d, i) => (
-        <circle key={i} cx={d.cx} cy={d.cy} r={d.r} fill={d.fill} opacity={d.opacity} />
+        <circle key={i} cx={d.cx} cy={d.cy} r={d.r} fill="#FFFFFF" opacity={d.opacity} />
       ))}
     </svg>
+  );
+}
+
+/** Compact overview band: "01 Source · 02 Source · 03 Source". */
+function OverviewBand({ items }: { readonly items: readonly DigestItem[] }) {
+  return (
+    <Section style={{ backgroundColor: CARD_BG, padding: `4px ${PX} 24px` }}>
+      <Row>
+        <Column style={{ borderTop: `1px solid ${RULE_SOFT}`, paddingTop: '14px' }}>
+          <Text
+            style={{
+              fontFamily: MONO_STACK,
+              fontSize: '13px',
+              color: MUTED,
+              margin: '0',
+              lineHeight: '1.4',
+            }}
+          >
+            {items.map((item, i) => (
+              <React.Fragment key={i}>
+                {i > 0 && <span>&nbsp;&nbsp;·&nbsp;&nbsp;</span>}
+                <span style={{ color: BRAND, fontWeight: '700' }}>
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                &nbsp;{item.sourceName}
+              </React.Fragment>
+            ))}
+          </Text>
+        </Column>
+      </Row>
+    </Section>
   );
 }
 
 interface StoryBlockProps {
   readonly item: DigestItem;
   readonly index: number;
+  readonly isLast: boolean;
 }
 
-function StoryBlock({ item, index }: StoryBlockProps) {
-  const isEven = index % 2 === 0;
+/**
+ * A numbered story block: big mono number + UPPERCASE source eyebrow +
+ * 3px Process-Blue accent rule + headline + summary + "devamını oku →".
+ */
+function StoryBlock({ item, index, isLast }: StoryBlockProps) {
+  const number = String(index + 1).padStart(2, '0');
 
   return (
-    // Outlook requires table wrapper for consistent spacing
-    <Section
-      style={{
-        padding: '0',
-        margin: '0',
-      }}
-    >
-      {/* Connector line from previous block (skip first) */}
-      {index > 0 && (
-        <Row>
-          <Column>
-            <div
-              style={{
-                height: '1px',
-                backgroundColor: '#E2EEF7',
-                margin: `0 ${space.xl} 0 ${space.xl}`,
-              }}
-            />
-          </Column>
-        </Row>
-      )}
+    <Section style={{ backgroundColor: CARD_BG, padding: `0 ${PX}` }}>
       <Row>
-        <Column style={{ padding: `${space.xl} ${space.xl} ${space.lg} ${space.xl}` }}>
-          {/* Item number + source — meta line */}
+        {/* Big mono number column */}
+        <Column
+          valign="top"
+          width={64}
+          style={{ width: '64px', verticalAlign: 'top', padding: '6px 18px 0 0' }}
+        >
           <Text
             style={{
-              fontFamily: FONT_STACK,
-              fontSize: fontSize.xs,
-              fontWeight: '700',
-              color: color.brand,
-              letterSpacing: '1.4px',
-              textTransform: 'uppercase',
-              margin: '0 0 10px 0',
+              fontFamily: MONO_STACK,
+              fontSize: '40px',
               lineHeight: '1',
+              fontWeight: '700',
+              color: BRAND,
+              margin: '0',
             }}
           >
-            {String(index + 1).padStart(2, '0')} &nbsp;·&nbsp; {item.sourceName}
+            {number}
           </Text>
+        </Column>
 
-          {/* Story title — editorial scale contrast */}
+        {/* Story content column */}
+        <Column valign="top" style={{ verticalAlign: 'top' }}>
+          {/* Source eyebrow */}
           <Text
             style={{
               fontFamily: FONT_STACK,
-              fontSize: fontSize.lg,
-              fontWeight: '800',
-              color: color.ink,
-              lineHeight: '1.3',
+              fontSize: '11px',
+              fontWeight: '700',
+              letterSpacing: '1px',
+              textTransform: 'uppercase',
+              color: MUTED,
+              margin: '0 0 8px 0',
+              lineHeight: '1.2',
+            }}
+          >
+            Kaynak · {item.sourceName}
+          </Text>
+
+          {/* 3px Process-Blue accent rule */}
+          <div
+            style={{
+              width: '34px',
+              height: '3px',
+              backgroundColor: BRAND,
+              borderRadius: '2px',
               margin: '0 0 12px 0',
-              letterSpacing: '-0.3px',
+              fontSize: '0',
+              lineHeight: '0',
+            }}
+          >
+            &nbsp;
+          </div>
+
+          {/* Headline */}
+          <Text
+            style={{
+              fontFamily: FONT_STACK,
+              fontSize: '21px',
+              lineHeight: '26px',
+              fontWeight: '800',
+              letterSpacing: '-0.4px',
+              color: INK,
+              margin: '0 0 8px 0',
             }}
           >
             {item.titleTr}
           </Text>
 
-          {/* Blue accent rule — intentional hierarchy element */}
-          <div
-            style={{
-              width: '32px',
-              height: '3px',
-              backgroundColor: isEven ? color.brand : color.accentTeal,
-              borderRadius: '2px',
-              margin: '0 0 14px 0',
-            }}
-          />
-
           {/* Summary */}
           <Text
             style={{
               fontFamily: FONT_STACK,
-              fontSize: fontSize.base,
-              fontWeight: '400',
-              color: color.inkMuted,
-              lineHeight: '1.7',
-              margin: '0 0 20px 0',
+              fontSize: '15px',
+              lineHeight: '23px',
+              color: MUTED,
+              margin: '0 0 12px 0',
             }}
           >
             {item.summaryTr}
@@ -231,21 +363,34 @@ function StoryBlock({ item, index }: StoryBlockProps) {
           <Link
             href={item.sourceUrl}
             style={{
-              display: 'inline-block',
               fontFamily: FONT_STACK,
-              fontSize: fontSize.sm,
+              fontSize: '14px',
               fontWeight: '700',
-              color: color.brand,
+              color: BRAND_DARK,
               textDecoration: 'none',
-              borderBottom: `2px solid ${color.brand}`,
-              paddingBottom: '2px',
-              letterSpacing: '0.3px',
             }}
           >
-            Devamını oku →
+            Devamını oku&nbsp;→
           </Link>
         </Column>
       </Row>
+
+      {/* Soft divider between stories (skip after the last one) */}
+      {!isLast && (
+        <Row>
+          <Column style={{ padding: '22px 0' }}>
+            <div
+              style={{
+                borderTop: `1px solid ${RULE_SOFT}`,
+                fontSize: '0',
+                lineHeight: '0',
+              }}
+            >
+              &nbsp;
+            </div>
+          </Column>
+        </Row>
+      )}
     </Section>
   );
 }
@@ -266,7 +411,7 @@ export function DigestEmail(props: DigestEmailData) {
     assetBaseUrl,
   } = props;
 
-  const wordmarkUrl = `${assetBaseUrl ?? ''}${WORDMARK_PATH}`;
+  const logoUrl = `${assetBaseUrl ?? ''}${LOGO_PATH}`;
 
   const formattedDate = new Date(issueDate).toLocaleDateString('tr-TR', {
     day: 'numeric',
@@ -274,30 +419,13 @@ export function DigestEmail(props: DigestEmailData) {
     year: 'numeric',
   });
 
+  const lastIndex = items.length - 1;
+
   return (
     <Html lang="tr" dir="ltr">
       <Head>
-        {/* Webfont declaration — degrades gracefully to Arial on Outlook */}
-        <Font
-          fontFamily="Nunito Sans"
-          fallbackFontFamily={['Arial', 'Helvetica', 'sans-serif']}
-          webFont={{
-            url: 'https://fonts.gstatic.com/s/nunitosans/v15/pe0IMImSLYBIv1o4X1M8ce2xCx3yop4tQpF_MeTm0lfGWVpNn64CL7U8upHZIbMV51Q.woff2',
-            format: 'woff2',
-          }}
-          fontWeight={400}
-          fontStyle="normal"
-        />
-        <Font
-          fontFamily="Nunito Sans"
-          fallbackFontFamily={['Arial', 'Helvetica', 'sans-serif']}
-          webFont={{
-            url: 'https://fonts.gstatic.com/s/nunitosans/v15/pe0IMImSLYBIv1o4X1M8ce2xCx3yop4tQpF_MeTm0lfGWVpNn64CL7U8upHZIbMV51Q.woff2',
-            format: 'woff2',
-          }}
-          fontWeight={800}
-          fontStyle="normal"
-        />
+        {/* No webfont declarations: bulletproof clients fall back to Arial. The
+            brand stack hint is applied inline on every text node. */}
       </Head>
 
       {/* Hidden preview text — max ~90 chars before Gmail clips */}
@@ -305,252 +433,225 @@ export function DigestEmail(props: DigestEmailData) {
 
       <Body
         style={{
-          backgroundColor: BODY_BG,
+          backgroundColor: PAGE_BG,
           margin: '0',
-          padding: '0',
+          padding: '24px 12px',
           fontFamily: FONT_STACK,
           WebkitTextSizeAdjust: '100%',
           MozTextSizeAdjust: '100%',
         }}
       >
-        {/*
-         * Outer wrapper table — required for Outlook to respect max-width.
-         * <!--[if mso]> wrapper is not injectable via React Email directly,
-         * but the 600px Container + table-layout handles most Outlook cases.
-         */}
-        <Container
-          style={{
-            maxWidth: '600px',
-            margin: '32px auto',
-            backgroundColor: CONTAINER_BG,
-            borderRadius: radius.md,
-            overflow: 'hidden',
-            // Box shadow degrades gracefully — Outlook ignores it
-            boxShadow: '0 4px 24px rgba(0,137,207,0.10)',
-          }}
+        {/* MSO: fixed-width wrapper so Outlook respects the 600px container. */}
+        <table
+          role="presentation"
+          width="100%"
+          cellPadding={0}
+          cellSpacing={0}
+          border={0}
+          align="center"
         >
-
-          {/* ----------------------------------------------------------------
-           * HEADER — Process Blue band with wordmark + dot-dissolve motif
-           * ---------------------------------------------------------------- */}
-          <Section
-            style={{
-              backgroundColor: HEADER_BG,
-              padding: '0',
-            }}
-          >
-            {/* Wordmark row */}
-            <Row>
-              <Column style={{ padding: `${space.xl} ${space.xl} ${space.md} ${space.xl}` }}>
-                {/* Official Mega white wordmark. alt text is critical for Outlook
-                    (images off by default). */}
-                <Img
-                  src={wordmarkUrl}
-                  width={WORDMARK_WIDTH}
-                  height={WORDMARK_HEIGHT}
-                  alt="mega Bilişim Teknolojileri"
-                  style={{ display: 'block' }}
-                />
-              </Column>
-              <Column
-                style={{
-                  padding: `${space.xl} ${space.xl} ${space.md} 0`,
-                  textAlign: 'right',
-                  verticalAlign: 'bottom',
-                }}
-              >
-                <Text
-                  style={{
-                    fontFamily: FONT_STACK,
-                    fontSize: fontSize.xs,
-                    fontWeight: '700',
-                    color: 'rgba(255,255,255,0.65)',
-                    letterSpacing: '1.2px',
-                    textTransform: 'uppercase',
-                    margin: '0',
-                    lineHeight: '1',
-                  }}
-                >
-                  Haftalık Bülten
-                </Text>
-              </Column>
-            </Row>
-
-            {/* Dot-dissolve motif band */}
-            <Row>
-              <Column style={{ padding: '0', lineHeight: '0', fontSize: '0' }}>
-                <DotBand />
-              </Column>
-            </Row>
-          </Section>
-
-          {/* ----------------------------------------------------------------
-           * ISSUE META — date + label on a subtle tinted strip
-           * ---------------------------------------------------------------- */}
-          <Section style={{ backgroundColor: color.brandTint, padding: '0' }}>
-            <Row>
-              <Column style={{ padding: `${space.md} ${space.xl}` }}>
-                <Text
-                  style={{
-                    fontFamily: FONT_STACK,
-                    fontSize: fontSize.xs,
-                    fontWeight: '700',
-                    color: color.brand,
-                    letterSpacing: '1.2px',
-                    textTransform: 'uppercase',
-                    margin: '0',
-                    lineHeight: '1',
-                  }}
-                >
-                  {formattedDate} &nbsp;·&nbsp; Sayı {issueLabel}
-                </Text>
-              </Column>
-            </Row>
-          </Section>
-
-          {/* ----------------------------------------------------------------
-           * SUBJECT / INTRO BANNER
-           * ---------------------------------------------------------------- */}
-          <Section style={{ backgroundColor: CONTAINER_BG }}>
-            <Row>
-              <Column style={{ padding: `${space.xl} ${space.xl} ${space.md} ${space.xl}` }}>
-                <Text
-                  style={{
-                    fontFamily: FONT_STACK,
-                    fontSize: '26px',
-                    fontWeight: '800',
-                    color: color.ink,
-                    lineHeight: '1.25',
-                    margin: '0',
-                    letterSpacing: '-0.5px',
-                  }}
-                >
-                  {subject}
-                </Text>
-                {/* Brand rule */}
+          <tbody>
+            <tr>
+              <td align="center">
+                {/* eslint-disable-next-line react/no-danger */}
                 <div
-                  style={{
-                    width: '48px',
-                    height: '4px',
-                    backgroundColor: color.brand,
-                    borderRadius: '2px',
-                    marginTop: '18px',
+                  dangerouslySetInnerHTML={{
+                    __html: `<!--[if mso]><table role="presentation" width="${CONTAINER_WIDTH}" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]-->`,
                   }}
                 />
-              </Column>
-            </Row>
-          </Section>
-
-          {/* ----------------------------------------------------------------
-           * STORY BLOCKS
-           * ---------------------------------------------------------------- */}
-          <Section style={{ backgroundColor: CONTAINER_BG }}>
-            {items.map((item, i) => (
-              <StoryBlock key={i} item={item} index={i} />
-            ))}
-          </Section>
-
-          {/* ----------------------------------------------------------------
-           * DIVIDER before footer
-           * ---------------------------------------------------------------- */}
-          <Section style={{ backgroundColor: CONTAINER_BG }}>
-            <Row>
-              <Column style={{ padding: `0 ${space.xl}` }}>
-                <Hr
+                <Container
                   style={{
-                    borderTop: `2px solid ${color.brand}`,
-                    margin: '0',
+                    width: '600px',
+                    maxWidth: '600px',
+                    margin: '0 auto',
+                    backgroundColor: CARD_BG,
+                    borderRadius: '8px',
+                    overflow: 'hidden',
+                  }}
+                >
+                  {/* ----------------------------------------------------------
+                   * HEADER — Process-Blue band, white Buka chameleon + dot grid
+                   * ---------------------------------------------------------- */}
+                  <HeaderBand
+                    logoUrl={logoUrl}
+                    issueLabel={issueLabel}
+                    formattedDate={formattedDate}
+                  />
+
+                  {/* ----------------------------------------------------------
+                   * MASTHEAD — bold subject + short blue accent rule + lede
+                   * ---------------------------------------------------------- */}
+                  <Section style={{ backgroundColor: CARD_BG, padding: `34px ${PX} 4px` }}>
+                    <Row>
+                      <Column>
+                        <Text
+                          style={{
+                            fontFamily: FONT_STACK,
+                            fontSize: '34px',
+                            lineHeight: '38px',
+                            fontWeight: '800',
+                            letterSpacing: '-1px',
+                            color: INK,
+                            margin: '0 0 14px 0',
+                          }}
+                        >
+                          {subject}
+                        </Text>
+                        <div
+                          style={{
+                            width: '48px',
+                            height: '4px',
+                            backgroundColor: BRAND,
+                            borderRadius: '2px',
+                            margin: '0 0 14px 0',
+                            fontSize: '0',
+                            lineHeight: '0',
+                          }}
+                        >
+                          &nbsp;
+                        </div>
+                        <Text
+                          style={{
+                            fontFamily: FONT_STACK,
+                            fontSize: '16px',
+                            lineHeight: '24px',
+                            color: MUTED,
+                            margin: '0',
+                          }}
+                        >
+                          {preheader}
+                        </Text>
+                      </Column>
+                    </Row>
+                  </Section>
+
+                  {/* ----------------------------------------------------------
+                   * OVERVIEW BAND — "01 … · 02 … · 03 …"
+                   * ---------------------------------------------------------- */}
+                  <OverviewBand items={items} />
+
+                  {/* ----------------------------------------------------------
+                   * STORY BLOCKS — numbered, accent rule, CTA
+                   * ---------------------------------------------------------- */}
+                  {items.map((item, i) => (
+                    <StoryBlock key={i} item={item} index={i} isLast={i === lastIndex} />
+                  ))}
+
+                  {/* Spacer before footer */}
+                  <Section style={{ backgroundColor: CARD_BG }}>
+                    <Row>
+                      <Column style={{ padding: `0 ${PX} 30px` }}>&nbsp;</Column>
+                    </Row>
+                  </Section>
+
+                  {/* ----------------------------------------------------------
+                   * FOOTER — dark navy band, chameleon again + compliance
+                   * ---------------------------------------------------------- */}
+                  <Section style={{ backgroundColor: FOOTER_BG, padding: `30px ${PX}` }}>
+                    <Row>
+                      <Column>
+                        <Img
+                          src={logoUrl}
+                          width={FOOTER_LOGO_WIDTH}
+                          height={FOOTER_LOGO_HEIGHT}
+                          alt="Mega Bilgisayar"
+                          style={{ display: 'block', border: '0', marginBottom: '14px' }}
+                        />
+                        <Text
+                          style={{
+                            fontFamily: FONT_STACK,
+                            fontSize: '13px',
+                            fontWeight: '700',
+                            letterSpacing: '1.2px',
+                            textTransform: 'uppercase',
+                            color: FOOTER_INK,
+                            margin: '0 0 6px 0',
+                            lineHeight: '1',
+                          }}
+                        >
+                          Mega Bülten
+                        </Text>
+                        <Text
+                          style={{
+                            fontFamily: FONT_STACK,
+                            fontSize: '13px',
+                            lineHeight: '20px',
+                            color: FOOTER_TEXT,
+                            margin: '0 0 4px 0',
+                          }}
+                        >
+                          Yapay zeka dünyasından haftalık seçkiler.
+                        </Text>
+                        <Text
+                          style={{
+                            fontFamily: FONT_STACK,
+                            fontSize: '12px',
+                            lineHeight: '18px',
+                            color: FOOTER_TEXT,
+                            margin: '0 0 18px 0',
+                          }}
+                        >
+                          Mega Bülten — Mega Bilişim Teknolojileri&rsquo;nin haftalık yapay zeka
+                          digesti.
+                        </Text>
+                      </Column>
+                    </Row>
+
+                    {/* Compliance row — address + unsubscribe */}
+                    <Row>
+                      <Column
+                        style={{
+                          borderTop: `1px solid ${FOOTER_RULE}`,
+                          paddingTop: '14px',
+                        }}
+                      >
+                        <Text
+                          style={{
+                            fontFamily: FONT_STACK,
+                            fontSize: '12px',
+                            lineHeight: '18px',
+                            color: FOOTER_TEXT,
+                            margin: '0 0 8px 0',
+                          }}
+                        >
+                          Bu e-postayı almak istemiyorsanız{' '}
+                          <Link
+                            href={unsubscribeUrl}
+                            style={{
+                              color: FOOTER_LINK,
+                              textDecoration: 'underline',
+                              fontWeight: '600',
+                            }}
+                          >
+                            aboneliğinizi iptal edebilirsiniz
+                          </Link>
+                          .
+                        </Text>
+                        <Text
+                          style={{
+                            fontFamily: MONO_STACK,
+                            fontSize: '11px',
+                            lineHeight: '18px',
+                            color: FOOTER_TEXT,
+                            margin: '0',
+                          }}
+                        >
+                          © {new Date(issueDate).getFullYear()} {senderAddress}
+                        </Text>
+                      </Column>
+                    </Row>
+                  </Section>
+                </Container>
+                {/* eslint-disable-next-line react/no-danger */}
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: `<!--[if mso]></td></tr></table><![endif]-->`,
                   }}
                 />
-              </Column>
-            </Row>
-          </Section>
-
-          {/* ----------------------------------------------------------------
-           * FOOTER — dark, Mega signature + compliance
-           * ---------------------------------------------------------------- */}
-          <Section style={{ backgroundColor: FOOTER_BG }}>
-            {/* Brand signature row */}
-            <Row>
-              <Column style={{ padding: `${space.xl} ${space.xl} ${space.lg} ${space.xl}` }}>
-                <Text
-                  style={{
-                    fontFamily: FONT_STACK,
-                    fontSize: fontSize.sm,
-                    fontWeight: '800',
-                    color: color.brand,
-                    letterSpacing: '1.5px',
-                    textTransform: 'uppercase',
-                    margin: '0 0 4px 0',
-                    lineHeight: '1',
-                  }}
-                >
-                  mega bülten
-                </Text>
-                <Text
-                  style={{
-                    fontFamily: FONT_STACK,
-                    fontSize: fontSize.xs,
-                    fontWeight: '400',
-                    color: 'rgba(255,255,255,0.5)',
-                    margin: '0',
-                    lineHeight: '1.4',
-                  }}
-                >
-                  Yapay zeka dünyasından haftalık seçkiler
-                </Text>
-              </Column>
-            </Row>
-
-            {/* Compliance row — address + unsubscribe */}
-            <Row>
-              <Column
-                style={{
-                  padding: `0 ${space.xl} ${space.xl} ${space.xl}`,
-                  borderTop: '1px solid rgba(255,255,255,0.08)',
-                  paddingTop: space.lg,
-                }}
-              >
-                <Text
-                  style={{
-                    fontFamily: FONT_STACK,
-                    fontSize: '11px',
-                    fontWeight: '400',
-                    color: 'rgba(255,255,255,0.35)',
-                    margin: '0 0 8px 0',
-                    lineHeight: '1.6',
-                  }}
-                >
-                  {senderAddress}
-                </Text>
-                <Text
-                  style={{
-                    fontFamily: FONT_STACK,
-                    fontSize: '11px',
-                    fontWeight: '400',
-                    color: 'rgba(255,255,255,0.35)',
-                    margin: '0',
-                    lineHeight: '1.6',
-                  }}
-                >
-                  Bu e-postayı almak istemiyorsanız{' '}
-                  <Link
-                    href={unsubscribeUrl}
-                    style={{
-                      color: color.gray,
-                      textDecoration: 'underline',
-                      fontWeight: '600',
-                    }}
-                  >
-                    aboneliğinizi iptal edebilirsiniz
-                  </Link>
-                  .
-                </Text>
-              </Column>
-            </Row>
-          </Section>
-
-        </Container>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </Body>
     </Html>
   );
