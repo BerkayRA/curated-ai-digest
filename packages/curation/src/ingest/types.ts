@@ -28,11 +28,49 @@ export interface IngestResult {
   readonly persisted: number;
   /** Non-fatal errors from individual sources. */
   readonly errors: readonly SourceError[];
+  /** Raw candidate counts keyed by provider id (pre-dedup). */
+  readonly bySource?: Record<string, number>;
 }
 
 export interface SourceError {
   readonly source: string;
   readonly message: string;
+}
+
+// ---------------------------------------------------------------------------
+// Pluggable source providers (ADR-0003, decision 1)
+// ---------------------------------------------------------------------------
+
+/**
+ * Context handed to every provider on each run.
+ *
+ * `topic` tunes provider queries (e.g. Exa search terms) and will later be
+ * sourced from Settings; for now it defaults to {@link DEFAULT_TOPIC}.
+ * `signal` is reserved for cancellation support and may be undefined.
+ */
+export interface SourceContext {
+  readonly topic: string;
+  readonly logger: Logger;
+  readonly signal?: AbortSignal;
+}
+
+/** What a provider returns: candidates plus any non-fatal errors it collected. */
+export interface SourceFetchResult {
+  readonly candidates: readonly RawCandidate[];
+  readonly errors: readonly SourceError[];
+}
+
+/**
+ * A pluggable news source. Implement this interface and register it in
+ * `providers.ts` to add a new source — no orchestrator changes required.
+ *
+ * `fetch` must isolate its own per-item failures into the returned `errors`
+ * array; a thrown error is tolerated by the orchestrator but loses granularity.
+ */
+export interface SourceProvider {
+  readonly id: string;
+  readonly label: string;
+  fetch(ctx: SourceContext): Promise<SourceFetchResult>;
 }
 
 /**
