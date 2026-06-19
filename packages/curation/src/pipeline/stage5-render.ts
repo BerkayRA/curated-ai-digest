@@ -114,7 +114,7 @@ export async function runRenderStage(
       issueLabel: isoWeek,
       items,
       unsubscribeUrl: '{{unsubscribeUrl}}',
-      senderAddress: 'Mega Bilisim, Ankara, Turkiye',
+      senderAddress: 'Mega Bilgisayar Tic. Ltd. Şti, Ankara, Türkiye',
     });
 
     // 4. Build structured bodyJson for the dashboard editor.
