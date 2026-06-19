@@ -2,6 +2,7 @@
 
 **A self-hosted, Claude-powered system that curates, writes, brands, and sends a weekly Turkish AI-news digest — with a human approval gate by default and guarded auto-send for holidays.**
 
+[![CI](https://github.com/BerkayRA/curated-ai-digest/actions/workflows/ci.yml/badge.svg)](https://github.com/BerkayRA/curated-ai-digest/actions/workflows/ci.yml)
 ![Node](https://img.shields.io/badge/node-%E2%89%A520-339933?logo=node.js&logoColor=white)
 ![pnpm](https://img.shields.io/badge/pnpm-10-F69220?logo=pnpm&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)

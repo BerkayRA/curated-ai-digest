@@ -1,11 +1,16 @@
 /**
  * Curation job — triggers the weekly curation pipeline for the current ISO week.
  *
+ * Before curating, it imports the committed candidate-pool artifact
+ * (data/candidates/latest.jsonl, refreshed daily by the GitHub Actions scan)
+ * into Postgres, so the freshest scan results are available to the pipeline.
+ * A missing/failed import is non-fatal — the DB may already hold candidates.
+ *
  * Resolves the Phase 7 wiring TODO: passes renderDigestEmail from @digest/email
  * as renderFn so the pipeline produces real HTML output.
  */
 
-import { runWeeklyPipeline } from '@digest/curation';
+import { runWeeklyPipeline, importCommittedCandidates } from '@digest/curation';
 import { renderDigestEmail } from '@digest/email';
 import type { Logger } from '../logger.js';
 
@@ -27,15 +32,37 @@ export async function runCurationJob(opts: CurationJobOptions): Promise<void> {
 
   logger.info('job.curate.start', { isoWeek: isoWeek ?? 'current' });
 
+  // Shared adapter so library code logs through the worker logger.
+  const libLogger = {
+    info: (msg: string, meta?: Record<string, unknown>) => logger.info(msg, meta),
+    warn: (msg: string, meta?: Record<string, unknown>) => logger.warn(msg, meta),
+    error: (msg: string, meta?: Record<string, unknown>) => logger.error(msg, meta),
+  };
+
+  // Import the daily-refreshed candidate pool into Postgres first. CANDIDATES_DIR
+  // points at the committed artifact in deployment; when unset, import-pool falls
+  // back to its default (data/candidates relative to cwd). Never let a missing or
+  // failed import abort the weekly run.
+  try {
+    const imported = await importCommittedCandidates({
+      dir: process.env['CANDIDATES_DIR'],
+      logger: libLogger,
+    });
+    logger.info('job.curate.pool-imported', {
+      poolSize: imported.poolSize,
+      imported: imported.imported,
+    });
+  } catch (error) {
+    logger.warn('job.curate.pool-import-failed', {
+      message: error instanceof Error ? error.message : String(error),
+    });
+  }
+
   try {
     const result = await runWeeklyPipeline({
       isoWeek,
       renderFn: renderDigestEmail,
-      logger: {
-        info: (msg, meta) => logger.info(msg, meta),
-        warn: (msg, meta) => logger.warn(msg, meta),
-        error: (msg, meta) => logger.error(msg, meta),
-      },
+      logger: libLogger,
     });
 
     logger.info('job.curate.done', {

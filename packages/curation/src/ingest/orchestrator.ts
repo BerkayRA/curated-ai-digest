@@ -1,5 +1,4 @@
 import { deduplicateWithinRun, filterAgainstExisting } from './dedup.js';
-import { createPrismaRepository } from './repository.js';
 import { defaultProviders } from './providers.js';
 import { DEFAULT_TOPIC } from './sources.js';
 import type {
@@ -72,7 +71,9 @@ async function runProvider(
  */
 export async function runIngest(opts: IngestOptions = {}): Promise<IngestResult> {
   const logger = opts.logger ?? silentLogger;
-  const repo = opts.repository ?? createPrismaRepository();
+  const repo =
+    opts.repository ??
+    (await import('./repository.js')).createPrismaRepository();
   const providers = opts.providers ?? defaultProviders();
   const topic = opts.topic ?? DEFAULT_TOPIC;
 

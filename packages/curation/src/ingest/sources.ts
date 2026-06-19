@@ -30,8 +30,10 @@ export const FEEDS: readonly FeedDefinition[] = [
     url: 'https://openai.com/blog/rss.xml',
   },
   {
-    name: 'Anthropic News',
-    url: 'https://www.anthropic.com/rss.xml',
+    // Anthropic publishes no public RSS feed; Google's AI blog is a verified
+    // major-lab replacement (see ADR-0004 follow-up / docs/AUTOMATION.md).
+    name: 'Google AI Blog',
+    url: 'https://blog.google/technology/ai/rss/',
   },
   {
     name: 'Google DeepMind Blog',
@@ -46,8 +48,10 @@ export const FEEDS: readonly FeedDefinition[] = [
     url: 'https://venturebeat.com/category/ai/feed/',
   },
   {
-    name: 'The Verge AI',
-    url: 'https://www.theverge.com/ai-artificial-intelligence/rss/index.xml',
+    // The Verge's per-section AI feed 404s; the main feed works and is
+    // topic-filtered downstream.
+    name: 'The Verge',
+    url: 'https://www.theverge.com/rss/index.xml',
   },
   {
     name: 'Ars Technica AI',
