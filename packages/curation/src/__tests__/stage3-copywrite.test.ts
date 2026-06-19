@@ -44,7 +44,7 @@ const validCopyOutput = {
     {
       candidateId: 'a1',
       titleTr: 'Türkçe Başlık Bir',
-      summaryTr: 'Bu haber, yapay zeka alanında önemli bir gelişmeyi ele almaktadır. Mega Bilişim okuyucuları için kritik bilgiler içermektedir.',
+      summaryTr: 'Bu haber, yapay zeka alanında önemli bir gelişmeyi ele almaktadır. Mega Bilgisayar okuyucuları için kritik bilgiler içermektedir.',
       sourceUrl: 'https://example.com/a1',
       sourceName: 'Test Source',
     },

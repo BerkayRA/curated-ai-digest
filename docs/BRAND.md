@@ -21,7 +21,7 @@ magenta — use ONLY as decorative particle motif, never for the logo or text.
 - No geometric container shapes around the logo.
 - No deformation / aspect-ratio changes.
 - No recoloring outside approved colors (white, Process Blue, or black on suitable grounds).
-- Subtitle "Bilişim Teknolojileri" is Centrale Sans Bold (part of the locked logo lockup).
+- The lockup is the Buka chameleon + the `mega bilgisayar` wordmark; do not add or re-typeset any subtitle.
 - Provide white logo on blue/dark grounds; blue/black logo on light grounds.
 
 ## Mascot — "Buka" the chameleon
@@ -49,6 +49,6 @@ dashboard — it is what keeps the UI from looking like a generic template.
 
 ## Assets needed (tracked)
 
-- [ ] `mega` wordmark SVG (white + blue + black) — to drop into `packages/brand/assets`.
+- [x] `mega bilgisayar` logo lockup SVG (white + blue) — in `packages/brand/assets` and `apps/web/public/brand`.
 - [ ] Buka chameleon SVGs (solid blue, dot-dissolve) — for email header + dashboard.
 - Until provided, build with placeholders that respect the lockup/proportions.

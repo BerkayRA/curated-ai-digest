@@ -1,7 +1,6 @@
 import { z } from 'zod';
 import type {
   RawCandidate,
-  SourceError,
   SourceContext,
   SourceFetchResult,
   SourceProvider,
