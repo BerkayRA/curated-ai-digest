@@ -134,3 +134,39 @@ export const rssProvider: SourceProvider = {
     return result;
   },
 };
+
+// ---------------------------------------------------------------------------
+// Factory (for DB-driven provider resolution)
+// ---------------------------------------------------------------------------
+
+export interface RssProviderOptions {
+  /** Provider id. Defaults to `'rss'`. */
+  id?: string;
+  /** Injectable fetch implementation (for tests). Not used directly here but
+   *  forwarded via fetchAllFeeds if provided. */
+  fetchImpl?: (feeds: readonly FeedDefinition[]) => Promise<SourceFetchResult>;
+}
+
+/**
+ * Create an RSS {@link SourceProvider} that fetches the given feeds.
+ * The `opts.id` allows each DB-backed source row to get its own distinct id
+ * (e.g. `'rss:cuid123'`) so per-source health can be recorded.
+ */
+export function createRssProvider(
+  feeds: readonly FeedDefinition[],
+  opts: RssProviderOptions = {},
+): SourceProvider {
+  const providerId = opts.id ?? 'rss';
+  const fetchFeeds = opts.fetchImpl ?? fetchAllFeeds;
+
+  return {
+    id: providerId,
+    label: 'RSS Feeds',
+    async fetch(ctx: SourceContext): Promise<SourceFetchResult> {
+      ctx.logger.info('rss.fetch.start', { feeds: feeds.length, id: providerId });
+      const result = await fetchFeeds(feeds);
+      ctx.logger.info('rss.fetch.done', { candidates: result.candidates.length });
+      return result;
+    },
+  };
+}

@@ -26,6 +26,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **ESLint workspace-wide** — shared config via the `eslintConfig` field in the root
   `package.json` (ESLint 8 + `@typescript-eslint`) and `apps/web` (`next/core-web-vitals`),
   so `pnpm turbo run lint` passes across all packages and `lint` runs in CI.
+- **Data-source management** — a `Source` Prisma model + the `/sources` ("Kaynaklar") dashboard page
+  to browse, add, toggle, test, and edit ingestion sources (RSS, the On-Prem AI Adoption Radar, Exa),
+  with per-source health and a "Şimdi Tara" run-now button. Ingestion resolves providers from the
+  enabled DB sources (with a static fallback) and records health; admin API under `/api/sources`.
+  See `docs/adr/ADR-0005-db-backed-sources.md`.
 
 ### Changed
 
@@ -37,7 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- **Branding** — removed the incorrect "Bilişim Teknolojileri" wordmark (it was baked into raster
+- **Branding** — removed an incorrect wordmark subtitle that had been baked into raster
   PNGs) everywhere it surfaced (login page, curation prompt, email sender address, brand docs) and
   deleted the five stale `mega-wordmark-*.png` assets. The product now consistently uses **Mega
   Bilgisayar**.

@@ -49,8 +49,10 @@ export type {
 
 // Source providers (pluggable ingestion — ADR-0003)
 export { defaultProviders, isRadarEnabled } from './ingest/providers.js';
-export { rssProvider } from './ingest/rss-source.js';
-export { exaProvider } from './ingest/exa-source.js';
+export { rssProvider, createRssProvider } from './ingest/rss-source.js';
+export type { RssProviderOptions } from './ingest/rss-source.js';
+export { exaProvider, createExaProvider } from './ingest/exa-source.js';
+export type { ExaProviderOptions } from './ingest/exa-source.js';
 export {
   radarProvider,
   createRadarProvider,
@@ -66,12 +68,21 @@ export {
 } from './ingest/radar-source.js';
 export type {
   RadarProviderConfig,
+  RadarProviderFactoryOptions,
   RadarCategory,
   RadarRing,
   RadarChangeType,
   RadarEvent,
   FetchImpl,
 } from './ingest/radar-source.js';
+
+// DB-driven ingestion wiring
+export { resolveProviders } from './ingest/resolve-providers.js';
+export type { ResolveProvidersOptions } from './ingest/resolve-providers.js';
+export { recordSourceHealth } from './ingest/record-health.js';
+export type { RecordSourceHealthOptions } from './ingest/record-health.js';
+export { runIngestFromDb } from './ingest/run-ingest-from-db.js';
+export type { RunIngestFromDbOptions } from './ingest/run-ingest-from-db.js';
 
 // Feed source catalogue (consumers may want to read the list)
 export { FEEDS, EXA_QUERIES, DEFAULT_TOPIC } from './ingest/sources.js';

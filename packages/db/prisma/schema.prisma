@@ -11,6 +11,12 @@ datasource db {
 // Enums
 // ---------------------------------------------------------------------------
 
+enum SourceType {
+  rss
+  radar
+  exa
+}
+
 enum IssueStatus {
   draft
   in_review
@@ -238,4 +244,31 @@ model AuditLog {
   @@index([entity, entityId])
   @@index([actorId])
   @@map("audit_logs")
+}
+
+// ---------------------------------------------------------------------------
+// Source — DB-backed registry of ingest sources (rss / radar / exa)
+// ---------------------------------------------------------------------------
+
+model Source {
+  id          String     @id @default(cuid())
+  type        SourceType
+  label       String
+  url         String? // rss/radar feed URL; null for exa
+  enabled     Boolean    @default(true)
+  config      Json? // type-specific config blob (non-secret only)
+
+  // Persistent health fields updated after each ingest run
+  lastRunAt   DateTime?  @map("last_run_at")
+  lastStatus  String?    @map("last_status") // "ok" | "error"
+  lastCount   Int        @default(0) @map("last_count")
+  lastError   String?    @map("last_error")
+
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+
+  // Postgres allows multiple NULLs in a unique index — fine for exa rows.
+  @@unique([type, url])
+  @@index([enabled])
+  @@map("sources")
 }

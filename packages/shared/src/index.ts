@@ -8,3 +8,4 @@ export * from './issue.js';
 export * from './article.js';
 export * from './subscriber.js';
 export * from './settings.js';
+export * from './source.js';
