@@ -10,6 +10,7 @@ interface FooterChip {
 const QUICK_LINKS: FooterChip[] = [
   { href: '/issues', label: '→ Sayı arşivi' },
   { href: '/subscribers', label: '→ Aboneler' },
+  { href: '/sources', label: '→ Kaynaklar' },
   { href: '/settings', label: '→ Ayarlar' },
 ];
 
@@ -29,8 +30,8 @@ export function ShellFooter() {
         <div className={styles.footerLead}>
           <h2 className={styles.footerHeading}>Curated AI Digest</h2>
           <p className={styles.footerText}>
-            Mega Bilgisayar Tic. Ltd. Şti&apos;nin haftalık yapay zeka digesti. &ldquo;On-Prem AI
-            Adoption Radar&rdquo; ile aynı tasarım sistemini paylaşır.
+            Mega Bilgisayar Tic. Ltd. Şti&apos;nin haftalık, özenle seçilmiş yapay zeka haber
+            digesti.
           </p>
         </div>
 
@@ -64,7 +65,7 @@ export function ShellFooter() {
       <div className={styles.footerBase}>
         <div className={styles.footerBaseInner}>
           <span>© {CURRENT_YEAR} Mega Bilgisayar Tic. Ltd. Şti</span>
-          <span className={styles.footerVersion}>radar sistemi ile eşlenik</span>
+          <span className={styles.footerVersion}>yapay zeka haber kürasyonu</span>
         </div>
       </div>
     </footer>

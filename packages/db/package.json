@@ -15,7 +15,9 @@
     "seed": "tsx prisma/seed.ts",
     "studio": "prisma studio",
     "lint": "eslint src --max-warnings 0",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@prisma/client": "^6.9.0"
@@ -23,6 +25,7 @@
   "devDependencies": {
     "@types/node": "^20.19.1",
     "prisma": "^6.9.0",
-    "tsx": "^4.19.3"
+    "tsx": "^4.19.3",
+    "vitest": "^3.2.4"
   }
 }

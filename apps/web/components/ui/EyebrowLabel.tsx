@@ -11,7 +11,7 @@ interface EyebrowLabelProps {
 
 /**
  * Eyebrow label — the signature Mega tell: a small uppercase muted kicker.
- * Shared with the sibling on-prem AI radar's design language
+ * Part of the Mega design language
  * (0.7rem / .07em / weight 700 / muted). Reused across the dashboard,
  * archive cards, and (via parity) the email templates.
  */

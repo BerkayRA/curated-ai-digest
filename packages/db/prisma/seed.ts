@@ -1,5 +1,6 @@
 import { PrismaClient, EmailProviderKind } from '@prisma/client';
 import { randomUUID } from 'node:crypto';
+import { seedSources } from './seed-sources.js';
 
 const prisma = new PrismaClient();
 
@@ -59,6 +60,11 @@ async function main(): Promise<void> {
   }
 
   console.log('Seed complete: 1 Settings row + 3 sample subscribers upserted.');
+
+  // -------------------------------------------------------------------------
+  // Sources — upsert all static ingest sources from curation constants
+  // -------------------------------------------------------------------------
+  await seedSources(prisma);
 }
 
 main()

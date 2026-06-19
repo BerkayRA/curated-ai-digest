@@ -132,3 +132,35 @@ export const exaProvider: SourceProvider = {
     return fetchExaCandidates(ctx.logger, queries);
   },
 };
+
+// ---------------------------------------------------------------------------
+// Factory (for DB-driven provider resolution)
+// ---------------------------------------------------------------------------
+
+export interface ExaProviderOptions {
+  /** Provider id. Defaults to `'exa'`. */
+  id?: string;
+  /** Override the queries used for this provider. Defaults to {@link EXA_QUERIES}. */
+  queries?: readonly string[];
+}
+
+/**
+ * Create an Exa neural-search {@link SourceProvider} with a custom id and
+ * optional query override. The `opts.id` allows each DB-backed source row to
+ * get its own distinct id (e.g. `'exa:cuid123'`) so per-source health can be
+ * recorded.
+ */
+export function createExaProvider(opts: ExaProviderOptions = {}): SourceProvider {
+  const providerId = opts.id ?? 'exa';
+  const customQueries = opts.queries;
+
+  return {
+    id: providerId,
+    label: 'Exa Neural Search',
+    async fetch(ctx: SourceContext): Promise<SourceFetchResult> {
+      const baseQueries = customQueries ?? EXA_QUERIES;
+      const queries = topicTunedQueries(ctx.topic, baseQueries);
+      return fetchExaCandidates(ctx.logger, queries);
+    },
+  };
+}

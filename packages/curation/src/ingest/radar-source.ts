@@ -347,14 +347,26 @@ export async function fetchRadarCandidates(
 // SourceProvider factory + default instance
 // ---------------------------------------------------------------------------
 
+export interface RadarProviderFactoryOptions {
+  /** Provider id. Defaults to `'radar'`. */
+  id?: string;
+}
+
 /**
  * Create a radar {@link SourceProvider} with a custom configuration. The feed
  * URL, site root, category/changeType filters, item cap, and fetch impl are all
  * overridable here (handy for tests and bespoke worker setups).
+ *
+ * The optional `factoryOpts.id` allows DB-backed source rows to get their own
+ * distinct id (e.g. `'radar:cuid123'`) so per-source health can be recorded.
  */
-export function createRadarProvider(config: RadarProviderConfig = {}): SourceProvider {
+export function createRadarProvider(
+  config: RadarProviderConfig = {},
+  factoryOpts: RadarProviderFactoryOptions = {},
+): SourceProvider {
+  const providerId = factoryOpts.id ?? 'radar';
   return {
-    id: 'radar',
+    id: providerId,
     label: 'On-Prem AI Adoption Radar',
     async fetch(ctx: SourceContext): Promise<SourceFetchResult> {
       ctx.logger.info('radar.fetch.start', {
