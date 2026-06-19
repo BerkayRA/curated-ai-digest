@@ -1,0 +1,61 @@
+name: Daily news scan
+
+# Refresh the candidate pool once a day and commit it back to the repo — the
+# same pattern the on-prem AI adoption radar uses for its data feed. The scan is
+# deterministic and keyless (RSS + Radar only): no LLM, no API keys, no database.
+
+on:
+  schedule:
+    # GitHub cron is always UTC. 02:00 UTC ≈ 05:00 Europe/Istanbul (Türkiye is
+    # UTC+3 year-round, no DST), so this runs in the early morning local time.
+    - cron: "0 2 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  # Never run two scans at once; let an in-flight scan finish rather than cancel.
+  group: daily-scan
+  cancel-in-progress: false
+
+jobs:
+  scan:
+    name: Scan and commit candidate pool
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # The scan code path is DB-free: Prisma is lazy-loaded only when a database
+      # repository is used, and the scan injects a file repository. So no
+      # `prisma generate` and no Postgres service container are needed here.
+      - name: Run deterministic scan (RSS + Radar)
+        run: pnpm scan
+        env:
+          SCAN_MAX_ITEMS: "200"
+
+      - name: Commit refreshed pool (if changed)
+        run: |
+          git config user.name 'digest-scanner[bot]'
+          git config user.email 'digest-scanner[bot]@users.noreply.github.com'
+          git add data/candidates
+          if git diff --staged --quiet; then
+            echo 'No candidate-pool changes to commit.'
+          else
+            # [skip ci] stops this push from re-triggering ci.yml (avoids a loop).
+            git commit -m 'chore(scan): refresh candidate pool [skip ci]'
+            git push
+          fi

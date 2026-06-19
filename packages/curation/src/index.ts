@@ -7,6 +7,32 @@
 export { runIngest } from './ingest/orchestrator.js';
 export type { IngestOptions } from './ingest/orchestrator.js';
 
+// File-based repository (scan path — no DB dependency)
+export { createFileRepository } from './ingest/file-repository.js';
+export type { FileRepositoryOptions } from './ingest/file-repository.js';
+
+// Candidate pool artifact contract
+export {
+  CANDIDATES_DIR_DEFAULT,
+  LATEST_FILE,
+  INDEX_FILE,
+  storedCandidateSchema,
+  toStored,
+  serializeStored,
+  parseStoredLine,
+  readPool,
+  writePool,
+} from './ingest/candidate-file.js';
+export type { StoredCandidate } from './ingest/candidate-file.js';
+
+// Committed-pool import bridge (daily scan artifact → Postgres)
+export { importCommittedCandidates } from './ingest/import-pool.js';
+export type { ImportPoolOptions, ImportPoolResult } from './ingest/import-pool.js';
+
+// Scan runner
+export { runScan } from './scan/run-scan.js';
+export type { RunScanOptions } from './scan/run-scan.js';
+
 // Types
 export type {
   RawCandidate,

@@ -36,5 +36,9 @@
     "eslint-config-next": "^14.2.18",
     "typescript": "^5.7.2",
     "vitest": "^2.1.8"
+  },
+  "eslintConfig": {
+    "root": true,
+    "extends": "next/core-web-vitals"
   }
 }
