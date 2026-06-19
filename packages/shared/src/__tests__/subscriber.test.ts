@@ -6,11 +6,11 @@ describe('SubscriberImportRowSchema', () => {
     const result = SubscriberImportRowSchema.parse({
       email: 'Ahmet@Example.COM',
       displayName: 'Ahmet Yılmaz',
-      company: 'Mega Bilişim',
+      company: 'Örnek Teknoloji',
     });
     expect(result.email).toBe('ahmet@example.com');
     expect(result.displayName).toBe('Ahmet Yılmaz');
-    expect(result.company).toBe('Mega Bilişim');
+    expect(result.company).toBe('Örnek Teknoloji');
   });
 
   it('parses a minimal row (email only)', () => {

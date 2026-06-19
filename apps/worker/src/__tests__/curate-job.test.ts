@@ -22,6 +22,7 @@ const mockPipelineResult = {
 
 vi.mock('@digest/curation', () => ({
   runWeeklyPipeline: vi.fn().mockResolvedValue(mockPipelineResult),
+  importCommittedCandidates: vi.fn().mockResolvedValue({ poolSize: 5, imported: 5 }),
 }));
 
 vi.mock('@digest/email', () => ({
@@ -29,7 +30,7 @@ vi.mock('@digest/email', () => ({
 }));
 
 const { runCurationJob } = await import('../jobs/curate.js');
-const { runWeeklyPipeline } = await import('@digest/curation');
+const { runWeeklyPipeline, importCommittedCandidates } = await import('@digest/curation');
 const { renderDigestEmail } = await import('@digest/email');
 
 // ---------------------------------------------------------------------------
@@ -111,5 +112,28 @@ describe('runCurationJob', () => {
     const callArgs = vi.mocked(runWeeklyPipeline).mock.calls[0]![0]!;
     // isoWeek should be undefined so the pipeline defaults to current week
     expect(callArgs.isoWeek).toBeUndefined();
+  });
+
+  it('imports the committed candidate pool before running the pipeline', async () => {
+    const logger = makeLogger();
+    await runCurationJob({ logger, isoWeek: '2026-W25' });
+
+    expect(importCommittedCandidates).toHaveBeenCalledTimes(1);
+    const importOrder = vi.mocked(importCommittedCandidates).mock.invocationCallOrder[0]!;
+    const pipelineOrder = vi.mocked(runWeeklyPipeline).mock.invocationCallOrder[0]!;
+    expect(importOrder).toBeLessThan(pipelineOrder);
+  });
+
+  it('still runs the pipeline when the pool import fails', async () => {
+    vi.mocked(importCommittedCandidates).mockRejectedValueOnce(new Error('no artifact'));
+    const logger = makeLogger();
+
+    await runCurationJob({ logger, isoWeek: '2026-W25' });
+
+    expect(runWeeklyPipeline).toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledWith(
+      'job.curate.pool-import-failed',
+      expect.objectContaining({ message: 'no artifact' }),
+    );
   });
 });

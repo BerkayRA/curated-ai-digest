@@ -11,7 +11,8 @@
   "scripts": {
     "lint": "eslint src --max-warnings 0",
     "type-check": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "scan": "tsx src/bin/scan.ts"
   },
   "dependencies": {
     "@digest/db": "workspace:*",

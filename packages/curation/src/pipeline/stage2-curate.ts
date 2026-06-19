@@ -32,7 +32,7 @@ export interface CurateStageResult {
   readonly pipelineRun: PipelineRunRecord;
 }
 
-const SYSTEM_PROMPT = `You are a senior editorial AI for Mega Bilisim's weekly AI newsletter.
+const SYSTEM_PROMPT = `You are a senior editorial AI for Mega Bilgisayar's weekly AI newsletter.
 Your task: select exactly 2 or 3 of the provided articles for inclusion in this week's issue.
 
 Selection criteria:

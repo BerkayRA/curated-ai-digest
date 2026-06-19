@@ -236,11 +236,11 @@ describe('runWeeklyPipeline', () => {
 
   it('wires stages in correct order', async () => {
     const callOrder: string[] = [];
-    vi.mocked(runRankStage).mockImplementation(async (...args) => {
+    vi.mocked(runRankStage).mockImplementation(async () => {
       callOrder.push('rank');
       return { scored: scoredCandidates, pipelineRun: makeRun('rank') };
     });
-    vi.mocked(runCurateStage).mockImplementation(async (...args) => {
+    vi.mocked(runCurateStage).mockImplementation(async () => {
       callOrder.push('curate');
       return {
         selection: { selectedIds: ['c1', 'c2'], justification: 'ok' },
@@ -248,11 +248,11 @@ describe('runWeeklyPipeline', () => {
         pipelineRun: makeRun('curate'),
       };
     });
-    vi.mocked(runCopywriteStage).mockImplementation(async (...args) => {
+    vi.mocked(runCopywriteStage).mockImplementation(async () => {
       callOrder.push('copywrite');
       return { output: copywriteOutput, pipelineRun: makeRun('copywrite') };
     });
-    vi.mocked(runEditorQaStage).mockImplementation(async (...args) => {
+    vi.mocked(runEditorQaStage).mockImplementation(async () => {
       callOrder.push('editor_qa');
       return {
         qaOutput: { passed: true, flags: [], factCheckNotes: [], feedbackForCopywrite: undefined },
@@ -261,7 +261,7 @@ describe('runWeeklyPipeline', () => {
         allFlags: [],
       };
     });
-    vi.mocked(runRenderStage).mockImplementation(async (...args) => {
+    vi.mocked(runRenderStage).mockImplementation(async () => {
       callOrder.push('render');
       return {
         render: { issueId: 'issue-abc', isoWeek: '2026-W24', bodyHtml: '<html>', bodyJson: {} },

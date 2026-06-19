@@ -1,6 +1,8 @@
 /* ============================================================
    Login page — Curated AI Digest
-   Process Blue brand, single-card centred layout.
+   Process Blue brand header band over a clean white body,
+   single centred card. The brand mark is the official Mega
+   Bilgisayar chameleon logo (white-on-blue) — never re-typeset.
    ============================================================ */
 
 .page {
@@ -17,7 +19,7 @@
   overflow-y: auto;
 }
 
-/* Subtle brand-coloured background strip */
+/* Subtle brand-coloured background wash */
 .page::before {
   content: '';
   position: absolute;
@@ -33,39 +35,45 @@
   background: var(--color-surface);
   border-radius: var(--radius-lg);
   border: 1px solid var(--color-gray-light);
-  padding: var(--space-xxl) var(--space-xl);
-  max-width: 440px;
+  max-width: 420px;
   width: 100%;
+  /* clip the coloured header band to the card's rounded corners */
+  overflow: hidden;
   box-shadow:
     0 2px 8px rgba(0, 137, 207, 0.06),
-    0 12px 40px rgba(0, 0, 0, 0.08);
+    0 18px 50px rgba(12, 17, 24, 0.1);
 }
 
-/* ── Brand mark ────────────────────────────────────────────── */
+/* ── Brand header band ─────────────────────────────────────── */
 
-.brandMark {
+.cardHeader {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   gap: var(--space-sm);
-  margin-bottom: var(--space-xl);
+  padding: var(--space-xl) var(--space-xl) var(--space-lg);
+  text-align: center;
+  background: linear-gradient(135deg, var(--color-brand) 0%, var(--color-brand-dark) 100%);
 }
 
-.brandMark :global(img) {
-  height: auto;
-  width: 200px;
-  max-width: 100%;
+.logo {
+  height: 46px;
+  width: auto;
 }
 
 .productLabel {
   font-size: var(--text-xs);
-  color: var(--color-ink-muted);
   font-weight: 600;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.82);
 }
 
-/* ── Heading ───────────────────────────────────────────────── */
+/* ── Body ──────────────────────────────────────────────────── */
+
+.cardBody {
+  padding: var(--space-xl);
+}
 
 .heading {
   font-size: var(--text-xl);
@@ -74,6 +82,7 @@
   letter-spacing: -0.02em;
   line-height: 1.2;
   margin-bottom: var(--space-xs);
+  text-align: center;
 }
 
 .subheading {
@@ -81,6 +90,7 @@
   color: var(--color-ink-muted);
   margin-bottom: var(--space-xl);
   line-height: 1.5;
+  text-align: center;
 }
 
 /* ── SSO button (Entra mode) ───────────────────────────────── */
@@ -213,24 +223,4 @@
   font-size: var(--text-sm);
   color: #b91c1c;
   line-height: 1.5;
-}
-
-/* ── Buka particle motif (decorative) ──────────────────────── */
-
-.bukaAccent {
-  position: absolute;
-  bottom: var(--space-lg);
-  right: var(--space-lg);
-  opacity: 0.3;
-  pointer-events: none;
-}
-
-.bukaParticle {
-  position: absolute;
-  left: var(--x);
-  top: var(--y);
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background-color: var(--c);
 }

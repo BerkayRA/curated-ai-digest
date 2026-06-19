@@ -37,19 +37,6 @@ function getErrorMessage(code: string | undefined): string | null {
 }
 
 // ---------------------------------------------------------------------------
-// Buka decorative particles (static — no JS motion on login)
-// ---------------------------------------------------------------------------
-
-const BUKA_PARTICLES = [
-  { x: '0px', y: '0px', c: 'var(--color-brand)' },
-  { x: '12px', y: '8px', c: 'var(--color-accent-teal)' },
-  { x: '24px', y: '2px', c: 'var(--color-accent-orange)' },
-  { x: '6px', y: '16px', c: 'var(--color-accent-magenta)' },
-  { x: '18px', y: '20px', c: 'var(--color-brand)' },
-  { x: '30px', y: '12px', c: 'var(--color-accent-teal)' },
-] as const;
-
-// ---------------------------------------------------------------------------
 // Server action for local credentials sign-in
 // ---------------------------------------------------------------------------
 
@@ -103,102 +90,94 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   return (
     <main className={styles.page}>
       <article className={styles.card}>
-        {/* Brand mark — official Mega wordmark (blue on light card) */}
-        <div className={styles.brandMark}>
+        {/* Brand header band — official Mega Bilgisayar chameleon logo, white on Process Blue */}
+        <header className={styles.cardHeader}>
           <Image
-            src="/brand/mega-wordmark-blue.png"
+            className={styles.logo}
+            src="/brand/mega-logo-white.svg"
             width={200}
-            height={73}
+            height={65}
             alt="Mega Bilgisayar Tic. Ltd. Şti"
             priority
           />
           <span className={styles.productLabel}>Curated AI Digest · Yönetim Paneli</span>
-        </div>
+        </header>
 
-        <h1 className={styles.heading}>Hoş Geldiniz</h1>
-        <p className={styles.subheading}>
-          {authMode === 'entra'
-            ? 'Mega Bilgisayar kurumsal hesabınızla giriş yapın.'
-            : 'Yönetici hesabınızla giriş yapın.'}
-        </p>
+        <div className={styles.cardBody}>
+          <h1 className={styles.heading}>Hoş Geldiniz</h1>
+          <p className={styles.subheading}>
+            {authMode === 'entra'
+              ? 'Mega Bilgisayar kurumsal hesabınızla giriş yapın.'
+              : 'Yönetici hesabınızla giriş yapın.'}
+          </p>
 
-        {/* Error notice */}
-        {errorMessage && (
-          <div className={styles.errorNotice} role="alert">
-            <span className={styles.errorIcon} aria-hidden="true">!</span>
-            <p className={styles.errorText}>{errorMessage}</p>
-          </div>
-        )}
-
-        {authMode === 'entra' ? (
-          /* ── Entra SSO ── */
-          <form action={entraSignIn}>
-            <button type="submit" className={styles.ssoButton}>
-              {/* Microsoft logo (simplified inline SVG) */}
-              <svg
-                className={styles.microsoftIcon}
-                viewBox="0 0 21 21"
-                aria-hidden="true"
-                focusable="false"
-              >
-                <rect x="1" y="1" width="9" height="9" fill="#f25022" />
-                <rect x="11" y="1" width="9" height="9" fill="#7fba00" />
-                <rect x="1" y="11" width="9" height="9" fill="#00a4ef" />
-                <rect x="11" y="11" width="9" height="9" fill="#ffb900" />
-              </svg>
-              Microsoft ile giriş yap
-            </button>
-          </form>
-        ) : (
-          /* ── Local credentials form ── */
-          <form action={localSignIn} className={styles.form}>
-            <div className={styles.fieldGroup}>
-              <label htmlFor="email" className={styles.label}>
-                E-posta
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                placeholder="admin@mega.com.tr"
-                className={styles.input}
-              />
+          {/* Error notice */}
+          {errorMessage && (
+            <div className={styles.errorNotice} role="alert">
+              <span className={styles.errorIcon} aria-hidden="true">
+                !
+              </span>
+              <p className={styles.errorText}>{errorMessage}</p>
             </div>
+          )}
 
-            <div className={styles.fieldGroup}>
-              <label htmlFor="password" className={styles.label}>
-                Şifre
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                placeholder="••••••••"
-                className={styles.input}
-              />
-            </div>
+          {authMode === 'entra' ? (
+            /* ── Entra SSO ── */
+            <form action={entraSignIn}>
+              <button type="submit" className={styles.ssoButton}>
+                {/* Microsoft logo (simplified inline SVG) */}
+                <svg
+                  className={styles.microsoftIcon}
+                  viewBox="0 0 21 21"
+                  aria-hidden="true"
+                  focusable="false"
+                >
+                  <rect x="1" y="1" width="9" height="9" fill="#f25022" />
+                  <rect x="11" y="1" width="9" height="9" fill="#7fba00" />
+                  <rect x="1" y="11" width="9" height="9" fill="#00a4ef" />
+                  <rect x="11" y="11" width="9" height="9" fill="#ffb900" />
+                </svg>
+                Microsoft ile giriş yap
+              </button>
+            </form>
+          ) : (
+            /* ── Local credentials form ── */
+            <form action={localSignIn} className={styles.form}>
+              <div className={styles.fieldGroup}>
+                <label htmlFor="email" className={styles.label}>
+                  E-posta
+                </label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  placeholder="admin@megabilgisayar.com.tr"
+                  className={styles.input}
+                />
+              </div>
 
-            <button type="submit" className={styles.submitButton}>
-              Giriş Yap
-            </button>
-          </form>
-        )}
+              <div className={styles.fieldGroup}>
+                <label htmlFor="password" className={styles.label}>
+                  Şifre
+                </label>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autoComplete="current-password"
+                  required
+                  placeholder="••••••••"
+                  className={styles.input}
+                />
+              </div>
 
-        {/* Buka dot motif — decorative */}
-        <div className={styles.bukaAccent} aria-hidden="true" style={{ position: 'relative', width: 40, height: 30 }}>
-          {BUKA_PARTICLES.map((p, i) => (
-            <span
-              key={i}
-              className={styles.bukaParticle}
-              style={
-                { '--x': p.x, '--y': p.y, '--c': p.c } as React.CSSProperties
-              }
-            />
-          ))}
+              <button type="submit" className={styles.submitButton}>
+                Giriş Yap
+              </button>
+            </form>
+          )}
         </div>
       </article>
     </main>
