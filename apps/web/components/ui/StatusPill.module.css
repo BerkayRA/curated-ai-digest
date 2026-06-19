@@ -1,4 +1,4 @@
-/* Ring/status pill — shared recipe from the Mega/radar design language.
+/* Ring/status pill — recipe from the Mega design language.
    999px, uppercase, leading status dot, tint bg + colored border + solid text.
    Colors come entirely from the --ring-* tokens so dark mode is automatic. */
 .pill {
