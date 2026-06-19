@@ -1,0 +1,991 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kaynaklar — Curated AI Digest · Mega Bilgisayar</title>
+<style>
+  /* ============================================================
+     Mega design system (Mega Bilgisayar kurumsal kimlik)
+     ============================================================ */
+  :root {
+    --blue:        #009FDA;   /* Process Blue — primary */
+    --blue-dark:   #0082B3;
+    --blue-darker: #005F85;
+    --cool-gray:   #BCBEC0;
+    --surface-30:  #E8E8E9;
+    --surface-20:  #F0F0F0;
+    --bg:          #FFFFFF;
+    --surface:     #FFFFFF;
+    --text:        #1A1A1A;
+    --muted:       #6B7280;
+    --border:      #E8E8E9;
+
+    --ok:        #15803d;
+    --warn:      #C89100;
+    --warn-deep: #8C6200;
+    --danger:    #B93025;
+
+    /* type-badge hues */
+    --rss:   #0082B3;
+    --rss-bg:#e0f2fb;
+    --radar: #6d28d9;
+    --radar-bg:#ede9fe;
+    --exa:   #166534;
+    --exa-bg:#dcfce7;
+
+    --card-shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+    --focus-glow:  0 0 0 3px rgba(0,159,218,.16);
+
+    --r-badge: .3rem;
+    --r-input: .4rem;
+    --r-card:  .5rem;
+    --r-pill:  999px;
+
+    --font:  "Hanken Grotesk", system-ui, -apple-system, sans-serif;
+    --mono:  ui-monospace, "SF Mono", monospace;
+
+    --container: 1060px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --blue:        #009FDA;   /* constant in dark */
+      --blue-dark:   #33B3E8;
+      --blue-darker: #60AACC;
+      --cool-gray:   #2E3D52;
+      --surface-30:  #222B3A;
+      --surface-20:  #141A24;
+      --bg:          #0C1118;
+      --surface:     #181E2A;
+      --text:        #DDE4EF;
+      --muted:       #8499B5;
+      --border:      #222B3A;
+
+      --ok:        #4ade80;
+      --warn:      #E0B33A;
+      --warn-deep: #E0B33A;
+      --danger:    #F0857B;
+
+      --rss:   #5BC2EE;
+      --rss-bg:#0e2a3a;
+      --radar: #b79bf2;
+      --radar-bg:#241a3d;
+      --exa:   #6fd99a;
+      --exa-bg:#10301f;
+
+      --card-shadow: 0 1px 3px rgba(0,0,0,.4), 0 1px 2px rgba(0,0,0,.3);
+    }
+  }
+
+  /* ---------- reset / base ---------- */
+  *, *::before, *::after { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    font-feature-settings: "ss01" on;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, p { margin: 0; }
+  a { color: inherit; }
+  button { font-family: inherit; }
+
+  /* font fallback hint — Hanken Grotesk loaded if present locally */
+  @supports (font-variation-settings: normal) { body { letter-spacing: -0.005em; } }
+
+  .container { max-width: var(--container); margin: 0 auto; padding: 0 1.5rem; }
+
+  .eyebrow {
+    font-size: .7rem;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    font-weight: 700;
+    color: var(--muted);
+  }
+
+  h1 { font-size: 1.9rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; }
+  h2 { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.01em; }
+
+  /* ============================================================
+     HERO BAND
+     ============================================================ */
+  .hero {
+    position: relative;
+    background: var(--blue);
+    color: #fff;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  /* Buka dot texture — only on the open/right area, masked off the text column */
+  .hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(255,255,255,.12) 1.5px, transparent 1.5px);
+    background-size: 22px 22px;
+    /* fade dots in only toward the right, never behind reading text */
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, transparent 52%, #000 78%, #000 100%);
+            mask-image: linear-gradient(to right, transparent 0%, transparent 52%, #000 78%, #000 100%);
+    z-index: -1;
+    pointer-events: none;
+  }
+  .hero-inner { padding: 1.5rem 0 2.5rem; }
+
+  .hero-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+  }
+  .wordmark {
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    display: inline-flex;
+    align-items: center;
+    gap: .55rem;
+    color: #fff;
+  }
+  /* white chameleon glyph placeholder + lockup */
+  .wordmark .glyph {
+    width: 26px; height: 26px;
+    display: inline-grid; place-items: center;
+    border: 1.5px solid rgba(255,255,255,.85);
+    border-radius: var(--r-input);
+    font-size: .9rem;
+  }
+
+  .hero-nav { display: flex; gap: .25rem; flex-wrap: wrap; }
+  .hero-nav a {
+    text-decoration: none;
+    color: rgba(255,255,255,.82);
+    font-weight: 600;
+    font-size: .9rem;
+    padding: .4rem .7rem;
+    border-radius: var(--r-pill);
+    transition: background .15s ease, color .15s ease;
+  }
+  .hero-nav a:hover { background: rgba(255,255,255,.14); color: #fff; }
+  .hero-nav a[aria-current="page"] {
+    background: #fff;
+    color: var(--blue-darker);
+  }
+  .hero-nav a:focus-visible,
+  .hero-top .wordmark:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+  }
+
+  .hero-copy { max-width: 46ch; }
+  .hero-copy .eyebrow { color: rgba(255,255,255,.78); }
+  .hero-copy h1 { color: #fff; margin: .35rem 0 .5rem; font-size: 2.2rem; }
+  .hero-tagline { color: rgba(255,255,255,.82); font-size: 1.02rem; max-width: 42ch; }
+
+  /* ============================================================
+     PAGE HEADER ROW
+     ============================================================ */
+  main { padding: 2.25rem 0 0; }
+
+  .pagehead {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.75rem;
+  }
+  .pagehead .lead h1 { margin-bottom: .35rem; }
+  .pagehead .lead p { color: var(--muted); font-size: .98rem; }
+  .pagehead .actions { display: flex; gap: .6rem; flex-wrap: wrap; }
+
+  /* ---------- buttons ---------- */
+  .btn {
+    display: inline-flex; align-items: center; gap: .45rem;
+    font-weight: 600; font-size: .9rem;
+    padding: .6rem 1rem;
+    border-radius: var(--r-input);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background .15s ease, border-color .15s ease, color .15s ease, transform .05s ease;
+    white-space: nowrap;
+  }
+  .btn:active { transform: translateY(1px); }
+  .btn:focus-visible { outline: none; box-shadow: var(--focus-glow); }
+
+  .btn-primary { background: var(--blue); color: #fff; }
+  .btn-primary:hover { background: var(--blue-dark); }
+  .btn-secondary { background: var(--surface); color: var(--text); border-color: var(--border); }
+  .btn-secondary:hover { border-color: var(--cool-gray); background: var(--surface-20); }
+  .btn-ghost { background: transparent; color: var(--muted); padding: .5rem .7rem; }
+  .btn-ghost:hover { color: var(--text); background: var(--surface-20); }
+  .btn-danger-ghost { background: transparent; color: var(--danger); padding: .5rem .7rem; }
+  .btn-danger-ghost:hover { background: color-mix(in srgb, var(--danger) 10%, transparent); }
+
+  .btn .spin { display: inline-block; }
+  .btn.is-scanning .spin { animation: spin .8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .btn.is-scanning .spin { animation: none; } }
+
+  /* ============================================================
+     SOURCE CARDS
+     ============================================================ */
+  .scan-status {
+    font-size: .85rem; color: var(--muted);
+    margin: -0.5rem 0 1.1rem;
+    min-height: 1.2em;
+  }
+
+  .source-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.1rem;
+  }
+  .source-card {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-card);
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+    padding: 1.1rem 1.15rem 0.95rem;
+    display: flex;
+    flex-direction: column;
+    gap: .8rem;
+    transition: border-color .15s ease;
+  }
+  /* 3px Process-Blue top accent */
+  .source-card::before {
+    content: "";
+    position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: var(--blue);
+  }
+  .source-card.is-disabled { opacity: .82; }
+  .source-card.is-disabled::before { background: var(--cool-gray); }
+
+  .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: .75rem; }
+
+  /* type badge — pill recipe (~12% tint, ~30% border, solid darker text) */
+  .type-badge {
+    display: inline-flex; align-items: center; gap: .35rem;
+    font-size: .72rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .04em;
+    padding: .28rem .6rem;
+    border-radius: var(--r-badge);
+    line-height: 1;
+  }
+  .type-badge .emoji { font-size: .9rem; }
+  .type-rss   { color: var(--rss);   background: color-mix(in srgb, var(--rss) 12%, var(--surface)); border: 1px solid color-mix(in srgb, var(--rss) 30%, transparent); }
+  .type-radar { color: var(--radar); background: color-mix(in srgb, var(--radar) 12%, var(--surface)); border: 1px solid color-mix(in srgb, var(--radar) 30%, transparent); }
+  .type-exa   { color: var(--exa);   background: color-mix(in srgb, var(--exa) 12%, var(--surface)); border: 1px solid color-mix(in srgb, var(--exa) 30%, transparent); }
+
+  .card-id { min-width: 0; }
+  .card-label { font-weight: 700; font-size: 1.02rem; letter-spacing: -0.01em; }
+  .card-url {
+    font-family: var(--mono);
+    font-size: .8rem;
+    color: var(--muted);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    max-width: 100%;
+    display: block;
+    margin-top: .15rem;
+  }
+
+  /* ---------- toggle switch ---------- */
+  .toggle { display: inline-flex; align-items: center; gap: .5rem; cursor: pointer; }
+  .toggle input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .track {
+    width: 38px; height: 22px; border-radius: var(--r-pill);
+    background: var(--cool-gray);
+    position: relative; flex: none;
+    transition: background .18s ease;
+  }
+  .track::after {
+    content: ""; position: absolute; top: 2px; left: 2px;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.3);
+    transition: transform .18s ease;
+  }
+  .toggle input:checked + .track { background: var(--blue); }
+  .toggle input:checked + .track::after { transform: translateX(16px); }
+  .toggle input:focus-visible + .track { box-shadow: var(--focus-glow); }
+  .toggle input:disabled + .track { opacity: .55; cursor: not-allowed; }
+  .toggle .toggle-text { font-size: .8rem; font-weight: 600; color: var(--muted); }
+
+  /* ---------- health line ---------- */
+  .health {
+    display: flex; align-items: center; gap: .5rem;
+    font-size: .82rem;
+    padding-top: .15rem;
+    flex-wrap: wrap;
+  }
+  .health .state { font-weight: 700; display: inline-flex; align-items: center; gap: .25rem; }
+  .health .state.ok    { color: var(--ok); }
+  .health .state.warn  { color: var(--warn); }
+  .health .state.idle  { color: var(--muted); }
+  .health .meta { color: var(--muted); }
+  .health .dot { color: var(--cool-gray); }
+
+  /* ---------- card actions ---------- */
+  .card-actions {
+    display: flex; align-items: center; gap: .15rem;
+    border-top: 1px solid var(--border);
+    margin: .25rem -1.15rem 0;
+    padding: .4rem .75rem;
+  }
+  .card-actions .grow { flex: 1; }
+
+  /* ============================================================
+     SLIDE-OVER FORM PANEL
+     ============================================================ */
+  .scrim {
+    position: fixed; inset: 0;
+    background: rgba(12,17,24,.45);
+    backdrop-filter: blur(2px);
+    opacity: 0; visibility: hidden;
+    transition: opacity .25s ease, visibility .25s ease;
+    z-index: 40;
+  }
+  .scrim.open { opacity: 1; visibility: visible; }
+
+  .panel {
+    position: fixed; top: 0; right: 0; bottom: 0;
+    width: min(480px, 100%);
+    background: var(--bg);
+    border-left: 1px solid var(--border);
+    box-shadow: -8px 0 30px rgba(0,0,0,.18);
+    transform: translateX(100%);
+    transition: transform .28s cubic-bezier(.16,1,.3,1);
+    z-index: 50;
+    display: flex; flex-direction: column;
+  }
+  .panel.open { transform: translateX(0); }
+  @media (prefers-reduced-motion: reduce) {
+    .scrim, .panel { transition: none; }
+  }
+
+  .panel-head {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .panel-head .eyebrow { display: block; margin-bottom: .2rem; }
+  .panel-head h2 { font-size: 1.3rem; }
+  .panel-close {
+    background: transparent; border: 1px solid var(--border);
+    width: 34px; height: 34px; border-radius: var(--r-input);
+    cursor: pointer; color: var(--muted); font-size: 1.1rem;
+    display: grid; place-items: center; flex: none;
+  }
+  .panel-close:hover { border-color: var(--cool-gray); color: var(--text); }
+  .panel-close:focus-visible { outline: none; box-shadow: var(--focus-glow); }
+
+  .panel-body { padding: 1.25rem 1.5rem; overflow-y: auto; flex: 1; }
+  .panel-foot {
+    padding: 1rem 1.5rem; border-top: 1px solid var(--border);
+    display: flex; gap: .6rem; justify-content: flex-end;
+    background: var(--surface-20);
+  }
+
+  /* ---------- form fields ---------- */
+  .field { margin-bottom: 1.15rem; }
+  .field > label,
+  .fieldset-legend {
+    display: block;
+    font-size: .8rem; font-weight: 700;
+    margin-bottom: .4rem;
+  }
+  .field .hint { font-size: .75rem; color: var(--muted); margin-top: .35rem; font-weight: 400; }
+
+  .input, .select, .textarea {
+    width: 100%;
+    font-family: var(--font);
+    font-size: .92rem;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-input);
+    padding: .6rem .7rem;
+    transition: border-color .15s ease, box-shadow .15s ease;
+  }
+  .input[type="url"], .input.mono { font-family: var(--mono); font-size: .85rem; }
+  .textarea { resize: vertical; min-height: 90px; line-height: 1.55; font-family: var(--mono); font-size: .82rem; }
+  .select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B7280' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right .8rem center;
+    padding-right: 2rem;
+  }
+  .input:focus, .select:focus, .textarea:focus {
+    outline: none;
+    border-color: var(--blue);
+    box-shadow: var(--focus-glow);
+  }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: .9rem; }
+
+  /* chip checkboxes for changeTypes */
+  .chips { display: flex; flex-wrap: wrap; gap: .45rem; }
+  .chip {
+    display: inline-flex; align-items: center; gap: .4rem;
+    font-size: .82rem; font-weight: 600;
+    padding: .4rem .7rem;
+    border: 1px solid var(--border);
+    border-radius: var(--r-input);
+    cursor: pointer;
+    user-select: none;
+    transition: border-color .15s ease, background .15s ease, color .15s ease;
+  }
+  .chip input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .chip:has(input:checked) {
+    border-color: var(--blue);
+    background: color-mix(in srgb, var(--blue) 10%, var(--surface));
+    color: var(--blue-darker);
+  }
+  .chip:has(input:focus-visible) { box-shadow: var(--focus-glow); }
+
+  .type-specific[hidden] { display: none; }
+
+  /* ---------- test-fetch result ---------- */
+  .test-result { margin-top: 1.25rem; }
+  details.test {
+    border: 1px solid var(--border);
+    border-radius: var(--r-input);
+    background: var(--surface-20);
+    overflow: hidden;
+  }
+  details.test > summary {
+    cursor: pointer;
+    list-style: none;
+    padding: .7rem .85rem;
+    font-weight: 600; font-size: .88rem;
+    display: flex; align-items: center; gap: .5rem;
+  }
+  details.test > summary::-webkit-details-marker { display: none; }
+  details.test > summary::before {
+    content: "\25B8"; color: var(--muted); transition: transform .15s ease;
+  }
+  details.test[open] > summary::before { transform: rotate(90deg); }
+  details.test > summary:focus-visible { outline: none; box-shadow: var(--focus-glow); border-radius: var(--r-input); }
+  .test-success { color: var(--ok); font-weight: 700; }
+  .test-body { padding: 0 .9rem .9rem; }
+  .candidate-list { list-style: none; margin: 0; padding: 0; }
+  .candidate-list li {
+    display: flex; gap: .6rem; align-items: baseline;
+    padding: .5rem 0;
+    border-top: 1px solid var(--border);
+    font-size: .86rem;
+  }
+  .candidate-list li .num { font-family: var(--mono); color: var(--muted); font-size: .75rem; flex: none; }
+  .test-error {
+    color: var(--warn-deep);
+    background: color-mix(in srgb, var(--warn) 12%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--warn) 30%, transparent);
+    border-radius: var(--r-input);
+    padding: .55rem .7rem;
+    font-size: .82rem;
+    margin-top: .7rem;
+    display: flex; gap: .45rem;
+  }
+
+  /* ============================================================
+     FOOTER
+     ============================================================ */
+  footer.site {
+    position: relative;
+    margin-top: 3.5rem;
+    background: var(--cool-gray);
+    color: var(--text);
+    overflow: hidden;
+    isolation: isolate;
+  }
+  @media (prefers-color-scheme: dark) { footer.site { color: var(--text); } }
+  footer.site::before {
+    content: "";
+    position: absolute; inset: 0;
+    background-image: radial-gradient(circle, rgba(0,0,0,.08) 1.5px, transparent 1.5px);
+    background-size: 20px 20px;
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, transparent 50%, #000 80%);
+            mask-image: linear-gradient(to right, transparent 0%, transparent 50%, #000 80%);
+    z-index: -1; pointer-events: none;
+  }
+  @media (prefers-color-scheme: dark) {
+    footer.site::before {
+      background-image: radial-gradient(circle, rgba(255,255,255,.07) 1.5px, transparent 1.5px);
+    }
+  }
+  .footer-inner {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 1rem; flex-wrap: wrap;
+    padding: 1.5rem 0;
+  }
+  .footer-brand { display: inline-flex; align-items: center; gap: .55rem; font-weight: 700; }
+  .footer-brand .glyph {
+    width: 24px; height: 24px; display: inline-grid; place-items: center;
+    border: 1.5px solid currentColor; border-radius: var(--r-input);
+    font-size: .85rem; opacity: .9;
+  }
+  .footer-legal { font-size: .85rem; opacity: .85; }
+
+  /* visually-hidden helper */
+  .sr-only {
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
+
+  @media (max-width: 560px) {
+    .pagehead { align-items: stretch; }
+    .pagehead .actions .btn { flex: 1; justify-content: center; }
+    .hero-copy h1 { font-size: 1.8rem; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- ============================= HERO ============================= -->
+  <header class="hero">
+    <div class="hero-inner container">
+      <div class="hero-top">
+        <a class="wordmark" href="#" aria-label="mega bilgisayar ana sayfa">
+          <span class="glyph" aria-hidden="true">&#9670;</span>
+          mega bilgisayar
+        </a>
+        <nav class="hero-nav" aria-label="Yönetim paneli gezinmesi">
+          <a href="#">Arşiv</a>
+          <a href="#">Aboneler</a>
+          <a href="#" aria-current="page">Kaynaklar</a>
+          <a href="#">Ayarlar</a>
+        </nav>
+      </div>
+      <div class="hero-copy">
+        <span class="eyebrow">Yönetim Paneli</span>
+        <h1>Curated AI Digest</h1>
+        <p class="hero-tagline">Haftalık yapay zekâ haber digesti — kaynaklardan adaylara, tek panelden yönetin.</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============================= MAIN ============================= -->
+  <main class="container" id="main">
+
+    <!-- header row -->
+    <div class="pagehead">
+      <div class="lead">
+        <h1>Kaynaklar</h1>
+        <p>Haber kaynaklarını yönet, test et ve tara.</p>
+      </div>
+      <div class="actions">
+        <button class="btn btn-primary" id="scanNow" type="button">
+          <span class="spin" aria-hidden="true">&#10227;</span> Şimdi Tara
+        </button>
+        <button class="btn btn-secondary" type="button" data-open-panel data-mode="new">
+          + Yeni Kaynak
+        </button>
+      </div>
+    </div>
+
+    <p class="scan-status" id="scanStatus" role="status" aria-live="polite"></p>
+
+    <!-- source cards -->
+    <section aria-label="Kayıtlı kaynaklar">
+      <ul class="source-grid" style="list-style:none;margin:0;padding:0;">
+
+        <!-- 1 · OpenAI Blog -->
+        <li class="source-card">
+          <div class="card-top">
+            <span class="type-badge type-rss"><span class="emoji" aria-hidden="true">&#128225;</span> RSS</span>
+            <label class="toggle">
+              <input type="checkbox" checked aria-label="OpenAI Blog kaynağını etkinleştir">
+              <span class="track" aria-hidden="true"></span>
+            </label>
+          </div>
+          <div class="card-id">
+            <div class="card-label">OpenAI Blog</div>
+            <a class="card-url" href="https://openai.com/blog/rss.xml" title="https://openai.com/blog/rss.xml">https://openai.com/blog/rss.xml</a>
+          </div>
+          <div class="health">
+            <span class="state ok">&#10003; ok</span>
+            <span class="dot" aria-hidden="true">·</span>
+            <span class="meta">son tarama: 24 aday · 2s önce</span>
+          </div>
+          <div class="card-actions">
+            <button class="btn btn-ghost" type="button" data-test-source="OpenAI Blog">Test</button>
+            <button class="btn btn-ghost" type="button" data-open-panel data-mode="edit" data-type="rss" data-label="OpenAI Blog" data-url="https://openai.com/blog/rss.xml">Düzenle</button>
+            <span class="grow"></span>
+            <button class="btn btn-danger-ghost" type="button" aria-label="OpenAI Blog kaynağını sil">Sil</button>
+          </div>
+        </li>
+
+        <!-- 2 · Google AI Blog -->
+        <li class="source-card">
+          <div class="card-top">
+            <span class="type-badge type-rss"><span class="emoji" aria-hidden="true">&#128225;</span> RSS</span>
+            <label class="toggle">
+              <input type="checkbox" checked aria-label="Google AI Blog kaynağını etkinleştir">
+              <span class="track" aria-hidden="true"></span>
+            </label>
+          </div>
+          <div class="card-id">
+            <div class="card-label">Google AI Blog</div>
+            <a class="card-url" href="https://blog.google/technology/ai/rss/" title="https://blog.google/technology/ai/rss/">https://blog.google/technology/ai/rss/</a>
+          </div>
+          <div class="health">
+            <span class="state ok">&#10003; ok</span>
+            <span class="dot" aria-hidden="true">·</span>
+            <span class="meta">son tarama: 18 aday · 12dk önce</span>
+          </div>
+          <div class="card-actions">
+            <button class="btn btn-ghost" type="button" data-test-source="Google AI Blog">Test</button>
+            <button class="btn btn-ghost" type="button" data-open-panel data-mode="edit" data-type="rss" data-label="Google AI Blog" data-url="https://blog.google/technology/ai/rss/">Düzenle</button>
+            <span class="grow"></span>
+            <button class="btn btn-danger-ghost" type="button" aria-label="Google AI Blog kaynağını sil">Sil</button>
+          </div>
+        </li>
+
+        <!-- 3 · Hugging Face Blog -->
+        <li class="source-card">
+          <div class="card-top">
+            <span class="type-badge type-rss"><span class="emoji" aria-hidden="true">&#128225;</span> RSS</span>
+            <label class="toggle">
+              <input type="checkbox" checked aria-label="Hugging Face Blog kaynağını etkinleştir">
+              <span class="track" aria-hidden="true"></span>
+            </label>
+          </div>
+          <div class="card-id">
+            <div class="card-label">Hugging Face Blog</div>
+            <a class="card-url" href="https://huggingface.co/blog/feed.xml" title="https://huggingface.co/blog/feed.xml">https://huggingface.co/blog/feed.xml</a>
+          </div>
+          <div class="health">
+            <span class="state ok">&#10003; ok</span>
+            <span class="dot" aria-hidden="true">·</span>
+            <span class="meta">son tarama: 31 aday · 5dk önce</span>
+          </div>
+          <div class="card-actions">
+            <button class="btn btn-ghost" type="button" data-test-source="Hugging Face Blog">Test</button>
+            <button class="btn btn-ghost" type="button" data-open-panel data-mode="edit" data-type="rss" data-label="Hugging Face Blog" data-url="https://huggingface.co/blog/feed.xml">Düzenle</button>
+            <span class="grow"></span>
+            <button class="btn btn-danger-ghost" type="button" aria-label="Hugging Face Blog kaynağını sil">Sil</button>
+          </div>
+        </li>
+
+        <!-- 4 · The Verge -->
+        <li class="source-card">
+          <div class="card-top">
+            <span class="type-badge type-rss"><span class="emoji" aria-hidden="true">&#128225;</span> RSS</span>
+            <label class="toggle">
+              <input type="checkbox" checked aria-label="The Verge kaynağını etkinleştir">
+              <span class="track" aria-hidden="true"></span>
+            </label>
+          </div>
+          <div class="card-id">
+            <div class="card-label">The Verge</div>
+            <a class="card-url" href="https://www.theverge.com/rss/index.xml" title="https://www.theverge.com/rss/index.xml">https://www.theverge.com/rss/index.xml</a>
+          </div>
+          <div class="health">
+            <span class="state warn">&#9888; uyarı</span>
+            <span class="dot" aria-hidden="true">·</span>
+            <span class="meta">son tarama: 0 aday · 3sa önce — zaman aşımı</span>
+          </div>
+          <div class="card-actions">
+            <button class="btn btn-ghost" type="button" data-test-source="The Verge">Test</button>
+            <button class="btn btn-ghost" type="button" data-open-panel data-mode="edit" data-type="rss" data-label="The Verge" data-url="https://www.theverge.com/rss/index.xml">Düzenle</button>
+            <span class="grow"></span>
+            <button class="btn btn-danger-ghost" type="button" aria-label="The Verge kaynağını sil">Sil</button>
+          </div>
+        </li>
+
+        <!-- 5 · On-Prem AI Adoption Radar -->
+        <li class="source-card">
+          <div class="card-top">
+            <span class="type-badge type-radar"><span class="emoji" aria-hidden="true">&#128752;</span> Radar</span>
+            <label class="toggle">
+              <input type="checkbox" checked aria-label="On-Prem AI Adoption Radar kaynağını etkinleştir">
+              <span class="track" aria-hidden="true"></span>
+            </label>
+          </div>
+          <div class="card-id">
+            <div class="card-label">On-Prem AI Adoption Radar</div>
+            <a class="card-url" href="radar://on-prem/adoption" title="radar://on-prem/adoption">radar://on-prem/adoption</a>
+          </div>
+          <div class="health">
+            <span class="state ok">&#10003; ok</span>
+            <span class="dot" aria-hidden="true">·</span>
+            <span class="meta">son tarama: 9 aday · 1sa önce</span>
+          </div>
+          <div class="card-actions">
+            <button class="btn btn-ghost" type="button" data-test-source="On-Prem AI Adoption Radar">Test</button>
+            <button class="btn btn-ghost" type="button" data-open-panel data-mode="edit" data-type="radar" data-label="On-Prem AI Adoption Radar" data-url="radar://on-prem/adoption">Düzenle</button>
+            <span class="grow"></span>
+            <button class="btn btn-danger-ghost" type="button" aria-label="On-Prem AI Adoption Radar kaynağını sil">Sil</button>
+          </div>
+        </li>
+
+        <!-- 6 · Exa Neural Search (disabled) -->
+        <li class="source-card is-disabled">
+          <div class="card-top">
+            <span class="type-badge type-exa"><span class="emoji" aria-hidden="true">&#128270;</span> Exa</span>
+            <label class="toggle">
+              <input type="checkbox" disabled aria-label="Exa Neural Search kaynağını etkinleştir (API anahtarı gerekli)">
+              <span class="track" aria-hidden="true"></span>
+            </label>
+          </div>
+          <div class="card-id">
+            <div class="card-label">Exa Neural Search</div>
+            <span class="card-url" title="neural search · 6 sorgu">neural search · 6 sorgu</span>
+          </div>
+          <div class="health">
+            <span class="state warn">&#9888; EXA_API_KEY gerekli</span>
+          </div>
+          <div class="card-actions">
+            <button class="btn btn-ghost" type="button" data-test-source="Exa Neural Search" disabled>Test</button>
+            <button class="btn btn-ghost" type="button" data-open-panel data-mode="edit" data-type="exa" data-label="Exa Neural Search" data-url="">Düzenle</button>
+            <span class="grow"></span>
+            <button class="btn btn-danger-ghost" type="button" aria-label="Exa Neural Search kaynağını sil">Sil</button>
+          </div>
+        </li>
+
+      </ul>
+    </section>
+  </main>
+
+  <!-- ============================= FOOTER ============================= -->
+  <footer class="site">
+    <div class="footer-inner container">
+      <span class="footer-brand">
+        <span class="glyph" aria-hidden="true">&#9670;</span>
+        Curated AI Digest
+      </span>
+      <span class="footer-legal">Curated AI Digest — Mega Bilgisayar Tic. Ltd. Şti.</span>
+    </div>
+  </footer>
+
+  <!-- ============================= SLIDE-OVER PANEL ============================= -->
+  <div class="scrim" id="scrim" tabindex="-1"></div>
+
+  <aside class="panel" id="panel" role="dialog" aria-modal="true" aria-labelledby="panelTitle" hidden>
+    <div class="panel-head">
+      <div>
+        <span class="eyebrow" id="panelEyebrow">Yeni Kaynak</span>
+        <h2 id="panelTitle">Kaynak Ekle</h2>
+      </div>
+      <button class="panel-close" id="panelClose" type="button" aria-label="Paneli kapat">✕</button>
+    </div>
+
+    <form class="panel-body" id="sourceForm">
+      <!-- type -->
+      <div class="field">
+        <label for="f-type">Tür</label>
+        <select class="select" id="f-type" name="type">
+          <option value="rss">📡 RSS akışı</option>
+          <option value="radar">🛰 Radar</option>
+          <option value="exa">🔎 Exa Neural Search</option>
+        </select>
+      </div>
+
+      <!-- label -->
+      <div class="field">
+        <label for="f-label">Etiket</label>
+        <input class="input" type="text" id="f-label" name="label" placeholder="örn. OpenAI Blog" autocomplete="off">
+      </div>
+
+      <!-- url (hidden when Exa) -->
+      <div class="field" id="urlField">
+        <label for="f-url">URL</label>
+        <input class="input mono" type="url" id="f-url" name="url" placeholder="https://…" autocomplete="off">
+        <span class="hint">RSS için akış adresi, Radar için <code>radar://…</code> tanımlayıcısı.</span>
+      </div>
+
+      <!-- ============ Radar-specific ============ -->
+      <div class="type-specific" id="radarFields" hidden>
+        <div class="field">
+          <label for="f-categories">Kategoriler</label>
+          <input class="input" type="text" id="f-categories" name="categories" placeholder="adopt, pilot, watch" autocomplete="off">
+          <span class="hint">Virgülle ayır.</span>
+        </div>
+
+        <fieldset class="field" style="border:0;margin:0;padding:0;">
+          <legend class="fieldset-legend">Değişiklik türleri</legend>
+          <div class="chips">
+            <label class="chip"><input type="checkbox" name="changeTypes" value="added" checked> Eklendi</label>
+            <label class="chip"><input type="checkbox" name="changeTypes" value="moved" checked> Taşındı</label>
+            <label class="chip"><input type="checkbox" name="changeTypes" value="removed"> Çıkarıldı</label>
+          </div>
+        </fieldset>
+
+        <div class="grid-2">
+          <div class="field">
+            <label for="f-maxitems">maxItems</label>
+            <input class="input mono" type="number" id="f-maxitems" name="maxItems" value="20" min="1" max="200">
+          </div>
+          <div class="field">
+            <label for="f-siteroot">siteRoot</label>
+            <input class="input mono" type="text" id="f-siteroot" name="siteRoot" placeholder="/radar" autocomplete="off">
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ Exa-specific ============ -->
+      <div class="type-specific" id="exaFields" hidden>
+        <div class="field">
+          <label for="f-queries">Sorgular</label>
+          <textarea class="textarea" id="f-queries" name="queries" placeholder="her satıra bir sorgu&#10;on-prem LLM deployment&#10;enterprise RAG benchmark&#10;model quantization news"></textarea>
+          <span class="hint">Her satır ayrı bir nöral arama sorgusudur.</span>
+        </div>
+        <div class="field" aria-live="polite">
+          <div class="test-error" style="margin-top:0;">
+            <span aria-hidden="true">&#9888;</span>
+            <span><code>EXA_API_KEY</code> ortam değişkeni tanımlı değil — bu kaynak tarama dışı kalır. Ayarlar &rsaquo; Gizli Anahtarlar bölümünden ekleyin.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ test-fetch result ============ -->
+      <div class="test-result">
+        <details class="test" id="testDetails">
+          <summary id="testSummary"><span class="test-success">&#10003; 24 aday bulundu</span></summary>
+          <div class="test-body" id="testBody">
+            <ul class="candidate-list">
+              <li><span class="num">01</span> <span>GPT-4o yerel dağıtım kılavuzu yayımlandı</span></li>
+              <li><span class="num">02</span> <span>Açık ağırlıklı modellerde nicemleme karşılaştırması</span></li>
+              <li><span class="num">03</span> <span>Kurumsal RAG mimarisi için referans şema</span></li>
+              <li><span class="num">04</span> <span>On-prem çıkarım maliyetleri 2026 raporu</span></li>
+              <li><span class="num">05</span> <span>Vektör veritabanı kıyaslaması: pgvector vs. dedicated</span></li>
+            </ul>
+            <div class="test-error">
+              <span aria-hidden="true">&#9888;</span>
+              <span>2 öğe okunamadı: geçersiz tarih biçimi (atlandı).</span>
+            </div>
+          </div>
+        </details>
+      </div>
+    </form>
+
+    <div class="panel-foot">
+      <button class="btn btn-secondary" type="button" id="testInPanel">Test Et</button>
+      <button class="btn btn-primary" type="submit" form="sourceForm">Kaydet</button>
+    </div>
+  </aside>
+
+  <script>
+    (function () {
+      "use strict";
+
+      /* ---------- slide-over open / close ---------- */
+      var panel  = document.getElementById("panel");
+      var scrim  = document.getElementById("scrim");
+      var closeBtn = document.getElementById("panelClose");
+      var eyebrow = document.getElementById("panelEyebrow");
+      var title   = document.getElementById("panelTitle");
+      var lastFocused = null;
+
+      function openPanel(mode, data) {
+        lastFocused = document.activeElement;
+        if (mode === "edit") {
+          eyebrow.textContent = "Kaynağı Düzenle";
+          title.textContent = (data.label || "Kaynak") + " — Düzenle";
+          setType(data.type || "rss");
+          document.getElementById("f-type").value = data.type || "rss";
+          document.getElementById("f-label").value = data.label || "";
+          document.getElementById("f-url").value = data.url || "";
+        } else {
+          eyebrow.textContent = "Yeni Kaynak";
+          title.textContent = "Kaynak Ekle";
+          document.getElementById("sourceForm").reset();
+          setType("rss");
+        }
+        panel.hidden = false;
+        requestAnimationFrame(function () {
+          panel.classList.add("open");
+          scrim.classList.add("open");
+        });
+        document.body.style.overflow = "hidden";
+        closeBtn.focus();
+      }
+
+      function closePanel() {
+        panel.classList.remove("open");
+        scrim.classList.remove("open");
+        document.body.style.overflow = "";
+        window.setTimeout(function () { panel.hidden = true; }, 280);
+        if (lastFocused && lastFocused.focus) lastFocused.focus();
+      }
+
+      document.querySelectorAll("[data-open-panel]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          openPanel(btn.getAttribute("data-mode"), {
+            type:  btn.getAttribute("data-type"),
+            label: btn.getAttribute("data-label"),
+            url:   btn.getAttribute("data-url")
+          });
+        });
+      });
+      closeBtn.addEventListener("click", closePanel);
+      scrim.addEventListener("click", closePanel);
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape" && panel.classList.contains("open")) closePanel();
+      });
+
+      /* ---------- type-driven field visibility ---------- */
+      var typeSel    = document.getElementById("f-type");
+      var urlField   = document.getElementById("urlField");
+      var radarFields= document.getElementById("radarFields");
+      var exaFields  = document.getElementById("exaFields");
+
+      function setType(t) {
+        var isExa = (t === "exa");
+        urlField.hidden    = isExa;
+        radarFields.hidden = (t !== "radar");
+        exaFields.hidden   = !isExa;
+      }
+      typeSel.addEventListener("change", function () { setType(typeSel.value); });
+
+      /* ---------- submit (no backend; honest local feedback) ---------- */
+      document.getElementById("sourceForm").addEventListener("submit", function (e) {
+        e.preventDefault();
+        closePanel();
+      });
+
+      /* ---------- test buttons open the result details ---------- */
+      var testDetails = document.getElementById("testDetails");
+      document.getElementById("testInPanel").addEventListener("click", function () {
+        testDetails.open = true;
+      });
+      document.querySelectorAll("[data-test-source]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          if (btn.disabled) return;
+          openPanel("edit", {
+            type:  btn.closest(".source-card").querySelector("[data-open-panel]").getAttribute("data-type"),
+            label: btn.getAttribute("data-test-source"),
+            url:   btn.closest(".source-card").querySelector("[data-open-panel]").getAttribute("data-url")
+          });
+          testDetails.open = true;
+        });
+      });
+
+      /* ---------- "Şimdi Tara" — visible scanning state, no fake stats ---------- */
+      var scanBtn = document.getElementById("scanNow");
+      var scanStatus = document.getElementById("scanStatus");
+      scanBtn.addEventListener("click", function () {
+        if (scanBtn.classList.contains("is-scanning")) return;
+        scanBtn.classList.add("is-scanning");
+        scanBtn.disabled = true;
+        scanStatus.textContent = "Etkin kaynaklar taranıyor…";
+        window.setTimeout(function () {
+          scanBtn.classList.remove("is-scanning");
+          scanBtn.disabled = false;
+          scanStatus.textContent = "Tarama tamamlandı — sonuçlar her kaynağın sağlık satırında.";
+        }, 1600);
+      });
+    })();
+  </script>
+
+</body>
+</html>

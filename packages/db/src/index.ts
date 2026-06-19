@@ -28,6 +28,7 @@ export {
   SendStatus,
   EmailProviderKind,
   SubscriberStatus,
+  SourceType,
   Prisma,
 } from '@prisma/client';
 
@@ -41,4 +42,13 @@ export type {
   IngestRun,
   PipelineRun,
   AuditLog,
+  Source,
 } from '@prisma/client';
+
+export { createSourceRepository } from './source-repository.js';
+export type {
+  SourceRepository,
+  CreateSourceData,
+  UpdateSourceData,
+  HealthData,
+} from './source-repository.js';

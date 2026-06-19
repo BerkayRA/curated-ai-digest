@@ -1,5 +1,5 @@
 /* Fonts: Hanken Grotesk is self-hosted via @font-face in @digest/brand tokens.css
-   (matches the sibling radar). No external font CDN — also satisfies the strict CSP. */
+   (matches the Mega design system). No external font CDN — also satisfies the strict CSP. */
 
 *,
 *::before,
@@ -60,4 +60,45 @@ textarea {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-ink-muted);
+}
+
+/* ── Source-type badge + health hues (Kaynaklar / Sources page) ──────────
+   Per-source-type hues not covered by the @digest/brand token set. Declared
+   here (global) because CSS Modules "pure" mode rejects :root in *.module.css. */
+:root {
+  --source-rss: #0082b3;
+  --source-rss-bg: #e0f2fb;
+  --source-rss-border: rgba(0, 130, 179, 0.3);
+
+  --source-radar: #6d28d9;
+  --source-radar-bg: #ede9fe;
+  --source-radar-border: rgba(109, 40, 217, 0.3);
+
+  --source-exa: #166534;
+  --source-exa-bg: #dcfce7;
+  --source-exa-border: rgba(22, 101, 52, 0.3);
+
+  --source-ok: #15803d;
+  --source-warn: #c89100;
+  --source-warn-deep: #8c6200;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --source-rss: #5bc2ee;
+    --source-rss-bg: #0e2a3a;
+    --source-rss-border: rgba(91, 194, 238, 0.28);
+
+    --source-radar: #b79bf2;
+    --source-radar-bg: #241a3d;
+    --source-radar-border: rgba(183, 155, 242, 0.28);
+
+    --source-exa: #6fd99a;
+    --source-exa-bg: #10301f;
+    --source-exa-border: rgba(111, 217, 154, 0.28);
+
+    --source-ok: #4ade80;
+    --source-warn: #e0b33a;
+    --source-warn-deep: #e0b33a;
+  }
 }
