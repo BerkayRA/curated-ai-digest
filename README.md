@@ -57,6 +57,9 @@ so a new source (or a second radar on a new topic) is a configuration change, no
   font).
 - 🖥️ **Dashboard** — Next.js App Router UI for the issue archive, a draft editor with live preview,
   subscriber CRUD + CSV import, settings, and approve/send actions.
+- 🗂️ **Data-source management** — a "Kaynaklar" dashboard page (+ `/api/sources`) to browse, add,
+  toggle, test, and edit ingestion sources (RSS feeds, an optional AI-adoption radar, Exa), each with
+  per-source health and an on-demand "Şimdi Tara" scan.
 - 🔌 **Pluggable `EmailProvider`** — **Azure Communication Services Email** (default), **Microsoft
   Graph**, and **Resend**, all behind one interface with a rate-limiter + retry/backoff wrapper.
   Switching provider is config-only (`Settings.activeProvider`).
@@ -144,12 +147,13 @@ edited from the dashboard.
 | `AUTOSEND_ENABLED` | `true` lets the worker send without human approval (kill-switch in Settings overrides at runtime). |
 | `AUTOSEND_MAX_SUBSCRIBERS` | Maximum subscriber count allowed for an unattended auto-send. |
 
-**News topic & the radar source provider** are configured from the dashboard `Settings`. The topic
-defaults to *"on-prem & enterprise AI workflows"* (threaded into curation prompts and provider
-queries) so Curated AI Digest pairs with the radar out of the box. The radar provider is toggled with
-`RADAR_ENABLED` and pointed at any radar exposing the same machine-readable contract via
-`RADAR_FEED_URL` (defaults to the on-prem radar's committed `history.jsonl`). See
-[`docs/RADAR-DATA-CONTRACT.md`](docs/RADAR-DATA-CONTRACT.md) for the feed shape.
+**Data sources** are managed from the dashboard's **Kaynaklar** page — a DB-backed `Source` registry
+(admin API under `/api/sources`) where you browse, add, toggle, test, and edit RSS feeds, an optional
+AI-adoption radar, and Exa, each with health and an on-demand scan. The ingestion **topic** defaults
+to *"on-prem & enterprise AI workflows"* (threaded into curation prompts and provider queries). The
+optional radar source consumes any feed exposing the machine-readable contract in
+[`docs/RADAR-DATA-CONTRACT.md`](docs/RADAR-DATA-CONTRACT.md) (env fallback: `RADAR_ENABLED` /
+`RADAR_FEED_URL`). See [`docs/adr/ADR-0005-db-backed-sources.md`](docs/adr/ADR-0005-db-backed-sources.md).
 
 ## Project structure
 

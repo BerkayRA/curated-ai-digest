@@ -7,7 +7,7 @@ interface AdminShellProps {
 }
 
 /**
- * Hero-led admin shell (no sidebar) — echoes the sibling on-prem AI radar so
+ * Hero-led admin shell (no sidebar) — follows the Mega design language so
  * the two products read as one system: a Process-Blue hero band with the
  * horizontal nav up top, a centered editorial column, and a Cool-Gray footer.
  */

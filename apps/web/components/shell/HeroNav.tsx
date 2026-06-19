@@ -12,6 +12,7 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { href: '/issues', label: 'Arşiv' },
   { href: '/subscribers', label: 'Aboneler' },
+  { href: '/sources', label: 'Kaynaklar' },
   { href: '/settings', label: 'Ayarlar' },
 ];
 

@@ -2,7 +2,7 @@ import type { IssueStatus, SubscriberStatus } from '@digest/db';
 import styles from './StatusPill.module.css';
 
 /**
- * Ring decisions from the shared Mega/radar design language:
+ * Ring/status recipe from the Mega design language:
  *   adopt = Process Blue · pilot = deeper blue · watch = amber · avoid = red.
  * Each maps to the --ring-* token triplet (tint bg / colored border / solid text).
  */
