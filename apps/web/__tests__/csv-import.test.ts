@@ -38,12 +38,12 @@ describe('parseCsvImport', () => {
   });
 
   it('parses optional displayName and company', () => {
-    const csv = 'email,displayName,company\ntest@example.com,Ali Veli,Mega Bilişim';
+    const csv = 'email,displayName,company\ntest@example.com,Ali Veli,Örnek Teknoloji';
     const result = parseCsvImport(csv);
     expect(result.valid[0]).toMatchObject({
       email: 'test@example.com',
       displayName: 'Ali Veli',
-      company: 'Mega Bilişim',
+      company: 'Örnek Teknoloji',
     });
   });
 
@@ -65,10 +65,10 @@ describe('parseCsvImport', () => {
   });
 
   it('handles quoted CSV fields', () => {
-    const csv = 'email,displayName,company\n"test@example.com","Ali Veli","Mega, Bilişim"';
+    const csv = 'email,displayName,company\n"test@example.com","Ali Veli","Örnek, Teknoloji"';
     const result = parseCsvImport(csv);
     expect(result.valid[0]!.email).toBe('test@example.com');
-    expect(result.valid[0]!.company).toBe('Mega, Bilişim');
+    expect(result.valid[0]!.company).toBe('Örnek, Teknoloji');
   });
 
   it('handles Windows-style CRLF line endings', () => {

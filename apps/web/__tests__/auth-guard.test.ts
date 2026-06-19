@@ -28,8 +28,8 @@ describe('isPublicPath', () => {
     // static brand/favicon assets must load pre-auth
     '/icon.png',
     '/apple-icon.png',
-    '/brand/mega-wordmark-white.png',
-    '/brand/mega-wordmark-blue.png',
+    '/brand/mega-logo-white.svg',
+    '/brand/mega-logo-blue.svg',
     '/some/nested/asset.svg',
   ];
 
