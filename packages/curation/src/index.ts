@@ -114,6 +114,9 @@ export type {
   RenderedEmail as PipelineRenderedEmail,
 } from './pipeline/stage5-render.js';
 
+// Repository factory (for consumers who need to call pipeline stages directly)
+export { createPipelinePrismaRepository } from './pipeline/repository.js';
+
 // Config (model map + pricing — consumers may inspect or override)
 export { MODEL_MAP, PRICING, calcCostUsd, MAX_QA_RETRIES } from './pipeline/config.js';
 export type { PipelineStage } from './pipeline/config.js';

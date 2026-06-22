@@ -161,3 +161,78 @@ SCAN_MAX_ITEMS=50 pnpm scan    # smaller pool
 
 To run the daily workflow manually on GitHub: **Actions → Daily news scan → Run
 workflow**.
+
+---
+
+## 6. Manual curation without an API key
+
+When you want to create a draft Issue without running the full Claude pipeline
+(e.g. the operator reviews the pool and picks items by hand, or an LLM in the
+loop produces the selection JSON directly), use the `curate:manual` CLI in
+`apps/worker`.
+
+### Step 1 — Review the live candidate pool
+
+```bash
+pnpm --filter @digest/worker curate:manual list
+```
+
+Flags:
+
+| Flag | Example | Purpose |
+|------|---------|---------|
+| `--source <substr>` | `--source TechCrunch` | Filter by source name (case-insensitive) |
+| `--limit <n>` | `--limit 10` | Show only the first n results |
+
+Example:
+
+```bash
+pnpm --filter @digest/worker curate:manual list --limit 5
+pnpm --filter @digest/worker curate:manual list --source "DeepMind" --limit 3
+```
+
+Output is grouped by source, with a stable index, title, URL, and excerpt for
+each candidate. Logs go to stderr; the listing goes to stdout.
+
+### Step 2 — Create the selection JSON
+
+Copy `apps/worker/sample-selection.json` as a starting point and fill in the
+Turkish copy. The shape:
+
+```json
+{
+  "subject": "AI Digest: Samsung×OpenAI, Gemma 4 ve Anthropic'in Yeni Modeli",
+  "preheader": "Bu hafta yapay zeka dünyasında üç önemli gelişme",
+  "isoWeek": "2026-W25",
+  "items": [
+    {
+      "titleTr": "Samsung ve OpenAI Stratejik Ortaklık Kurdu",
+      "summaryTr": "Samsung Electronics, OpenAI ile çip entegrasyonu … ortaklık imzaladı.",
+      "sourceUrl": "https://techcrunch.com/2026/samsung-openai-partnership",
+      "sourceName": "TechCrunch"
+    }
+  ]
+}
+```
+
+Rules:
+- `subject` and `preheader` — non-empty strings.
+- `isoWeek` — optional; omit to default to the current ISO week (`YYYY-Wnn`).
+- `items` — array of **2 or 3** objects, each with non-empty `titleTr`,
+  `summaryTr`, `sourceName`, and a valid `sourceUrl`.
+
+### Step 3 — Persist the draft Issue
+
+```bash
+pnpm --filter @digest/worker curate:manual draft my-selection.json
+```
+
+On success the command prints a JSON line to stdout:
+
+```json
+{"issueId":"clxxxxx","isoWeek":"2026-W25","status":"draft"}
+```
+
+Logs (including any DB errors) go to stderr. Exit code is `0` on success, `1`
+on validation or I/O errors. The Issue can then be reviewed and sent from the
+web dashboard like any other draft.
