@@ -1,0 +1,25 @@
+{
+  "subject": "AI Digest: Samsung×OpenAI, Gemma 4 ve Anthropic'in Yeni Modeli",
+  "preheader": "Bu hafta yapay zeka dünyasında üç önemli gelişme",
+  "isoWeek": "2026-W25",
+  "items": [
+    {
+      "titleTr": "Samsung ve OpenAI Stratejik Ortaklık Kurdu",
+      "summaryTr": "Samsung Electronics, OpenAI ile çip entegrasyonu ve AI asistan geliştirme alanında kapsamlı bir stratejik ortaklık anlaşması imzaladı. Anlaşma kapsamında Galaxy cihazlarına yerel çalışan modeller entegre edilecek.",
+      "sourceUrl": "https://techcrunch.com/2026/samsung-openai-partnership",
+      "sourceName": "TechCrunch"
+    },
+    {
+      "titleTr": "Google DeepMind Gemma 4'ü Duyurdu",
+      "summaryTr": "Google DeepMind'ın açık kaynaklı model serisi Gemma'nın dördüncü versiyonu yayınlandı. Gemma 4, önceki nesle kıyasla muhakeme ve kod üretme görevlerinde kayda değer performans artışı sunuyor.",
+      "sourceUrl": "https://deepmind.google/discover/blog/gemma-4",
+      "sourceName": "Google DeepMind Blog"
+    },
+    {
+      "titleTr": "Anthropic'in Yeni Claude Modeli Agentic Görevlerde Öne Çıkıyor",
+      "summaryTr": "Anthropic, çok adımlı otonom görevler için optimize edilmiş yeni bir Claude modelini duyurdu. Model, araç kullanımı ve uzun bağlam penceresi konularında rakiplerine göre güçlü sonuçlar sergiledi.",
+      "sourceUrl": "https://venturebeat.com/ai/anthropic-new-claude-agentic",
+      "sourceName": "VentureBeat"
+    }
+  ]
+}
