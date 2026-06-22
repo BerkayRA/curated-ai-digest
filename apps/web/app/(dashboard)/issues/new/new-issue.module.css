@@ -171,6 +171,32 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* LLM-free curation toolbar — picker + heuristic auto-fill. */
+.curateBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.curateBarHint {
+  font-size: var(--text-sm);
+  color: var(--color-ink-muted);
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.curateStatus {
+  font-size: var(--text-sm);
+  color: var(--color-brand-dark);
+  background: var(--color-surface-20);
+  border-left: 3px solid var(--color-brand-dark);
+  border-radius: var(--radius-sm, 6px);
+  padding: var(--space-sm) var(--space-md);
+  margin: 0 0 var(--space-md);
+}
+
 .items {
   list-style: none;
   margin: 0;
