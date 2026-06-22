@@ -114,6 +114,9 @@ importers:
       croner:
         specifier: ^9.0.0
         version: 9.1.0
+      zod:
+        specifier: ^3.24.1
+        version: 3.25.76
     devDependencies:
       '@types/node':
         specifier: ^22.10.5
