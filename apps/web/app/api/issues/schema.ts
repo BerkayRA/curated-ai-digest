@@ -16,6 +16,9 @@ const CreateIssueItemDraftSchema = z.object({
   summaryTr: z.string().trim().min(1, 'Haber özeti gerekli'),
   sourceUrl: z.string().trim().url('Geçerli bir kaynak URL gerekli'),
   sourceName: z.string().trim().min(1, 'Kaynak adı gerekli'),
+  // Optional link back to the scanned CandidateArticle when the item was picked
+  // via the LLM-free curator. Absent for hand-authored / file-pool items.
+  candidateArticleId: z.string().cuid().optional(),
 });
 
 export const CreateIssueDraftSchema = z.object({

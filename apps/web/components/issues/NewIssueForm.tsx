@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { EyebrowLabel } from '@/components/ui/EyebrowLabel';
 import { RunPipelineButton } from '@/components/issues/RunPipelineButton';
+import { CandidateCurator, type PickedDraft } from '@/components/issues/CandidateCurator';
 import type { ApiResponse } from '@/lib/api-response';
 import styles from '@/app/(dashboard)/issues/new/new-issue.module.css';
 
@@ -17,6 +18,8 @@ interface DraftItem {
   summaryTr: string;
   sourceUrl: string;
   sourceName: string;
+  /** Set when the item came from a scanned candidate — links the IssueItem back. */
+  candidateArticleId?: string;
 }
 
 interface NewIssueFormProps {
@@ -42,11 +45,21 @@ export function NewIssueForm({ defaultIsoWeek }: NewIssueFormProps) {
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
+  const [curatorOpen, setCuratorOpen] = useState(false);
+  const [autoLoading, setAutoLoading] = useState(false);
+  const [curateStatus, setCurateStatus] = useState<string | null>(null);
+
   const updateItem = useCallback(
-    (index: number, field: keyof DraftItem, value: string) => {
-      // Immutable update — never mutate the existing items array/objects.
+    (index: number, field: 'titleTr' | 'summaryTr' | 'sourceUrl' | 'sourceName', value: string) => {
+      // Immutable update — never mutate the existing items array/objects. Editing
+      // a field unlinks it from its candidate (the text no longer matches).
       setItems((prev) =>
-        prev.map((item, i) => (i === index ? { ...item, [field]: value } : item)),
+        prev.map((item, i) => {
+          if (i !== index) return item;
+          const next: DraftItem = { ...item, [field]: value };
+          delete next.candidateArticleId; // editing unlinks the item from its candidate
+          return next;
+        }),
       );
     },
     [],
@@ -59,6 +72,51 @@ export function NewIssueForm({ defaultIsoWeek }: NewIssueFormProps) {
   const removeItem = useCallback((index: number) => {
     setItems((prev) => (prev.length <= MIN_ITEMS ? prev : prev.filter((_, i) => i !== index)));
   }, []);
+
+  // ── LLM-free curation ─────────────────────────────────────
+
+  const isBlank = (it: DraftItem): boolean =>
+    !it.titleTr && !it.summaryTr && !it.sourceUrl && !it.sourceName;
+
+  /** Add a picked candidate: fill the first blank slot, else append (max 3). */
+  const addDraft = useCallback((draft: PickedDraft) => {
+    setItems((prev) => {
+      if (draft.sourceUrl && prev.some((it) => it.sourceUrl === draft.sourceUrl)) return prev; // dedup
+      const blankIdx = prev.findIndex(isBlank);
+      if (blankIdx !== -1) return prev.map((it, i) => (i === blankIdx ? { ...draft } : it));
+      if (prev.length >= MAX_ITEMS) return prev;
+      return [...prev, { ...draft }];
+    });
+  }, []);
+
+  /** Replace all slots with the heuristic auto-curate result. */
+  const handleAutoCurate = useCallback(async () => {
+    setAutoLoading(true);
+    setFormError(null);
+    setCurateStatus(null);
+    try {
+      const res = await fetch('/api/candidates/auto');
+      const json = (await res.json()) as ApiResponse<{ items: DraftItem[]; total: number }>;
+      if (!json.success || !json.data) {
+        setFormError(json.error ?? 'Otomatik kürasyon başarısız.');
+        return;
+      }
+      if (json.data.items.length === 0) {
+        setFormError('Taranmış haber bulunamadı. Önce Kaynaklar sayfasında bir tarama yapın.');
+        return;
+      }
+      setItems(json.data.items.slice(0, MAX_ITEMS).map((d) => ({ ...d })));
+      setCurateStatus(`${json.data.items.length} haber otomatik dolduruldu — düzenleyip oluşturun.`);
+    } catch {
+      setFormError('Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin.');
+    } finally {
+      setAutoLoading(false);
+    }
+  }, []);
+
+  const addedUrls = new Set(items.map((it) => it.sourceUrl).filter(Boolean));
+  const filledCount = items.filter((it) => !isBlank(it)).length;
+  const slotsFull = filledCount >= MAX_ITEMS;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -177,6 +235,36 @@ export function NewIssueForm({ defaultIsoWeek }: NewIssueFormProps) {
           </span>
         </div>
 
+        {/* LLM-free curation: pick from scanned news, or auto-fill heuristically. */}
+        <div className={styles.curateBar}>
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            onClick={() => setCuratorOpen(true)}
+          >
+            ✦ Curate
+          </Button>
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            onClick={handleAutoCurate}
+            loading={autoLoading}
+          >
+            Otomatik kürasyon (LLM&apos;siz)
+          </Button>
+          <span className={styles.curateBarHint}>
+            Taranan haberlerden seçin ya da otomatik doldurun — LLM gerektirmez.
+          </span>
+        </div>
+
+        {curateStatus && (
+          <p className={styles.curateStatus} role="status">
+            {curateStatus}
+          </p>
+        )}
+
         <ul className={styles.items}>
           {items.map((item, index) => (
             <li key={index} className={styles.item}>
@@ -280,6 +368,15 @@ export function NewIssueForm({ defaultIsoWeek }: NewIssueFormProps) {
       {/* Pipeline trigger — an alternative to hand-authoring: let the Claude
           curation pipeline draft the issue for the same week. */}
       <RunPipelineButton isoWeek={isoWeek} />
+
+      {/* LLM-free manual picker — pull top scanned news per source into slots. */}
+      <CandidateCurator
+        open={curatorOpen}
+        addedUrls={addedUrls}
+        slotsFull={slotsFull}
+        onPick={addDraft}
+        onClose={() => setCuratorOpen(false)}
+      />
     </form>
   );
 }
