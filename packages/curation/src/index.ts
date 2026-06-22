@@ -136,3 +136,23 @@ export type {
   StageOptions,
   AnthropicClient,
 } from './pipeline/types.js';
+
+// ---- Curate (LLM-free) -----------------------------------------------------
+// Deterministic scoring/selection over scanned candidates — powers the manual
+// picker and the heuristic auto-curate backup (no Anthropic/Exa, no API key).
+export {
+  recencyScore,
+  sourceTierScore,
+  topicScore,
+  scoreCandidate,
+  heuristicCurate,
+  candidateToDraftItem,
+  groupBySourceTopN,
+} from './curate/index.js';
+export type {
+  CandidateView,
+  CandidateDraftItem,
+  ScoreOptions,
+  CurateOptions,
+  SourceGroup,
+} from './curate/index.js';
