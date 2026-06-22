@@ -1,93 +1,102 @@
-// Next.js dev (Fast Refresh / HMR) compiles modules through eval(), so the dev
-// client bundle needs 'unsafe-eval' or it is blocked by CSP and the app never
-// hydrates (buttons appear but do nothing). Production webpack output contains
-// no eval, so the strict policy holds there — we relax ONLY in development.
-const isDev = process.env.NODE_ENV !== 'production';
-const scriptSrc = isDev
-  ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
-  : "script-src 'self' 'unsafe-inline'";
+import { PHASE_DEVELOPMENT_SERVER } from 'next/constants.js';
 
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  output: 'standalone',
-  transpilePackages: [
-    '@digest/brand',
-    '@digest/shared',
-    '@digest/db',
-    '@digest/email',
-    '@digest/delivery',
-    '@digest/curation',
-  ],
-  // argon2 uses native Node.js addons (node:crypto) and must never be bundled
-  // by webpack. Mark it as external so Next.js requires it at runtime instead.
-  // Note: Next.js 14 uses the experimental key; this moves to a top-level key
-  // in Next.js 15.
-  experimental: {
-    serverComponentsExternalPackages: ['argon2', 'exa-js', 'rss-parser'],
-  },
-  async headers() {
-    return [
-      {
-        source: '/(.*)',
-        headers: [
-          { key: 'X-Frame-Options', value: 'DENY' },
-          { key: 'X-Content-Type-Options', value: 'nosniff' },
-          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
-          {
-            key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=()',
-          },
-          {
-            key: 'Strict-Transport-Security',
-            value: 'max-age=63072000; includeSubDomains; preload',
-          },
-          {
-            key: 'Content-Security-Policy',
-            value: [
-              "default-src 'self'",
-              // Next App Router injects inline bootstrap/hydration scripts; without
-              // 'unsafe-inline' (or a per-request nonce) the app won't hydrate.
-              // Pragmatic for this internal, auth-gated tool; nonce-based CSP is the
-              // documented hardening step (see docs/SECURITY.md). In development the
-              // policy also allows 'unsafe-eval' (see isDev note above).
-              scriptSrc,
-              "style-src 'self' 'unsafe-inline'",
-              "img-src 'self' data: https:",
-              "font-src 'self'",
-              // 'self' (not 'none') so the email-preview srcdoc iframe is permitted.
-              "frame-src 'self'",
-              // Clickjacking protection (who may embed US) — pairs with X-Frame-Options.
-              "frame-ancestors 'none'",
-              "object-src 'none'",
-              "base-uri 'self'",
-              "form-action 'self'",
-            ].join('; '),
-          },
-        ],
-      },
-    ];
-  },
-  webpack: (config, { nextRuntime }) => {
-    // Resolve .js extension imports in ESM workspace packages to .ts source files.
-    // Workspace packages use NodeNext module resolution with explicit .js extensions,
-    // but webpack resolves source .ts files directly via transpilePackages.
-    config.resolve.extensionAlias = {
-      '.js': ['.ts', '.tsx', '.js'],
-      '.jsx': ['.tsx', '.jsx'],
-    };
+/**
+ * @param {string} phase - Next.js lifecycle phase (passed by the CLI).
+ * @returns {import('next').NextConfig}
+ */
+export default function nextConfig(phase) {
+  // Next.js dev (Fast Refresh / HMR) compiles modules through eval(), so the dev
+  // client bundle needs 'unsafe-eval' or it is blocked by CSP and the app never
+  // hydrates (buttons appear but do nothing). Production webpack output contains
+  // no eval, so the strict policy holds there — we relax ONLY in development.
+  //
+  // Detect dev via the `phase` argument, NOT process.env.NODE_ENV: Next sets
+  // NODE_ENV internally but not reliably before this config module is evaluated,
+  // so a NODE_ENV check intermittently fell back to the strict (no-eval) policy.
+  const isDev = phase === PHASE_DEVELOPMENT_SERVER;
+  const scriptSrc = isDev
+    ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
+    : "script-src 'self' 'unsafe-inline'";
 
-    // argon2 is a native Node.js addon. Externalize it ONLY for the Node.js server
-    // build so it is required at runtime. It must NEVER be externalized (or imported)
-    // for the Edge Runtime — middleware uses auth.config.ts which doesn't import it.
-    if (nextRuntime === 'nodejs') {
-      config.externals = [
-        ...(Array.isArray(config.externals) ? config.externals : []),
-        'argon2',
+  return {
+    output: 'standalone',
+    transpilePackages: [
+      '@digest/brand',
+      '@digest/shared',
+      '@digest/db',
+      '@digest/email',
+      '@digest/delivery',
+      '@digest/curation',
+    ],
+    // argon2 uses native Node.js addons (node:crypto) and must never be bundled
+    // by webpack. Mark it as external so Next.js requires it at runtime instead.
+    // Note: Next.js 14 uses the experimental key; this moves to a top-level key
+    // in Next.js 15.
+    experimental: {
+      serverComponentsExternalPackages: ['argon2', 'exa-js', 'rss-parser'],
+    },
+    async headers() {
+      return [
+        {
+          source: '/(.*)',
+          headers: [
+            { key: 'X-Frame-Options', value: 'DENY' },
+            { key: 'X-Content-Type-Options', value: 'nosniff' },
+            { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+            {
+              key: 'Permissions-Policy',
+              value: 'camera=(), microphone=(), geolocation=()',
+            },
+            {
+              key: 'Strict-Transport-Security',
+              value: 'max-age=63072000; includeSubDomains; preload',
+            },
+            {
+              key: 'Content-Security-Policy',
+              value: [
+                "default-src 'self'",
+                // Next App Router injects inline bootstrap/hydration scripts; without
+                // 'unsafe-inline' (or a per-request nonce) the app won't hydrate.
+                // Pragmatic for this internal, auth-gated tool; nonce-based CSP is the
+                // documented hardening step (see docs/SECURITY.md). In development the
+                // policy also allows 'unsafe-eval' (see isDev note above).
+                scriptSrc,
+                "style-src 'self' 'unsafe-inline'",
+                "img-src 'self' data: https:",
+                "font-src 'self'",
+                // 'self' (not 'none') so the email-preview srcdoc iframe is permitted.
+                "frame-src 'self'",
+                // Clickjacking protection (who may embed US) — pairs with X-Frame-Options.
+                "frame-ancestors 'none'",
+                "object-src 'none'",
+                "base-uri 'self'",
+                "form-action 'self'",
+              ].join('; '),
+            },
+          ],
+        },
       ];
-    }
+    },
+    webpack: (config, { nextRuntime }) => {
+      // Resolve .js extension imports in ESM workspace packages to .ts source files.
+      // Workspace packages use NodeNext module resolution with explicit .js extensions,
+      // but webpack resolves source .ts files directly via transpilePackages.
+      config.resolve.extensionAlias = {
+        '.js': ['.ts', '.tsx', '.js'],
+        '.jsx': ['.tsx', '.jsx'],
+      };
 
-    return config;
-  },
-};
+      // argon2 is a native Node.js addon. Externalize it ONLY for the Node.js server
+      // build so it is required at runtime. It must NEVER be externalized (or imported)
+      // for the Edge Runtime — middleware uses auth.config.ts which doesn't import it.
+      if (nextRuntime === 'nodejs') {
+        config.externals = [
+          ...(Array.isArray(config.externals) ? config.externals : []),
+          'argon2',
+        ];
+      }
 
-export default nextConfig;
+      return config;
+    },
+  };
+}
