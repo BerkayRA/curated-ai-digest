@@ -63,6 +63,7 @@ export async function POST(request: NextRequest) {
               summaryTr: item.summaryTr,
               sourceUrl: item.sourceUrl,
               sourceName: item.sourceName,
+              ...(item.candidateArticleId ? { candidateArticleId: item.candidateArticleId } : {}),
             })),
           },
         },
