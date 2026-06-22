@@ -1,3 +1,12 @@
+// Next.js dev (Fast Refresh / HMR) compiles modules through eval(), so the dev
+// client bundle needs 'unsafe-eval' or it is blocked by CSP and the app never
+// hydrates (buttons appear but do nothing). Production webpack output contains
+// no eval, so the strict policy holds there — we relax ONLY in development.
+const isDev = process.env.NODE_ENV !== 'production';
+const scriptSrc = isDev
+  ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
+  : "script-src 'self' 'unsafe-inline'";
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
@@ -39,8 +48,9 @@ const nextConfig = {
               // Next App Router injects inline bootstrap/hydration scripts; without
               // 'unsafe-inline' (or a per-request nonce) the app won't hydrate.
               // Pragmatic for this internal, auth-gated tool; nonce-based CSP is the
-              // documented hardening step (see docs/SECURITY.md).
-              "script-src 'self' 'unsafe-inline'",
+              // documented hardening step (see docs/SECURITY.md). In development the
+              // policy also allows 'unsafe-eval' (see isDev note above).
+              scriptSrc,
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: https:",
               "font-src 'self'",
