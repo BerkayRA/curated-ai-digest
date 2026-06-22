@@ -50,6 +50,9 @@ const DEFAULT_CHANGE_TYPES: readonly RadarChangeType[] = ['new', 'promoted', 'de
 
 const DEFAULT_MAX_ITEMS = 25;
 
+/** Per-request fetch timeout (ms) so a hung feed can't stall the scan. */
+const RADAR_TIMEOUT_MS = 15_000;
+
 const RADAR_SOURCE_NAME = 'On-Prem AI Adoption Radar';
 
 /** Minimal fetch signature so tests can inject a fake implementation. */
@@ -78,6 +81,8 @@ export interface RadarProviderConfig {
   readonly changeTypes?: readonly RadarChangeType[];
   /** Cap on the number of (most recent) events returned. Defaults to 25. */
   readonly maxItems?: number;
+  /** Per-request fetch timeout in ms so a hung feed can't stall the scan. Defaults to 15000. */
+  readonly timeoutMs?: number;
   /** sourceUrl fallback when no siteRoot is set. Defaults to the radar repo URL. */
   readonly repoUrl?: string;
   /** Injectable fetch (defaults to `globalThis.fetch`). */
@@ -312,6 +317,7 @@ export async function fetchRadarCandidates(
   const changeTypes = config.changeTypes ?? DEFAULT_CHANGE_TYPES;
   const maxItems = config.maxItems ?? DEFAULT_MAX_ITEMS;
   const fetchImpl = config.fetchImpl ?? (globalThis.fetch as FetchImpl | undefined);
+  const timeoutMs = config.timeoutMs ?? RADAR_TIMEOUT_MS;
 
   if (!fetchImpl) {
     return {
@@ -321,7 +327,11 @@ export async function fetchRadarCandidates(
   }
 
   try {
-    const response = await fetchImpl(feedUrl, signal ? { signal } : undefined);
+    // Per-request timeout so a hung feed can't stall the scan indefinitely;
+    // combine it with any caller-provided cancellation signal.
+    const timeoutSignal = AbortSignal.timeout(timeoutMs);
+    const effectiveSignal = signal ? AbortSignal.any([signal, timeoutSignal]) : timeoutSignal;
+    const response = await fetchImpl(feedUrl, { signal: effectiveSignal });
     if (!response.ok) {
       return {
         candidates: [],

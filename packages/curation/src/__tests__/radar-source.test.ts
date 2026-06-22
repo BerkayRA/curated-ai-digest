@@ -43,6 +43,14 @@ function recordingFetch(body: string): {
   return { impl, calls };
 }
 
+/** A fake fetch that never resolves until its abort signal fires (simulates a hung feed). */
+function hangingFetch(): FetchImpl {
+  return (_url, init) =>
+    new Promise((_resolve, reject) => {
+      init?.signal?.addEventListener('abort', () => reject(new Error('The operation was aborted')));
+    });
+}
+
 // ---------------------------------------------------------------------------
 // Fixtures — the two real example records from docs/RADAR-DATA-CONTRACT.md.
 // ---------------------------------------------------------------------------
@@ -199,6 +207,15 @@ describe('parseRadarBody (JSON Feed 1.1)', () => {
 // ---------------------------------------------------------------------------
 // Mapping — title / sourceUrl / excerpt / publishedAt
 // ---------------------------------------------------------------------------
+
+describe('fetchRadarCandidates — timeout', () => {
+  it('aborts a hung fetch via the per-request timeout (non-fatal radar error)', async () => {
+    const result = await fetchRadarCandidates({ fetchImpl: hangingFetch(), timeoutMs: 30 });
+    expect(result.candidates).toEqual([]);
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0]?.source).toBe('radar');
+  });
+});
 
 describe('fetchRadarCandidates — mapping', () => {
   it('maps a demoted event title as "from → to (change_type)"', async () => {
@@ -374,7 +391,13 @@ describe('createRadarProvider', () => {
     expect(result.candidates).toHaveLength(1);
     expect(calls).toHaveLength(1);
     expect(calls[0]?.url).toBe('https://feed.example/history.jsonl');
-    expect(calls[0]?.signal).toBe(controller.signal);
+    // The context signal is combined with a per-request timeout via AbortSignal.any,
+    // so it is no longer identity-equal — but aborting the context still aborts the fetch.
+    const forwarded = calls[0]?.signal;
+    expect(forwarded).toBeInstanceOf(AbortSignal);
+    expect(forwarded?.aborted).toBe(false);
+    controller.abort();
+    expect(forwarded?.aborted).toBe(true);
   });
 
   it('reports errors through the provider result without throwing', async () => {
