@@ -7,6 +7,7 @@ import {
   heuristicCurate,
   candidateToDraftItem,
   groupBySourceTopN,
+  pickFirstUnused,
   type CandidateView,
 } from '../curate/heuristic.js';
 
@@ -204,6 +205,31 @@ describe('candidateToDraftItem', () => {
 // ---------------------------------------------------------------------------
 // groupBySourceTopN
 // ---------------------------------------------------------------------------
+
+describe('pickFirstUnused', () => {
+  const items = [
+    { sourceUrl: 'https://s/1' },
+    { sourceUrl: 'https://s/2' },
+    { sourceUrl: 'https://s/3' },
+  ];
+
+  it('returns the first item when nothing is used', () => {
+    expect(pickFirstUnused(items, new Set())).toEqual({ sourceUrl: 'https://s/1' });
+  });
+
+  it('skips used URLs and returns the next one (re-pick → next)', () => {
+    expect(pickFirstUnused(items, new Set(['https://s/1']))).toEqual({ sourceUrl: 'https://s/2' });
+    expect(pickFirstUnused(items, new Set(['https://s/1', 'https://s/2']))).toEqual({ sourceUrl: 'https://s/3' });
+  });
+
+  it('returns null when every item is used (source exhausted)', () => {
+    expect(pickFirstUnused(items, new Set(['https://s/1', 'https://s/2', 'https://s/3']))).toBeNull();
+  });
+
+  it('returns null for an empty source', () => {
+    expect(pickFirstUnused([], new Set())).toBeNull();
+  });
+});
 
 describe('groupBySourceTopN', () => {
   it('groups by source, caps each at n, and orders within a group by recency', () => {

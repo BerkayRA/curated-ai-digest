@@ -211,6 +211,22 @@ export function candidateToDraftItem(candidate: CandidateView): CandidateDraftIt
   return candidate.id ? { ...item, candidateArticleId: candidate.id } : item;
 }
 
+/**
+ * Return the first item whose `sourceUrl` is not already used — for filling a
+ * news slot from a chosen source (re-picking the same source yields the next
+ * one, since the just-filled URL joins the used set). Returns null when the
+ * source is exhausted.
+ */
+export function pickFirstUnused<T extends { sourceUrl: string }>(
+  items: readonly T[],
+  usedUrls: ReadonlySet<string>,
+): T | null {
+  for (const item of items) {
+    if (!usedUrls.has(item.sourceUrl)) return item;
+  }
+  return null;
+}
+
 /** Group by sourceName; order each group by recency; cap at `n` per source. */
 export function groupBySourceTopN(
   candidates: readonly CandidateView[],
