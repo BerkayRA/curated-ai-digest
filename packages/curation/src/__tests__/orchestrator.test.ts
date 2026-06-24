@@ -239,4 +239,41 @@ describe('runIngest orchestrator', () => {
 
     expect(sink.ctx?.topic).toBe('edge AI inference');
   });
+
+  it('scopes dedup queries + persistRun by the provided topicId', async () => {
+    const findExistingUrls = vi.fn(async () => new Set<string>());
+    const findExistingHashes = vi.fn(async () => new Set<string>());
+    const persistRun = makePersistRunSpy();
+
+    await runIngest({
+      repository: makeFakeRepo({ findExistingUrls, findExistingHashes, persistRun }),
+      logger: noopLogger,
+      topicId: 'topic_enterprise_ai',
+      providers: [
+        fakeProvider('rss', {
+          candidates: [makeCandidate('https://a.com/post', 'Post A')],
+          errors: [],
+        }),
+      ],
+    });
+
+    // Both dedup queries receive the topicId as their second arg.
+    expect(findExistingUrls).toHaveBeenCalledWith(expect.any(Array), 'topic_enterprise_ai');
+    expect(findExistingHashes).toHaveBeenCalledWith(expect.any(Array), 'topic_enterprise_ai');
+    // persistRun receives topicId in its options.
+    expect(persistRun.mock.calls.at(0)?.[0].topicId).toBe('topic_enterprise_ai');
+  });
+
+  it('passes an empty topicId to injected repos when none is provided (no DB access)', async () => {
+    const persistRun = makePersistRunSpy();
+
+    await runIngest({
+      repository: makeFakeRepo({ persistRun }),
+      logger: noopLogger,
+      providers: [fakeProvider('rss', { candidates: [], errors: [] })],
+    });
+
+    // Injected repo path must not resolve a default topic from the DB.
+    expect(persistRun.mock.calls.at(0)?.[0].topicId).toBe('');
+  });
 });

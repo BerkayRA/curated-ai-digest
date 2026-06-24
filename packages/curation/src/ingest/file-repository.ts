@@ -29,7 +29,12 @@ export function createFileRepository(opts: FileRepositoryOptions): IngestReposit
   const { dir, maxItems = 200, now = () => new Date() } = opts;
 
   return {
-    async findExistingUrls(urls: readonly string[]): Promise<Set<string>> {
+    // The file pool is topic-unaware: `topicId` is accepted to satisfy the
+    // IngestRepository interface but deliberately ignored.
+    async findExistingUrls(
+      urls: readonly string[],
+      _topicId: string,
+    ): Promise<Set<string>> {
       if (urls.length === 0) return new Set();
       const pool = await readPool(dir);
       const poolUrls = new Set(pool.map((item) => item.canonicalUrl));
@@ -40,7 +45,10 @@ export function createFileRepository(opts: FileRepositoryOptions): IngestReposit
       return result;
     },
 
-    async findExistingHashes(hashes: readonly string[]): Promise<Set<string>> {
+    async findExistingHashes(
+      hashes: readonly string[],
+      _topicId: string,
+    ): Promise<Set<string>> {
       if (hashes.length === 0) return new Set();
       const pool = await readPool(dir);
       const poolHashes = new Set(pool.map((item) => item.contentHash));

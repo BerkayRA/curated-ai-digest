@@ -134,6 +134,7 @@ export type {
   PipelineRunRecord,
   PipelineRepository,
   StageOptions,
+  TopicContext,
   AnthropicClient,
 } from './pipeline/types.js';
 

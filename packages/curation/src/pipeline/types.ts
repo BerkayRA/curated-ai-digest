@@ -112,8 +112,12 @@ export interface PipelineRunRecord {
 // ---------------------------------------------------------------------------
 
 export interface PipelineRepository {
-  /** Load pending (status='candidate') articles, ordered by fetchedAt desc, limited. */
-  findCandidates(opts: { isoWeek: string; limit?: number }): Promise<readonly CandidateArticle[]>;
+  /** Load pending (status='candidate') articles for a topic, ordered by fetchedAt desc, limited. */
+  findCandidates(opts: {
+    topicId: string;
+    isoWeek: string;
+    limit?: number;
+  }): Promise<readonly CandidateArticle[]>;
 
   /** Update importanceScore + relevanceScore on a batch of candidates. */
   updateScores(
@@ -129,6 +133,7 @@ export interface PipelineRepository {
    * Returns the issue id.
    */
   upsertIssue(opts: {
+    topicId: string;
     isoWeek: string;
     subject: string;
     preheader: string;
@@ -158,6 +163,7 @@ export interface PipelineRepository {
   /** Write a PipelineRun row. Returns the row id. */
   logPipelineRun(
     opts: Omit<PipelineRunRecord, 'startedAt' | 'finishedAt'> & {
+      topicId: string;
       issueId?: string;
       startedAt: Date;
       finishedAt: Date;
@@ -165,10 +171,13 @@ export interface PipelineRepository {
   ): Promise<string>;
 
   /**
-   * Find an existing Issue for the given isoWeek.
+   * Find an existing Issue for the given topic + isoWeek.
    * Returns null if not found.
    */
-  findIssueByWeek(isoWeek: string): Promise<{ id: string; status: string } | null>;
+  findIssueByWeek(
+    topicId: string,
+    isoWeek: string,
+  ): Promise<{ id: string; status: string } | null>;
 }
 
 // ---------------------------------------------------------------------------
@@ -178,6 +187,22 @@ export interface PipelineRepository {
 export type AnthropicClient = Pick<Anthropic, 'messages'>;
 
 // ---------------------------------------------------------------------------
+// Topic context — injected into stage system prompts
+// ---------------------------------------------------------------------------
+
+/**
+ * Per-topic configuration threaded into every stage. `audience` and `voice`
+ * are nullable: when null, stages fall back to their original hardcoded copy,
+ * so the default `enterprise-ai` topic produces byte-identical prompts.
+ */
+export interface TopicContext {
+  readonly topicId: string;
+  readonly name: string;
+  readonly audience: string | null;
+  readonly voice: string | null;
+}
+
+// ---------------------------------------------------------------------------
 // Options shared by all stages
 // ---------------------------------------------------------------------------
 
@@ -185,6 +210,8 @@ export interface StageOptions {
   readonly client: AnthropicClient;
   readonly repository: PipelineRepository;
   readonly logger: Logger;
+  /** Topic configuration injected into stage prompts + repository calls. */
+  readonly topicContext: TopicContext;
   /** Issue id — used to tag PipelineRun rows. */
   readonly issueId?: string;
 }

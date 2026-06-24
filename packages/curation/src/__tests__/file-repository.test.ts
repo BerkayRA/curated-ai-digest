@@ -40,7 +40,7 @@ describe('createFileRepository — empty state', () => {
     const repo = createFileRepository({ dir, now: () => FIXED_NOW });
 
     // Act
-    const result = await repo.findExistingUrls(['https://example.com/article']);
+    const result = await repo.findExistingUrls(['https://example.com/article'], '');
 
     // Assert
     expect(result.size).toBe(0);
@@ -54,7 +54,7 @@ describe('createFileRepository — empty state', () => {
     const repo = createFileRepository({ dir, now: () => FIXED_NOW });
 
     // Act
-    const result = await repo.findExistingHashes(['hash-001']);
+    const result = await repo.findExistingHashes(['hash-001'], '');
 
     // Assert
     expect(result.size).toBe(0);
@@ -68,7 +68,7 @@ describe('createFileRepository — empty state', () => {
     const repo = createFileRepository({ dir, now: () => FIXED_NOW });
 
     // Act
-    const result = await repo.findExistingUrls([]);
+    const result = await repo.findExistingUrls([], '');
 
     // Assert
     expect(result.size).toBe(0);
@@ -89,7 +89,7 @@ describe('persistRun — first run', () => {
     const candidate = makeEnriched();
 
     // Act
-    await repo.persistRun({ source: 'rss', candidates: [candidate], errors: [] });
+    await repo.persistRun({ topicId: '', source: 'rss', candidates: [candidate], errors: [] });
 
     // Assert
     const pool = await readPool(dir);
@@ -106,7 +106,7 @@ describe('persistRun — first run', () => {
     const candidate = makeEnriched();
 
     // Act
-    await repo.persistRun({ source: 'rss+radar', candidates: [candidate], errors: [] });
+    await repo.persistRun({ topicId: '', source: 'rss+radar', candidates: [candidate], errors: [] });
 
     // Assert
     const indexRaw = await fs.readFile(path.join(dir, INDEX_FILE), 'utf8');
@@ -126,7 +126,7 @@ describe('persistRun — first run', () => {
     const repo = createFileRepository({ dir, now: () => FIXED_NOW });
 
     // Act
-    const runId = await repo.persistRun({ source: 'rss', candidates: [], errors: [] });
+    const runId = await repo.persistRun({ topicId: '', source: 'rss', candidates: [], errors: [] });
 
     // Assert
     expect(runId).toMatch(/^file-/);
@@ -141,7 +141,7 @@ describe('persistRun — first run', () => {
     const repo = createFileRepository({ dir, now: () => FIXED_NOW });
 
     // Act
-    await repo.persistRun({ source: 'rss', candidates: [makeEnriched()], errors: [] });
+    await repo.persistRun({ topicId: '', source: 'rss', candidates: [makeEnriched()], errors: [] });
 
     // Assert
     const exists = await fs.access(path.join(dir, LATEST_FILE)).then(() => true).catch(() => false);
@@ -163,9 +163,9 @@ describe('persistRun — cross-run deduplication', () => {
     const candidate = makeEnriched({ title: 'First Title' });
 
     // Act — first run writes it
-    await repo.persistRun({ source: 'rss', candidates: [candidate], errors: [] });
+    await repo.persistRun({ topicId: '', source: 'rss', candidates: [candidate], errors: [] });
     // Second run with the same URL (same canonicalUrl)
-    await repo.persistRun({ source: 'rss', candidates: [candidate], errors: [] });
+    await repo.persistRun({ topicId: '', source: 'rss', candidates: [candidate], errors: [] });
 
     // Assert
     const pool = await readPool(dir);
@@ -190,8 +190,8 @@ describe('persistRun — cross-run deduplication', () => {
     const candidate = makeEnriched();
 
     // Act
-    await repo.persistRun({ source: 'rss', candidates: [candidate], errors: [] });
-    await repo.persistRun({ source: 'rss', candidates: [candidate], errors: [] });
+    await repo.persistRun({ topicId: '', source: 'rss', candidates: [candidate], errors: [] });
+    await repo.persistRun({ topicId: '', source: 'rss', candidates: [candidate], errors: [] });
 
     // Assert — firstSeenAt stays at the first run's time
     const pool = await readPool(dir);
@@ -208,8 +208,8 @@ describe('persistRun — cross-run deduplication', () => {
     const second = makeEnriched({ title: 'Second', canonicalUrl: 'https://b.com/b', sourceUrl: 'https://b.com/b', contentHash: 'h2' });
 
     // Act
-    await repo.persistRun({ source: 'rss', candidates: [first], errors: [] });
-    await repo.persistRun({ source: 'rss', candidates: [second], errors: [] });
+    await repo.persistRun({ topicId: '', source: 'rss', candidates: [first], errors: [] });
+    await repo.persistRun({ topicId: '', source: 'rss', candidates: [second], errors: [] });
 
     // Assert
     const pool = await readPool(dir);
@@ -225,8 +225,8 @@ describe('persistRun — cross-run deduplication', () => {
     const candidate = makeEnriched({ canonicalUrl: 'https://known.com/a', sourceUrl: 'https://known.com/a' });
 
     // Act
-    await repo.persistRun({ source: 'rss', candidates: [candidate], errors: [] });
-    const existingUrls = await repo.findExistingUrls(['https://known.com/a', 'https://unknown.com/b']);
+    await repo.persistRun({ topicId: '', source: 'rss', candidates: [candidate], errors: [] });
+    const existingUrls = await repo.findExistingUrls(['https://known.com/a', 'https://unknown.com/b'], '');
 
     // Assert
     expect(existingUrls.has('https://known.com/a')).toBe(true);
@@ -242,8 +242,8 @@ describe('persistRun — cross-run deduplication', () => {
     const candidate = makeEnriched({ contentHash: 'known-hash-xyz' });
 
     // Act
-    await repo.persistRun({ source: 'rss', candidates: [candidate], errors: [] });
-    const existingHashes = await repo.findExistingHashes(['known-hash-xyz', 'other-hash']);
+    await repo.persistRun({ topicId: '', source: 'rss', candidates: [candidate], errors: [] });
+    const existingHashes = await repo.findExistingHashes(['known-hash-xyz', 'other-hash'], '');
 
     // Assert
     expect(existingHashes.has('known-hash-xyz')).toBe(true);
@@ -274,7 +274,7 @@ describe('persistRun — maxItems cap', () => {
     );
 
     // Act
-    await repo.persistRun({ source: 'rss', candidates, errors: [] });
+    await repo.persistRun({ topicId: '', source: 'rss', candidates, errors: [] });
 
     // Assert
     const pool = await readPool(dir);
@@ -307,7 +307,7 @@ describe('persistRun — maxItems cap', () => {
     );
 
     // Act
-    await repo.persistRun({ source: 'rss', candidates, errors: [] });
+    await repo.persistRun({ topicId: '', source: 'rss', candidates, errors: [] });
 
     // Assert
     const pool = await readPool(dir);
@@ -323,10 +323,10 @@ describe('persistRun — maxItems cap', () => {
     const existing = makeEnriched({ title: 'Existing', canonicalUrl: 'https://a.com/a', sourceUrl: 'https://a.com/a', contentHash: 'h-exist' });
     const fresh = makeEnriched({ title: 'Fresh', canonicalUrl: 'https://b.com/b', sourceUrl: 'https://b.com/b', contentHash: 'h-fresh' });
 
-    await repo.persistRun({ source: 'rss', candidates: [existing], errors: [] });
+    await repo.persistRun({ topicId: '', source: 'rss', candidates: [existing], errors: [] });
 
     // Act — second run: existing URL again + one new
-    await repo.persistRun({ source: 'rss', candidates: [existing, fresh], errors: [] });
+    await repo.persistRun({ topicId: '', source: 'rss', candidates: [existing, fresh], errors: [] });
 
     // Assert
     const indexRaw = await fs.readFile(path.join(dir, INDEX_FILE), 'utf8');
@@ -344,6 +344,7 @@ describe('persistRun — maxItems cap', () => {
 
     // Act
     await repo.persistRun({
+      topicId: '',
       source: 'rss',
       candidates: [],
       errors: [{ source: 'rss', message: 'Feed timeout' }, { source: 'radar', message: 'HTTP 500' }],

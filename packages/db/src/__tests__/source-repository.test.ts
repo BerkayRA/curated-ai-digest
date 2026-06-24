@@ -35,6 +35,7 @@ function makeFakePrisma(overrides: Partial<FakeSourceDelegate> = {}) {
 
 const baseSource = {
   id: 'cuid-1',
+  topicId: 'topic_enterprise_ai',
   type: 'rss' as const,
   label: 'OpenAI Blog',
   url: 'https://openai.com/blog/rss.xml',
@@ -100,6 +101,34 @@ describe('SourceRepository.findEnabled', () => {
 });
 
 // ---------------------------------------------------------------------------
+// findEnabledByTopic
+// ---------------------------------------------------------------------------
+
+describe('SourceRepository.findEnabledByTopic', () => {
+  it('filters by enabled: true AND the given topicId', async () => {
+    const findMany = vi.fn().mockResolvedValue([baseSource]);
+    const fakePrisma = makeFakePrisma({ findMany });
+    const repo = createSourceRepository(fakePrisma);
+
+    await repo.findEnabledByTopic('topic_enterprise_ai');
+
+    expect(findMany).toHaveBeenCalledWith({
+      where: { enabled: true, topicId: 'topic_enterprise_ai' },
+    });
+  });
+
+  it('returns the rows the delegate yields', async () => {
+    const findMany = vi.fn().mockResolvedValue([baseSource]);
+    const fakePrisma = makeFakePrisma({ findMany });
+    const repo = createSourceRepository(fakePrisma);
+
+    const result = await repo.findEnabledByTopic('topic_enterprise_ai');
+    expect(result).toHaveLength(1);
+    expect(result[0]?.topicId).toBe('topic_enterprise_ai');
+  });
+});
+
+// ---------------------------------------------------------------------------
 // findById
 // ---------------------------------------------------------------------------
 
@@ -137,6 +166,7 @@ describe('SourceRepository.create', () => {
     const repo = createSourceRepository(fakePrisma);
 
     const data = {
+      topicId: 'topic_enterprise_ai',
       type: 'rss' as const,
       label: 'OpenAI Blog',
       url: 'https://openai.com/blog/rss.xml',
@@ -160,6 +190,7 @@ describe('SourceRepository.create', () => {
     const repo = createSourceRepository(fakePrisma);
 
     await repo.create({
+      topicId: 'topic_enterprise_ai',
       type: 'exa',
       label: 'Exa Neural Search',
       enabled: false,

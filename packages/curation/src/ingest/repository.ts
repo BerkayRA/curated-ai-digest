@@ -13,22 +13,28 @@ import type { EnrichedCandidate } from './types.js';
  */
 export function createPrismaRepository(): IngestRepository {
   return {
-    async findExistingUrls(urls: readonly string[]): Promise<Set<string>> {
+    async findExistingUrls(
+      urls: readonly string[],
+      topicId: string,
+    ): Promise<Set<string>> {
       if (urls.length === 0) return new Set();
 
       const rows = await prisma.candidateArticle.findMany({
-        where: { sourceUrl: { in: [...urls] } },
+        where: { topicId, sourceUrl: { in: [...urls] } },
         select: { sourceUrl: true },
       });
 
       return new Set(rows.map((r) => r.sourceUrl));
     },
 
-    async findExistingHashes(hashes: readonly string[]): Promise<Set<string>> {
+    async findExistingHashes(
+      hashes: readonly string[],
+      topicId: string,
+    ): Promise<Set<string>> {
       if (hashes.length === 0) return new Set();
 
       const rows = await prisma.candidateArticle.findMany({
-        where: { contentHash: { in: [...hashes] } },
+        where: { topicId, contentHash: { in: [...hashes] } },
         select: { contentHash: true },
       });
 
@@ -36,7 +42,7 @@ export function createPrismaRepository(): IngestRepository {
     },
 
     async persistRun(opts: PersistRunOpts): Promise<string> {
-      const { source, candidates, errors } = opts;
+      const { topicId, source, candidates, errors } = opts;
 
       const errorSummary =
         errors.length > 0
@@ -49,6 +55,7 @@ export function createPrismaRepository(): IngestRepository {
         // 1. Create the IngestRun row.
         const run = await tx.ingestRun.create({
           data: {
+            topicId,
             source,
             status,
             error: errorSummary,
@@ -58,7 +65,7 @@ export function createPrismaRepository(): IngestRepository {
 
         // 2. Upsert each candidate (idempotent on sourceUrl and contentHash).
         if (candidates.length > 0) {
-          await Promise.all(candidates.map((c) => upsertCandidate(tx, c, run.id)));
+          await Promise.all(candidates.map((c) => upsertCandidate(tx, c, run.id, topicId)));
         }
 
         // 3. Mark run finished.
@@ -83,10 +90,14 @@ async function upsertCandidate(
   tx: PrismaTransactionClient,
   candidate: EnrichedCandidate,
   ingestRunId: string,
+  topicId: string,
 ): Promise<void> {
   await tx.candidateArticle.upsert({
-    where: { sourceUrl: candidate.canonicalUrl },
+    where: {
+      topicId_sourceUrl: { topicId, sourceUrl: candidate.canonicalUrl },
+    },
     create: {
+      topicId,
       sourceUrl: candidate.canonicalUrl,
       sourceName: candidate.sourceName,
       title: candidate.title,
