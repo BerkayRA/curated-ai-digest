@@ -8,7 +8,13 @@
 import { z } from 'zod';
 import { MODEL_MAP, calcCostUsd } from './config.js';
 import { callWithValidatedTool } from './llm-utils.js';
-import type { ScoredCandidate, CurateSelection, StageOptions, PipelineRunRecord } from './types.js';
+import type {
+  ScoredCandidate,
+  CurateSelection,
+  StageOptions,
+  PipelineRunRecord,
+  TopicContext,
+} from './types.js';
 
 // ---------------------------------------------------------------------------
 // Zod schema for LLM tool output
@@ -32,17 +38,28 @@ export interface CurateStageResult {
   readonly pipelineRun: PipelineRunRecord;
 }
 
-const SYSTEM_PROMPT = `You are a senior editorial AI for Mega Bilgisayar's weekly AI newsletter.
+/**
+ * Build the Stage 2 CURATE system prompt for a topic.
+ *
+ * When `ctx.audience` is null, the audience phrase falls back verbatim to the
+ * original hardcoded copy ("Turkish IT professionals"), so the default
+ * `enterprise-ai` topic produces a byte-identical prompt.
+ */
+export function buildSystemPrompt(ctx: TopicContext): string {
+  const audience = ctx.audience ?? 'Turkish IT professionals';
+
+  return `You are a senior editorial AI for Mega Bilgisayar's weekly AI newsletter.
 Your task: select exactly 2 or 3 of the provided articles for inclusion in this week's issue.
 
 Selection criteria:
-1. Prioritise articles with high importance AND relevance to Turkish IT professionals.
+1. Prioritise articles with high importance AND relevance to ${audience}.
 2. Enforce topical diversity - do not pick two articles about the same company, model, or event.
 3. Drop near-duplicates - if two articles cover the same story, pick the better one.
 4. Aim for a mix of: major product/model news, research breakthroughs, and enterprise/business impact.
 5. You MUST select 2 or 3 articles - no more, no fewer.
 
 Return the exact article ids as provided.`;
+}
 
 /**
  * Stage 2 — CURATE
@@ -53,7 +70,7 @@ export async function runCurateStage(
   candidates: readonly ScoredCandidate[],
   opts: StageOptions,
 ): Promise<CurateStageResult> {
-  const { client, repository, logger, issueId } = opts;
+  const { client, repository, logger, issueId, topicContext } = opts;
   const model = MODEL_MAP['curate'];
   const startedAt = new Date();
 
@@ -72,7 +89,7 @@ export async function runCurateStage(
       startedAt,
       finishedAt,
     };
-    await repository.logPipelineRun({ ...run, issueId });
+    await repository.logPipelineRun({ ...run, topicId: topicContext.topicId, issueId });
     throw new Error(run.error);
   }
 
@@ -102,7 +119,7 @@ export async function runCurateStage(
     const result = await callWithValidatedTool({
       client,
       model,
-      system: SYSTEM_PROMPT,
+      system: buildSystemPrompt(topicContext),
       userMessage,
       tool: {
         name: 'select_articles',
@@ -144,7 +161,7 @@ export async function runCurateStage(
       startedAt,
       finishedAt,
     };
-    await repository.logPipelineRun({ ...run, issueId });
+    await repository.logPipelineRun({ ...run, topicId: topicContext.topicId, issueId });
     throw err;
   }
 
@@ -165,7 +182,7 @@ export async function runCurateStage(
       startedAt,
       finishedAt,
     };
-    await repository.logPipelineRun({ ...run, issueId });
+    await repository.logPipelineRun({ ...run, topicId: topicContext.topicId, issueId });
     throw new Error(run.error);
   }
 
@@ -191,7 +208,7 @@ export async function runCurateStage(
     finishedAt,
   };
 
-  await repository.logPipelineRun({ ...run, issueId });
+  await repository.logPipelineRun({ ...run, topicId: topicContext.topicId, issueId });
 
   logger.info('pipeline.curate.done', {
     selected: validIds.length,

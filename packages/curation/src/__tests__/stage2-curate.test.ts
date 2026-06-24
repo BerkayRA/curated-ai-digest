@@ -1,6 +1,11 @@
 import { describe, it, expect, vi } from 'vitest';
-import { runCurateStage } from '../pipeline/stage2-curate.js';
-import type { StageOptions, PipelineRepository, ScoredCandidate } from '../pipeline/types.js';
+import { runCurateStage, buildSystemPrompt } from '../pipeline/stage2-curate.js';
+import type {
+  StageOptions,
+  PipelineRepository,
+  ScoredCandidate,
+  TopicContext,
+} from '../pipeline/types.js';
 import type { Logger } from '../ingest/types.js';
 import type { AnthropicClient } from '../pipeline/types.js';
 
@@ -12,6 +17,13 @@ const noopLogger: Logger = {
   info: () => undefined,
   warn: () => undefined,
   error: () => undefined,
+};
+
+const topicContext: TopicContext = {
+  topicId: 'topic_enterprise_ai',
+  name: 'on-prem & enterprise AI workflows',
+  audience: null,
+  voice: null,
 };
 
 function makeRepo(overrides: Partial<PipelineRepository> = {}): PipelineRepository {
@@ -72,7 +84,7 @@ describe('runCurateStage', () => {
     ];
     const client = makeClient(['a1', 'a2']);
     const repo = makeRepo();
-    const opts: StageOptions = { client, repository: repo, logger: noopLogger };
+    const opts: StageOptions = { client, repository: repo, logger: noopLogger, topicContext };
 
     const result = await runCurateStage(candidates, opts);
 
@@ -90,7 +102,7 @@ describe('runCurateStage', () => {
     ];
     const client = makeClient(['a1', 'a2', 'a3']);
     const repo = makeRepo();
-    const opts: StageOptions = { client, repository: repo, logger: noopLogger };
+    const opts: StageOptions = { client, repository: repo, logger: noopLogger, topicContext };
 
     const result = await runCurateStage(candidates, opts);
 
@@ -101,7 +113,7 @@ describe('runCurateStage', () => {
   it('throws when fewer than 2 candidates provided', async () => {
     const client = makeClient([]);
     const repo = makeRepo();
-    const opts: StageOptions = { client, repository: repo, logger: noopLogger };
+    const opts: StageOptions = { client, repository: repo, logger: noopLogger, topicContext };
 
     await expect(runCurateStage([makeCandidate('a1')], opts)).rejects.toThrow(
       'Not enough candidates',
@@ -115,7 +127,7 @@ describe('runCurateStage', () => {
     const candidates = [makeCandidate('a1'), makeCandidate('a2'), makeCandidate('a3')];
     const client = makeClient(['a1', 'a2']);
     const repo = makeRepo();
-    const opts: StageOptions = { client, repository: repo, logger: noopLogger };
+    const opts: StageOptions = { client, repository: repo, logger: noopLogger, topicContext };
 
     const result = await runCurateStage(candidates, opts);
 
@@ -129,7 +141,7 @@ describe('runCurateStage', () => {
     // Model returns IDs not in the candidate list
     const client = makeClient(['nonexistent-1', 'nonexistent-2']);
     const repo = makeRepo();
-    const opts: StageOptions = { client, repository: repo, logger: noopLogger };
+    const opts: StageOptions = { client, repository: repo, logger: noopLogger, topicContext };
 
     await expect(runCurateStage(candidates, opts)).rejects.toThrow('invalid article ids');
   });
@@ -152,9 +164,24 @@ describe('runCurateStage', () => {
       },
     } as unknown as AnthropicClient;
     const repo = makeRepo();
-    const opts: StageOptions = { client, repository: repo, logger: noopLogger };
+    const opts: StageOptions = { client, repository: repo, logger: noopLogger, topicContext };
 
     // Should fail after retries because schema requires min 2
     await expect(runCurateStage(candidates, opts)).rejects.toThrow();
+  });
+});
+
+describe('buildSystemPrompt (curate)', () => {
+  it('preserves the original "Turkish IT professionals" audience when null', () => {
+    const prompt = buildSystemPrompt(topicContext);
+    expect(prompt).toContain(
+      'Prioritise articles with high importance AND relevance to Turkish IT professionals.',
+    );
+  });
+
+  it('injects a custom audience when provided', () => {
+    const prompt = buildSystemPrompt({ ...topicContext, audience: 'FinTech CTOs' });
+    expect(prompt).toContain('relevance to FinTech CTOs.');
+    expect(prompt).not.toContain('relevance to Turkish IT professionals.');
   });
 });

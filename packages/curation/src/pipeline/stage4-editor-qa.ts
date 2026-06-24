@@ -15,6 +15,7 @@ import type {
   QaFlag,
   StageOptions,
   PipelineRunRecord,
+  TopicContext,
 } from './types.js';
 
 // ---------------------------------------------------------------------------
@@ -48,14 +49,24 @@ export interface EditorQaStageResult {
   readonly allFlags: readonly QaFlag[];
 }
 
-const SYSTEM_PROMPT = `You are a senior editor and fact-checker for Mega Bilgisayar's Turkish AI newsletter.
+/**
+ * Build the Stage 4 EDITOR/QA system prompt for a topic.
+ *
+ * When `ctx.voice` is null, the brand-voice descriptor falls back verbatim to
+ * the original hardcoded copy ("confident, clear, no hype"), so the default
+ * `enterprise-ai` topic produces a byte-identical prompt.
+ */
+export function buildSystemPrompt(ctx: TopicContext): string {
+  const voice = ctx.voice ?? 'confident, clear, no hype';
+
+  return `You are a senior editor and fact-checker for Mega Bilgisayar's Turkish AI newsletter.
 
 Your tasks:
 1. FACT-CHECK: Verify every specific claim, number, date, or statistic in the Turkish copy against the provided source excerpts.
    Flag anything that is not supported by the source or that appears exaggerated or inaccurate.
    
 2. GRAMMAR & TONE: Check Turkish grammar, spelling, and punctuation. Flag errors.
-   Ensure the tone is professional and matches the brand voice (confident, clear, no hype).
+   Ensure the tone is professional and matches the brand voice (${voice}).
 
 3. BRAND VOICE: Flag any hype words ("devrimci", "çığır açan", "inanılmaz", "benzersiz", etc.),
    clickbait headlines, or off-brand language.
@@ -66,6 +77,7 @@ Severity levels:
 
 If ALL flags are "warn" or there are no flags → set passed: true.
 If ANY flag is "block" → set passed: false and include feedbackForCopywrite with specific correction instructions.`;
+}
 
 /**
  * Run a single QA pass (no retry logic here — handled by the caller).
@@ -76,7 +88,7 @@ async function runSingleQaPass(
   opts: StageOptions,
   passNumber: number,
 ): Promise<{ qaOutput: QaOutput; pipelineRun: PipelineRunRecord }> {
-  const { client, repository, logger, issueId } = opts;
+  const { client, repository, logger, issueId, topicContext } = opts;
   const model = MODEL_MAP['editor_qa'];
   const startedAt = new Date();
 
@@ -100,7 +112,7 @@ async function runSingleQaPass(
     const result = await callWithValidatedTool({
       client,
       model,
-      system: SYSTEM_PROMPT,
+      system: buildSystemPrompt(topicContext),
       userMessage,
       tool: {
         name: 'qa_review',
@@ -157,7 +169,7 @@ async function runSingleQaPass(
       startedAt,
       finishedAt,
     };
-    await repository.logPipelineRun({ ...run, issueId });
+    await repository.logPipelineRun({ ...run, topicId: topicContext.topicId, issueId });
     throw err;
   }
 
@@ -176,7 +188,7 @@ async function runSingleQaPass(
     finishedAt,
   };
 
-  await repository.logPipelineRun({ ...run, issueId });
+  await repository.logPipelineRun({ ...run, topicId: topicContext.topicId, issueId });
 
   logger.info('pipeline.editor_qa.pass.done', {
     passNumber,

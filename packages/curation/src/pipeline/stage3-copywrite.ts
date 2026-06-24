@@ -8,7 +8,13 @@
 import { z } from 'zod';
 import { MODEL_MAP, calcCostUsd } from './config.js';
 import { callWithValidatedTool } from './llm-utils.js';
-import type { ScoredCandidate, CopywriteOutput, StageOptions, PipelineRunRecord } from './types.js';
+import type {
+  ScoredCandidate,
+  CopywriteOutput,
+  StageOptions,
+  PipelineRunRecord,
+  TopicContext,
+} from './types.js';
 
 // ---------------------------------------------------------------------------
 // Zod schema for LLM tool output
@@ -37,14 +43,26 @@ export interface CopywriteStageResult {
   readonly pipelineRun: PipelineRunRecord;
 }
 
-const SYSTEM_PROMPT = `You are a senior Turkish copywriter for Mega Bilgisayar's weekly AI newsletter.
-
-Brand voice:
-- Language: Turkish (TR)
+/**
+ * Build the Stage 3 COPYWRITE system prompt for a topic.
+ *
+ * When `ctx.voice` is null, the brand-voice block falls back verbatim to the
+ * original hardcoded copy, so the default `enterprise-ai` topic produces a
+ * byte-identical prompt.
+ */
+export function buildSystemPrompt(ctx: TopicContext): string {
+  const voiceBlock =
+    ctx.voice ??
+    `- Language: Turkish (TR)
 - Tone: Confident, clear, professional — like a knowledgeable colleague sharing a finding, not a salesperson.
 - No hype, no clickbait, no exclamation marks. Avoid "devrimci", "çığır açan", "inanılmaz" and similar superlatives.
 - Cite the source naturally within the summary (e.g. "MIT Technology Review'a göre…" or "OpenAI'ın açıkladığına göre…").
-- Summaries should provide genuine insight, not just restate the headline.
+- Summaries should provide genuine insight, not just restate the headline.`;
+
+  return `You are a senior Turkish copywriter for Mega Bilgisayar's weekly AI newsletter.
+
+Brand voice:
+${voiceBlock}
 
 Deliverables per article:
 - titleTr: A concise Turkish title (max 120 chars). This is a title, not a sentence — no period at end.
@@ -53,6 +71,7 @@ Deliverables per article:
 Deliverables for the issue:
 - subject: A compelling Turkish email subject line (max 90 chars). No emojis. Should entice opening.
 - preheader: Preview text (max 130 chars) that complements the subject and hints at content.`;
+}
 
 /**
  * Stage 3 — COPYWRITE
@@ -65,7 +84,7 @@ export async function runCopywriteStage(
   opts: StageOptions,
   qaFeedback?: string,
 ): Promise<CopywriteStageResult> {
-  const { client, repository, logger, issueId } = opts;
+  const { client, repository, logger, issueId, topicContext } = opts;
   const model = MODEL_MAP['copywrite'];
   const startedAt = new Date();
 
@@ -101,7 +120,7 @@ export async function runCopywriteStage(
     const result = await callWithValidatedTool({
       client,
       model,
-      system: SYSTEM_PROMPT,
+      system: buildSystemPrompt(topicContext),
       userMessage,
       tool: {
         name: 'write_copy',
@@ -150,7 +169,7 @@ export async function runCopywriteStage(
       startedAt,
       finishedAt,
     };
-    await repository.logPipelineRun({ ...run, issueId });
+    await repository.logPipelineRun({ ...run, topicId: topicContext.topicId, issueId });
     throw err;
   }
 
@@ -169,7 +188,7 @@ export async function runCopywriteStage(
     finishedAt,
   };
 
-  await repository.logPipelineRun({ ...run, issueId });
+  await repository.logPipelineRun({ ...run, topicId: topicContext.topicId, issueId });
 
   logger.info('pipeline.copywrite.done', { itemCount: output.items.length, costUsd });
 

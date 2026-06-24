@@ -29,6 +29,7 @@ export {
   EmailProviderKind,
   SubscriberStatus,
   SourceType,
+  TopicStatus,
   Prisma,
 } from '@prisma/client';
 
@@ -43,6 +44,7 @@ export type {
   PipelineRun,
   AuditLog,
   Source,
+  Topic,
 } from '@prisma/client';
 
 export { createSourceRepository } from './source-repository.js';
@@ -52,3 +54,12 @@ export type {
   UpdateSourceData,
   HealthData,
 } from './source-repository.js';
+
+export { createTopicRepository } from './topic-repository.js';
+export type {
+  TopicRepository,
+  CreateTopicData,
+  UpdateTopicData,
+} from './topic-repository.js';
+
+export { getDefaultTopic, getDefaultTopicId } from './default-topic.js';

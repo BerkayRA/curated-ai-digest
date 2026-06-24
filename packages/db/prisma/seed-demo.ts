@@ -11,6 +11,7 @@ import { PrismaClient, IssueStatus } from '@prisma/client';
 const prisma = new PrismaClient();
 
 const ISO_WEEK = '2026-W25';
+const TOPIC_ID = 'topic_enterprise_ai';
 
 const ITEMS = [
   {
@@ -40,7 +41,9 @@ const ITEMS = [
 ];
 
 async function main(): Promise<void> {
-  const existing = await prisma.issue.findUnique({ where: { isoWeek: ISO_WEEK } });
+  const existing = await prisma.issue.findFirst({
+    where: { topicId: TOPIC_ID, isoWeek: ISO_WEEK },
+  });
   if (existing) {
     await prisma.issueItem.deleteMany({ where: { issueId: existing.id } });
     await prisma.issue.delete({ where: { id: existing.id } });
@@ -48,6 +51,7 @@ async function main(): Promise<void> {
 
   const issue = await prisma.issue.create({
     data: {
+      topicId: TOPIC_ID,
       isoWeek: ISO_WEEK,
       status: IssueStatus.draft,
       subject: 'Yapay Zeka Haftası: Gemini Ultra 2.0, Apple Intelligence ve Açık Kaynak Savaşı',

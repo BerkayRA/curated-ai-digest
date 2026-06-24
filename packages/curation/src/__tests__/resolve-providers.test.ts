@@ -26,6 +26,7 @@ function makeFakeSourceRepo(sources: FakeSource[]): SourceRepository {
   return {
     findAll: vi.fn().mockResolvedValue(sources),
     findEnabled: vi.fn().mockResolvedValue(sources),
+    findEnabledByTopic: vi.fn().mockResolvedValue(sources),
     findById: vi.fn().mockResolvedValue(null),
     create: vi.fn(),
     update: vi.fn(),
@@ -227,5 +228,36 @@ describe('resolveProviders', () => {
     // createSourceRepository should NOT have been called because we injected the repo.
     expect(createSourceRepository).not.toHaveBeenCalled();
     expect(providers.map((p) => p.id)).toContain('exa:direct-1');
+  });
+
+  it('uses findEnabledByTopic (not findEnabled) when topicId is provided', async () => {
+    const source = makeSource({
+      id: 'topic-rss',
+      type: 'rss',
+      label: 'Topic Feed',
+      url: 'https://topic.com/rss',
+    });
+    const fakeRepo = makeFakeSourceRepo([source]);
+
+    const { resolveProviders } = await import('../ingest/resolve-providers.js');
+    const providers = await resolveProviders({
+      repository: fakeRepo,
+      topicId: 'topic_enterprise_ai',
+    });
+
+    expect(fakeRepo.findEnabledByTopic).toHaveBeenCalledWith('topic_enterprise_ai');
+    expect(fakeRepo.findEnabled).not.toHaveBeenCalled();
+    expect(providers.map((p) => p.id)).toContain('rss:topic-rss');
+  });
+
+  it('uses findEnabled when topicId is omitted', async () => {
+    const source = makeSource({ id: 'all-rss', type: 'rss', label: 'Feed', url: 'https://a.com/rss' });
+    const fakeRepo = makeFakeSourceRepo([source]);
+
+    const { resolveProviders } = await import('../ingest/resolve-providers.js');
+    await resolveProviders({ repository: fakeRepo });
+
+    expect(fakeRepo.findEnabled).toHaveBeenCalled();
+    expect(fakeRepo.findEnabledByTopic).not.toHaveBeenCalled();
   });
 });

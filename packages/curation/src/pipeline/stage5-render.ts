@@ -71,7 +71,7 @@ export async function runRenderStage(
   input: RenderStageInput,
   opts: StageOptions,
 ): Promise<RenderStageResult> {
-  const { repository, logger, issueId: providedIssueId } = opts;
+  const { repository, logger, issueId: providedIssueId, topicContext } = opts;
   const { isoWeek, copywrite, qaFlags, factCheckNotes, renderFn } = input;
   const model = 'none';
   const startedAt = new Date();
@@ -81,6 +81,7 @@ export async function runRenderStage(
   try {
     // 1. Upsert the Issue row (creates if not exists, updates subject/preheader).
     const issueId = await repository.upsertIssue({
+      topicId: topicContext.topicId,
       isoWeek,
       subject: copywrite.subject,
       preheader: copywrite.preheader,
@@ -165,7 +166,7 @@ export async function runRenderStage(
       finishedAt,
     };
 
-    await repository.logPipelineRun({ ...run, issueId });
+    await repository.logPipelineRun({ ...run, topicId: topicContext.topicId, issueId });
 
     logger.info('pipeline.render.done', { issueId, isoWeek });
 
@@ -191,7 +192,11 @@ export async function runRenderStage(
       startedAt,
       finishedAt,
     };
-    await repository.logPipelineRun({ ...run, issueId: providedIssueId });
+    await repository.logPipelineRun({
+      ...run,
+      topicId: topicContext.topicId,
+      issueId: providedIssueId,
+    });
     throw err;
   }
 }

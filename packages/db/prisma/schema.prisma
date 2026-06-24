@@ -53,13 +53,57 @@ enum SubscriberStatus {
   bounced
 }
 
+enum TopicStatus {
+  active
+  paused
+}
+
 // ---------------------------------------------------------------------------
-// Issue — one edition of the newsletter
+// Topic — a configurable newsletter (its own sources, pool, issues, audience)
+// ---------------------------------------------------------------------------
+
+model Topic {
+  id          String      @id @default(cuid())
+  slug        String      @unique
+  name        String
+  description String?
+  audience    String? // injected into rank/curate/QA prompts; null → default copy
+  voice       String? // injected into copywrite/QA prompts; null → default copy
+  status      TopicStatus @default(active)
+
+  // Per-topic schedule (nullable; null → fall back to global Settings)
+  sendDayOfWeek    String?  @map("send_day_of_week")
+  sendTime         String?  @map("send_time")
+  timezone         String?
+  pipelineLeadDays Int?     @map("pipeline_lead_days")
+  autoSendEnabled  Boolean? @map("auto_send_enabled")
+
+  // Per-topic delivery branding (nullable; null → fall back to global Settings)
+  fromAddress   String? @map("from_address")
+  replyTo       String? @map("reply_to")
+  brandLogoUrl  String? @map("brand_logo_url")
+  brandColorHex String? @map("brand_color_hex")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  sources    Source[]
+  issues     Issue[]
+  ingestRuns IngestRun[]
+  candidates CandidateArticle[]
+
+  @@index([status])
+  @@map("topics")
+}
+
+// ---------------------------------------------------------------------------
+// Issue — one edition of a topic's newsletter
 // ---------------------------------------------------------------------------
 
 model Issue {
   id           String      @id @default(cuid())
-  isoWeek      String      @unique @map("iso_week") // e.g. "2026-W24"
+  topicId      String      @map("topic_id")
+  isoWeek      String      @map("iso_week") // e.g. "2026-W24"
   status       IssueStatus @default(draft)
   subject      String // TR marketing subject line
   preheader    String? // TR preview text
@@ -72,10 +116,13 @@ model Issue {
   createdAt    DateTime    @default(now()) @map("created_at")
   updatedAt    DateTime    @updatedAt @map("updated_at")
 
+  topic Topic       @relation(fields: [topicId], references: [id])
   items IssueItem[]
   sends Send[]
 
+  @@unique([topicId, isoWeek])
   @@index([status])
+  @@index([topicId])
   @@map("issues")
 }
 
@@ -84,23 +131,28 @@ model Issue {
 // ---------------------------------------------------------------------------
 
 model CandidateArticle {
-  id               String        @id @default(cuid())
-  sourceUrl        String        @unique @map("source_url")
-  sourceName       String        @map("source_name")
-  title            String
-  rawExcerpt       String?       @map("raw_excerpt")
-  publishedAt      DateTime?     @map("published_at")
-  contentHash      String        @unique @map("content_hash") // SHA-256 for dedup
-  importanceScore  Float?        @map("importance_score")
-  relevanceScore   Float?        @map("relevance_score")
-  status           ArticleStatus @default(candidate)
-  fetchedAt        DateTime      @default(now()) @map("fetched_at")
-  ingestRunId      String?       @map("ingest_run_id")
+  id              String        @id @default(cuid())
+  topicId         String        @map("topic_id")
+  sourceUrl       String        @map("source_url")
+  sourceName      String        @map("source_name")
+  title           String
+  rawExcerpt      String?       @map("raw_excerpt")
+  publishedAt     DateTime?     @map("published_at")
+  contentHash     String        @map("content_hash") // SHA-256 for dedup (per-topic)
+  importanceScore Float?        @map("importance_score")
+  relevanceScore  Float?        @map("relevance_score")
+  status          ArticleStatus @default(candidate)
+  fetchedAt       DateTime      @default(now()) @map("fetched_at")
+  ingestRunId     String?       @map("ingest_run_id")
 
+  topic     Topic      @relation(fields: [topicId], references: [id])
   ingestRun IngestRun? @relation(fields: [ingestRunId], references: [id])
 
+  @@unique([topicId, sourceUrl])
+  @@unique([topicId, contentHash])
   @@index([status])
   @@index([ingestRunId])
+  @@index([topicId])
   @@map("candidate_articles")
 }
 
@@ -148,7 +200,7 @@ model Subscriber {
 }
 
 // ---------------------------------------------------------------------------
-// Settings — single-row application configuration
+// Settings — single-row application configuration (global defaults)
 // ---------------------------------------------------------------------------
 
 model Settings {
@@ -188,11 +240,12 @@ model Send {
 }
 
 // ---------------------------------------------------------------------------
-// IngestRun — tracks each article-fetch execution
+// IngestRun — tracks each article-fetch execution (per topic)
 // ---------------------------------------------------------------------------
 
 model IngestRun {
   id             String    @id @default(cuid())
+  topicId        String?   @map("topic_id")
   startedAt      DateTime  @default(now()) @map("started_at")
   finishedAt     DateTime? @map("finished_at")
   source         String
@@ -200,9 +253,11 @@ model IngestRun {
   status         String
   error          String?
 
+  topic    Topic?             @relation(fields: [topicId], references: [id])
   articles CandidateArticle[]
 
   @@index([status])
+  @@index([topicId])
   @@map("ingest_runs")
 }
 
@@ -213,6 +268,7 @@ model IngestRun {
 model PipelineRun {
   id         String    @id @default(cuid())
   issueId    String?   @map("issue_id")
+  topicId    String?   @map("topic_id")
   stage      String // "rank" | "curate" | "copywrite" | "editor_qa" | "render"
   model      String
   tokensIn   Int       @default(0) @map("tokens_in")
@@ -225,6 +281,7 @@ model PipelineRun {
 
   @@index([issueId])
   @@index([stage])
+  @@index([topicId])
   @@map("pipeline_runs")
 }
 
@@ -247,28 +304,32 @@ model AuditLog {
 }
 
 // ---------------------------------------------------------------------------
-// Source — DB-backed registry of ingest sources (rss / radar / exa)
+// Source — DB-backed registry of ingest sources (rss / radar / exa), per topic
 // ---------------------------------------------------------------------------
 
 model Source {
-  id          String     @id @default(cuid())
-  type        SourceType
-  label       String
-  url         String? // rss/radar feed URL; null for exa
-  enabled     Boolean    @default(true)
-  config      Json? // type-specific config blob (non-secret only)
+  id      String     @id @default(cuid())
+  topicId String     @map("topic_id")
+  type    SourceType
+  label   String
+  url     String? // rss/radar feed URL; null for exa
+  enabled Boolean    @default(true)
+  config  Json? // type-specific config blob (non-secret only)
 
   // Persistent health fields updated after each ingest run
-  lastRunAt   DateTime?  @map("last_run_at")
-  lastStatus  String?    @map("last_status") // "ok" | "error"
-  lastCount   Int        @default(0) @map("last_count")
-  lastError   String?    @map("last_error")
+  lastRunAt  DateTime? @map("last_run_at")
+  lastStatus String?   @map("last_status") // "ok" | "error"
+  lastCount  Int       @default(0) @map("last_count")
+  lastError  String?   @map("last_error")
 
-  createdAt   DateTime   @default(now()) @map("created_at")
-  updatedAt   DateTime   @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  topic Topic @relation(fields: [topicId], references: [id])
 
   // Postgres allows multiple NULLs in a unique index — fine for exa rows.
-  @@unique([type, url])
+  @@unique([topicId, type, url])
   @@index([enabled])
+  @@index([topicId])
   @@map("sources")
 }

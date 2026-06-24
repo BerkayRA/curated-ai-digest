@@ -1,10 +1,26 @@
 import { PrismaClient, EmailProviderKind } from '@prisma/client';
 import { randomUUID } from 'node:crypto';
-import { seedSources } from './seed-sources.js';
+import { seedSources, ENTERPRISE_AI_TOPIC_ID } from './seed-sources.js';
 
 const prisma = new PrismaClient();
 
 async function main(): Promise<void> {
+  // -------------------------------------------------------------------------
+  // Topic — the default `enterprise-ai` newsletter. Must exist BEFORE sources
+  // (sources carry a non-nullable topicId FK). Idempotent via upsert.
+  // -------------------------------------------------------------------------
+  await prisma.topic.upsert({
+    where: { id: ENTERPRISE_AI_TOPIC_ID },
+    update: {},
+    create: {
+      id: ENTERPRISE_AI_TOPIC_ID,
+      slug: 'enterprise-ai',
+      name: 'on-prem & enterprise AI workflows',
+      // audience/voice intentionally left null → stages use their default copy.
+      status: 'active',
+    },
+  });
+
   // -------------------------------------------------------------------------
   // Settings — single-row config (upsert to keep seed idempotent)
   // -------------------------------------------------------------------------

@@ -55,6 +55,7 @@ vi.mock('@/auth', () => ({
 
 const makeSource = (overrides: Partial<Source> = {}): Source => ({
   id: 'src-1',
+  topicId: 'topic-1',
   type: 'rss',
   label: 'Test RSS',
   url: 'https://example.com/feed.xml',
@@ -72,6 +73,7 @@ const makeSource = (overrides: Partial<Source> = {}): Source => ({
 const makeRepo = (overrides: Partial<SourceRepository> = {}): SourceRepository => ({
   findAll: vi.fn().mockResolvedValue([makeSource()]),
   findEnabled: vi.fn().mockResolvedValue([makeSource()]),
+  findEnabledByTopic: vi.fn().mockResolvedValue([makeSource()]),
   findById: vi.fn().mockResolvedValue(makeSource()),
   create: vi.fn().mockResolvedValue(makeSource()),
   update: vi.fn().mockResolvedValue(makeSource()),
