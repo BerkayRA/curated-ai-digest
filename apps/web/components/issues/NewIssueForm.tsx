@@ -1,12 +1,18 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { pickFirstUnused } from '@digest/curation/curate';
 import { Button } from '@/components/ui/Button';
 import { EyebrowLabel } from '@/components/ui/EyebrowLabel';
 import { RunPipelineButton } from '@/components/issues/RunPipelineButton';
-import { CandidateCurator, type PickedDraft } from '@/components/issues/CandidateCurator';
+import {
+  CandidateCurator,
+  candidateToPickedDraft,
+  type PickedDraft,
+  type SourceGroupWire,
+} from '@/components/issues/CandidateCurator';
 import type { ApiResponse } from '@/lib/api-response';
 import styles from '@/app/(dashboard)/issues/new/new-issue.module.css';
 
@@ -48,6 +54,41 @@ export function NewIssueForm({ defaultIsoWeek }: NewIssueFormProps) {
   const [curatorOpen, setCuratorOpen] = useState(false);
   const [autoLoading, setAutoLoading] = useState(false);
   const [curateStatus, setCurateStatus] = useState<string | null>(null);
+
+  // Scanned candidate pool — fetched once and shared by the picker (CandidateCurator)
+  // and the per-slot "Kaynaktan doldur" dropdowns. Container/presentational split.
+  interface CandData {
+    scannedAt: string | null;
+    total: number;
+    sources: SourceGroupWire[];
+  }
+  const [candData, setCandData] = useState<CandData | null>(null);
+  const [candLoading, setCandLoading] = useState(true);
+  const [candError, setCandError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setCandLoading(true);
+    fetch('/api/candidates/recent')
+      .then((r) => r.json() as Promise<ApiResponse<CandData>>)
+      .then((json) => {
+        if (cancelled) return;
+        if (!json.success || !json.data) {
+          setCandError(json.error ?? 'Adaylar yüklenemedi.');
+          return;
+        }
+        setCandData(json.data);
+      })
+      .catch(() => {
+        if (!cancelled) setCandError('Beklenmeyen bir hata oluştu.');
+      })
+      .finally(() => {
+        if (!cancelled) setCandLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const updateItem = useCallback(
     (index: number, field: 'titleTr' | 'summaryTr' | 'sourceUrl' | 'sourceName', value: string) => {
@@ -113,6 +154,26 @@ export function NewIssueForm({ defaultIsoWeek }: NewIssueFormProps) {
       setAutoLoading(false);
     }
   }, []);
+
+  /** Fill one slot from a chosen source: its top article not already used in any
+   *  slot (so re-picking the same source yields the next one). */
+  const fillSlotFromSource = useCallback(
+    (index: number, sourceName: string) => {
+      if (!sourceName || !candData) return;
+      setFormError(null);
+      const group = candData.sources.find((g) => g.sourceName === sourceName);
+      if (!group) return;
+      const used = new Set(items.map((it) => it.sourceUrl).filter(Boolean));
+      const next = pickFirstUnused(group.items, used);
+      if (!next) {
+        setCurateStatus(`${sourceName} için kullanılabilir başka haber yok.`);
+        return;
+      }
+      setCurateStatus(null);
+      setItems((prev) => prev.map((it, i) => (i === index ? candidateToPickedDraft(next) : it)));
+    },
+    [candData, items],
+  );
 
   const addedUrls = new Set(items.map((it) => it.sourceUrl).filter(Boolean));
   const filledCount = items.filter((it) => !isBlank(it)).length;
@@ -272,15 +333,42 @@ export function NewIssueForm({ defaultIsoWeek }: NewIssueFormProps) {
                 <EyebrowLabel as="span" mono className={styles.itemOrdinal}>
                   Haber {String(index + 1).padStart(2, '0')}
                 </EyebrowLabel>
-                <button
-                  type="button"
-                  className={styles.removeBtn}
-                  onClick={() => removeItem(index)}
-                  disabled={!canRemove}
-                  aria-label={`Haber ${index + 1} kaldır`}
-                >
-                  Kaldır
-                </button>
+                <div className={styles.itemHeadActions}>
+                  {/* LLM-free: fill this slot from a chosen source's top unused article. */}
+                  <select
+                    className={styles.slotSourceSelect}
+                    value=""
+                    onChange={(e) => fillSlotFromSource(index, e.target.value)}
+                    disabled={candLoading || candError !== null || !candData || candData.sources.length === 0}
+                    aria-label={`Haber ${index + 1} için kaynaktan doldur`}
+                  >
+                    <option value="">
+                      {candLoading
+                        ? 'Yükleniyor…'
+                        : candError
+                          ? 'Kaynak yüklenemedi'
+                          : 'Kaynaktan doldur…'}
+                    </option>
+                    {candData?.sources.map((g) => {
+                      const available = g.items.filter((c) => !addedUrls.has(c.sourceUrl)).length;
+                      return (
+                        <option key={g.sourceName} value={g.sourceName} disabled={available === 0}>
+                          {g.sourceName}
+                          {available > 0 ? ` (${available})` : ' (—)'}
+                        </option>
+                      );
+                    })}
+                  </select>
+                  <button
+                    type="button"
+                    className={styles.removeBtn}
+                    onClick={() => removeItem(index)}
+                    disabled={!canRemove}
+                    aria-label={`Haber ${index + 1} kaldır`}
+                  >
+                    Kaldır
+                  </button>
+                </div>
               </div>
 
               <div className={styles.itemFields}>
@@ -372,6 +460,11 @@ export function NewIssueForm({ defaultIsoWeek }: NewIssueFormProps) {
       {/* LLM-free manual picker — pull top scanned news per source into slots. */}
       <CandidateCurator
         open={curatorOpen}
+        sources={candData?.sources ?? []}
+        scannedAt={candData?.scannedAt ?? null}
+        total={candData?.total ?? 0}
+        loading={candLoading}
+        error={candError}
         addedUrls={addedUrls}
         slotsFull={slotsFull}
         onPick={addDraft}
