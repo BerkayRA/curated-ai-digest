@@ -241,6 +241,55 @@
   font-variant-numeric: tabular-nums;
 }
 
+.itemHeadActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+/* Per-slot "fill from source" command menu. Compact, reads as an action. */
+.slotSourceSelect {
+  appearance: none;
+  -webkit-appearance: none;
+  background: var(--color-surface-20);
+  border: 1px solid var(--color-border-mid);
+  color: var(--color-ink-muted);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding: var(--space-xs) calc(var(--space-sm) + 0.75em) var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-badge);
+  cursor: pointer;
+  max-width: 13rem;
+  /* caret */
+  background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position:
+    right 0.85em center,
+    right 0.55em center;
+  background-size: 0.3em 0.3em, 0.3em 0.3em;
+  background-repeat: no-repeat;
+  transition:
+    border-color var(--duration-fast) var(--ease-out-expo),
+    color var(--duration-fast) var(--ease-out-expo);
+}
+
+.slotSourceSelect:hover:not(:disabled) {
+  border-color: var(--color-brand);
+  color: var(--color-ink);
+}
+
+.slotSourceSelect:focus-visible {
+  outline: none;
+  border-color: var(--color-brand);
+  box-shadow: 0 0 0 3px rgba(0, 159, 218, 0.16);
+}
+
+.slotSourceSelect:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .removeBtn {
   appearance: none;
   background: transparent;
