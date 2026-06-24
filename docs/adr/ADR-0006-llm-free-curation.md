@@ -50,3 +50,21 @@ so the raw material exists; it just wasn't reachable from the editor.
   `importanceScore`/`relevanceScore`).
 - Candidates group by the `sourceName` string (there is no FK from `CandidateArticle`
   to `Source`); acceptable for grouping and consistent with how the pool is stored.
+
+## Update — per-slot source fill (2026-06-24)
+
+A **third** LLM-free mode: each news slot gets its own **"Kaynaktan doldur…"**
+dropdown listing the scanned sources (with an availability count). Choosing a source
+fills that slot with the source's top article not already used in any slot — so
+re-picking the same source for another slot yields the next article. This is the
+finest-grained option (choose the source while filling each slot), beside the
+all-source picker and the auto-fill.
+
+- Reuses `GET /api/candidates/recent` (no new endpoint). `NewIssueForm` now fetches
+  that pool **once on mount** and shares it with both the picker and the per-slot
+  dropdowns; `CandidateCurator` became **presentational** (receives the data as props),
+  per the container/presentational split.
+- Selection logic is the pure, tested `pickFirstUnused(items, usedUrls)` in the curate
+  module, exposed to the client via a new client-safe **`@digest/curation/curate`**
+  subpath export (the barrel pulls in server-only deps and must not enter the client
+  bundle — same reasoning as `@digest/delivery/issue-status`).

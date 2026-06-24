@@ -148,6 +148,7 @@ export {
   heuristicCurate,
   candidateToDraftItem,
   groupBySourceTopN,
+  pickFirstUnused,
 } from './curate/index.js';
 export type {
   CandidateView,

@@ -10,6 +10,7 @@ export {
   heuristicCurate,
   candidateToDraftItem,
   groupBySourceTopN,
+  pickFirstUnused,
 } from './heuristic.js';
 
 export type {
