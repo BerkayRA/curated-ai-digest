@@ -4,12 +4,17 @@
 
 .layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 520px);
+  /* The email template is a fixed 600px-wide document; size the preview track to
+     fit it fully (600 + breathing room) so the iframe never needs a sideways
+     scroll. The form column (1fr) absorbs the remaining width. */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 640px);
   gap: var(--space-xl);
   align-items: start;
 }
 
-@media (max-width: 1100px) {
+/* Below this, two columns can't both be comfortable, so stack — the preview then
+   spans the full content width (well over 600px) and the email shows in full. */
+@media (max-width: 1200px) {
   .layout {
     grid-template-columns: 1fr;
   }
