@@ -17,6 +17,7 @@ export interface NavTopic {
 
 const NAV_ITEMS: NavItem[] = [
   { href: '/issues', label: 'Arşiv' },
+  { href: '/analytics', label: 'Analitik' },
   { href: '/subscribers', label: 'Aboneler' },
   { href: '/topics', label: 'Konular' },
   { href: '/sources', label: 'Kaynaklar' },
