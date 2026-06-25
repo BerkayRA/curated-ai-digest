@@ -27,6 +27,10 @@ vi.mock('@digest/db', async (importOriginal) => {
   return {
     ...actual,
     createSourceRepository: vi.fn(),
+    // Mock the default-topic resolver so the create route never touches a live
+    // DB in unit tests (CI has no DATABASE_URL).
+    getDefaultTopicId: vi.fn().mockResolvedValue('topic-1'),
+    getDefaultTopic: vi.fn().mockResolvedValue({ id: 'topic-1', slug: 'enterprise-ai' }),
     prisma: actual.prisma,
   };
 });
