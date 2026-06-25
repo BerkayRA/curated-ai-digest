@@ -51,6 +51,8 @@ export interface TopicRepository {
   findById(id: string): Promise<Topic | null>;
   create(data: CreateTopicData): Promise<Topic>;
   update(id: string, data: UpdateTopicData): Promise<Topic>;
+  /** Convenience for pause/activate toggles; equivalent to update(id, { status }). */
+  setStatus(id: string, status: TopicStatus): Promise<Topic>;
 }
 
 // ---------------------------------------------------------------------------
@@ -91,6 +93,10 @@ export function createTopicRepository(
         where: { id },
         data: data as Prisma.TopicUpdateInput,
       });
+    },
+
+    setStatus(id: string, status: TopicStatus): Promise<Topic> {
+      return client.topic.update({ where: { id }, data: { status } });
     },
   };
 }

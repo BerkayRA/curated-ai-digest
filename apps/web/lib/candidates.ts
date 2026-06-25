@@ -34,10 +34,12 @@ function latestIso(dates: ReadonlyArray<Date | null | undefined>): string | null
   return max > 0 ? new Date(max).toISOString() : null;
 }
 
-export async function loadRecentCandidates(): Promise<RecentCandidates> {
+export async function loadRecentCandidates(topicId?: string): Promise<RecentCandidates> {
   // --- Primary: DB candidate pool -----------------------------------------
+  // Scope to the active topic when provided; a missing topicId keeps the
+  // previous topic-agnostic behavior.
   const rows = await prisma.candidateArticle.findMany({
-    where: { status: 'candidate' },
+    where: { status: 'candidate', ...(topicId ? { topicId } : {}) },
     orderBy: [{ publishedAt: 'desc' }, { fetchedAt: 'desc' }],
     select: {
       id: true,
@@ -68,6 +70,9 @@ export async function loadRecentCandidates(): Promise<RecentCandidates> {
   }
 
   // --- Fallback: committed file pool (most recently stored scan) -----------
+  // TODO (Phase 1b): the committed file pool is global (single newsletter
+  // artifact) and not yet keyed by topic. When the pool moves to per-topic
+  // subdirs, scope `candidatesDir()` by topicId here.
   const { readPool } = await import('@digest/curation');
   const stored = await readPool(candidatesDir());
   if (stored.length === 0) {

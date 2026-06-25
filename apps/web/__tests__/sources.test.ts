@@ -31,6 +31,12 @@ vi.mock('@digest/db', async (importOriginal) => {
     // DB in unit tests (CI has no DATABASE_URL).
     getDefaultTopicId: vi.fn().mockResolvedValue('topic-1'),
     getDefaultTopic: vi.fn().mockResolvedValue({ id: 'topic-1', slug: 'enterprise-ai' }),
+    // resolve-topic.ts uses createTopicRepository(prisma).findBySlug(slug). A
+    // null result makes the helper fall back to the default topic — keeping the
+    // tests DB-free regardless of any `?topic=`/`topicSlug` input.
+    createTopicRepository: vi.fn().mockReturnValue({
+      findBySlug: vi.fn().mockResolvedValue(null),
+    }),
     prisma: actual.prisma,
   };
 });
@@ -76,6 +82,7 @@ const makeSource = (overrides: Partial<Source> = {}): Source => ({
 
 const makeRepo = (overrides: Partial<SourceRepository> = {}): SourceRepository => ({
   findAll: vi.fn().mockResolvedValue([makeSource()]),
+  findAllByTopic: vi.fn().mockResolvedValue([makeSource()]),
   findEnabled: vi.fn().mockResolvedValue([makeSource()]),
   findEnabledByTopic: vi.fn().mockResolvedValue([makeSource()]),
   findById: vi.fn().mockResolvedValue(makeSource()),
@@ -126,7 +133,7 @@ describe('GET /api/sources', () => {
     const { repo } = await setupMocks();
     const source1 = makeSource({ id: 'src-1' });
     const source2 = makeSource({ id: 'src-2', label: 'Second' });
-    vi.mocked(repo.findAll).mockResolvedValue([source1, source2]);
+    vi.mocked(repo.findAllByTopic).mockResolvedValue([source1, source2]);
 
     const { GET } = await import('../app/api/sources/route');
     const req = makeRequest('GET', '/api/sources');
@@ -137,11 +144,12 @@ describe('GET /api/sources', () => {
     expect(body.success).toBe(true);
     expect(body.data).toHaveLength(2);
     expect(body.data[0]?.id).toBe('src-1');
+    expect(repo.findAllByTopic).toHaveBeenCalledWith('topic-1');
   });
 
   it('returns 200 with empty array when no sources exist', async () => {
     const { repo } = await setupMocks();
-    vi.mocked(repo.findAll).mockResolvedValue([]);
+    vi.mocked(repo.findAllByTopic).mockResolvedValue([]);
 
     const { GET } = await import('../app/api/sources/route');
     const req = makeRequest('GET', '/api/sources');
@@ -155,7 +163,7 @@ describe('GET /api/sources', () => {
 
   it('returns 500 when repository throws', async () => {
     const { repo } = await setupMocks();
-    vi.mocked(repo.findAll).mockRejectedValue(new Error('DB connection failed'));
+    vi.mocked(repo.findAllByTopic).mockRejectedValue(new Error('DB connection failed'));
 
     const { GET } = await import('../app/api/sources/route');
     const req = makeRequest('GET', '/api/sources');

@@ -10,19 +10,21 @@
  * key, read-only. Auth is enforced by middleware.
  */
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { ok, err } from '@/lib/api-response';
 import { getErrorMessage } from '@/lib/error';
 import { loadRecentCandidates } from '@/lib/candidates';
+import { resolveTopicIdFromRequest } from '@/lib/resolve-topic';
 
 export const dynamic = 'force-dynamic';
 
 const PICK_LIMIT = 3;
 const PER_SOURCE_CAP = 1;
 
-export async function GET(): Promise<NextResponse> {
+export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
-    const { candidates, scannedAt } = await loadRecentCandidates();
+    const topicId = await resolveTopicIdFromRequest(request);
+    const { candidates, scannedAt } = await loadRecentCandidates(topicId);
     const { heuristicCurate, candidateToDraftItem, DEFAULT_TOPIC } = await import('@digest/curation');
 
     const picked = heuristicCurate(candidates, {

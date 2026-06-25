@@ -9,3 +9,4 @@ export * from './article.js';
 export * from './subscriber.js';
 export * from './settings.js';
 export * from './source.js';
+export * from './topic.js';

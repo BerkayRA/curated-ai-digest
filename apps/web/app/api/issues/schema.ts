@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { isoWeekSchema } from '@digest/shared';
+import { isoWeekSchema, TopicSlugSchema } from '@digest/shared';
 
 // ---------------------------------------------------------------------------
 // Create-draft DTO — validated at the API boundary.
@@ -25,6 +25,8 @@ export const CreateIssueDraftSchema = z.object({
   isoWeek: isoWeekSchema,
   subject: z.string().trim().min(1, 'Konu başlığı gerekli'),
   preheader: z.string().trim().optional(),
+  // Active topic slug from the surface. Absent/unknown degrades to default.
+  topicSlug: TopicSlugSchema.optional(),
   items: z
     .array(CreateIssueItemDraftSchema)
     .min(1, 'En az 1 haber gerekli')

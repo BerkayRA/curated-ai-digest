@@ -16,7 +16,11 @@ export const metadata = {
  * at the bottom of the form. The default ISO week is computed server-side so
  * the field is pre-filled with the upcoming week.
  */
-export default function NewIssuePage() {
+export default function NewIssuePage({
+  searchParams,
+}: {
+  searchParams: { topic?: string };
+}) {
   const defaultIsoWeek = nextIsoWeek();
 
   return (
@@ -30,7 +34,7 @@ export default function NewIssuePage() {
           </Link>
         }
       />
-      <NewIssueForm defaultIsoWeek={defaultIsoWeek} />
+      <NewIssueForm defaultIsoWeek={defaultIsoWeek} topicSlug={searchParams.topic} />
     </section>
   );
 }
