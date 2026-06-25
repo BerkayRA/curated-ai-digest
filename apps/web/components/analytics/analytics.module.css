@@ -1,0 +1,193 @@
+/* Analytics surface — KPI stat tiles + inline-SVG bar charts + an issue-history
+   table. Built entirely on the shared Mega tokens (3px Process-Blue top-rail,
+   eyebrow labels, ring pills) so light/dark theming is automatic. Tokens only. */
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+.topicTag {
+  color: var(--color-brand-dark);
+}
+
+/* ---- Stat cards ---------------------------------------------------------- */
+
+.statGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-lg);
+}
+
+.statCard {
+  position: relative;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+/* 3px Process-Blue top-rail */
+.statCard::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: var(--color-brand);
+}
+
+.statLabel {
+  margin-bottom: var(--space-xs);
+}
+
+.statValue {
+  font-family: var(--font-mono);
+  font-weight: 800;
+  font-size: var(--text-display);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--color-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.statSub {
+  margin-top: var(--space-xs);
+  font-size: var(--text-sm);
+  color: var(--color-ink-muted);
+}
+
+/* ---- Note ---------------------------------------------------------------- */
+
+.note {
+  font-size: var(--text-sm);
+  color: var(--color-ink-muted);
+  font-style: italic;
+  margin: calc(var(--space-md) * -0.5) 0 0;
+}
+
+/* ---- Panels (chart + table containers) ----------------------------------- */
+
+.panel {
+  position: relative;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.panel::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: var(--color-brand);
+}
+
+.panelLabel {
+  margin-bottom: var(--space-md);
+}
+
+/* ---- Bar chart (inline SVG) ---------------------------------------------- */
+
+.barChart {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.barLabel {
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-weight: 700;
+  fill: var(--color-ink-muted);
+}
+
+.barTrack {
+  fill: var(--color-row-hover);
+}
+
+.barFill {
+  fill: var(--color-brand);
+}
+
+.barValue {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: var(--text-sm);
+  fill: var(--color-ink);
+}
+
+/* ---- Issue-history table ------------------------------------------------- */
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+
+.table th {
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  color: var(--color-ink-muted);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-row-hover);
+  border-bottom: 1px solid var(--color-border);
+}
+
+/* 3px Process-Blue left-rail on the first header cell — the Mega table tell. */
+.table th:first-child {
+  box-shadow: inset 3px 0 0 var(--color-brand);
+}
+
+.table td {
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: middle;
+  color: var(--color-ink);
+}
+
+.table tbody tr:hover {
+  background: var(--color-row-hover);
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.subjectCell {
+  max-width: 22ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---- Responsive ---------------------------------------------------------- */
+
+@media (max-width: 1024px) {
+  .statGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .statGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}

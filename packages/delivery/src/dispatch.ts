@@ -16,8 +16,10 @@ import { createEmailProvider, renderDigestEmail } from '@digest/email';
 import type { DigestEmailData, DigestItem } from '@digest/email';
 import type { IssueStatus } from '@digest/shared';
 import type { Issue, IssueItem, Settings, TopicRecipient } from '@digest/db';
+import { randomUUID } from 'node:crypto';
 import { transitionIssue } from './issue-transition.js';
 import type { TransitionOptions, TransitionResult } from './issue-transition.js';
+import { injectTrackingHooks } from './track.js';
 
 // ---------------------------------------------------------------------------
 // PII scrubbing
@@ -51,6 +53,7 @@ export interface DispatchRepo {
     issueId: string;
     subscriberId: string;
     subscriberTopicId: string;
+    trackToken: string;
     status: 'queued' | 'sent' | 'failed';
     providerMessageId?: string;
     error?: string;
@@ -81,12 +84,21 @@ export const defaultDispatchRepo: DispatchRepo = {
   async getSettings() {
     return prisma.settings.findFirst();
   },
-  async recordSend({ issueId, subscriberId, subscriberTopicId, status, providerMessageId, error }) {
+  async recordSend({
+    issueId,
+    subscriberId,
+    subscriberTopicId,
+    trackToken,
+    status,
+    providerMessageId,
+    error,
+  }) {
     await prisma.send.create({
       data: {
         issueId,
         subscriberId,
         subscriberTopicId,
+        trackToken,
         status,
         providerMessageId: providerMessageId ?? null,
         error: error !== undefined ? scrubPii(error) : null,
@@ -221,11 +233,24 @@ export async function dispatchIssue(
   const senderAddress = 'Mega Bilgisayar Tic. Ltd. Şti, Ankara, Türkiye';
 
   // 3. Build per-recipient messages
-  const messages: Array<{ message: EmailMessage; recipient: TopicRecipient }> = await Promise.all(
+  const messages: Array<{
+    message: EmailMessage;
+    recipient: TopicRecipient;
+    trackToken: string;
+  }> = await Promise.all(
     recipients.map(async (recipient) => {
       const unsubscribeUrl = buildUnsubscribeUrl(recipient.unsubscribeToken);
       const data = buildDigestEmailData(issue, unsubscribeUrl, senderAddress);
       const rendered = await renderDigestEmail(data);
+
+      // One opaque tracking token per Send — links + open pixel resolve to it.
+      const trackToken = randomUUID();
+      const trackedHtml = injectTrackingHooks(
+        rendered.html,
+        trackToken,
+        issue.items,
+        APP_BASE_URL,
+      );
 
       const headers: Record<string, string> = {
         'List-Unsubscribe': `<${unsubscribeUrl}>`,
@@ -245,12 +270,12 @@ export async function dispatchIssue(
           name: 'Curated AI Digest',
         },
         subject: issue.subject,
-        html: rendered.html,
+        html: trackedHtml,
         text: rendered.text,
         headers,
       };
 
-      return { message, recipient };
+      return { message, recipient, trackToken };
     }),
   );
 
@@ -263,11 +288,12 @@ export async function dispatchIssue(
 
     await Promise.all(
       results.map(async (result, i) => {
-        const { recipient } = messages[i]!;
+        const { recipient, trackToken } = messages[i]!;
         await repo.recordSend({
           issueId,
           subscriberId: recipient.subscriberId,
           subscriberTopicId: recipient.subscriberTopicId,
+          trackToken,
           status: 'sent',
           providerMessageId: result.providerMessageId,
         });
@@ -277,11 +303,12 @@ export async function dispatchIssue(
   } catch (batchError) {
     // Batch failed — record individual failures with PII scrubbed from error message
     const rawError = batchError instanceof Error ? batchError.message : String(batchError);
-    for (const { recipient } of messages) {
+    for (const { recipient, trackToken } of messages) {
       await repo.recordSend({
         issueId,
         subscriberId: recipient.subscriberId,
         subscriberTopicId: recipient.subscriberTopicId,
+        trackToken,
         status: 'failed',
         error: rawError,
       });

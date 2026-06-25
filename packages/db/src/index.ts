@@ -46,7 +46,10 @@ export type {
   Source,
   Topic,
   SubscriberTopic,
+  EmailEvent,
 } from '@prisma/client';
+
+export { EmailEventType } from '@prisma/client';
 
 export { createSourceRepository } from './source-repository.js';
 export type {
@@ -70,5 +73,20 @@ export type {
   UpsertSubscriberTopicData,
   TopicRecipient,
 } from './subscriber-topic-repository.js';
+
+export { createEmailEventRepository } from './email-event-repository.js';
+export type {
+  EmailEventRepository,
+  RecordEmailEventData,
+} from './email-event-repository.js';
+
+export { createAnalyticsRepository } from './analytics-repository.js';
+export type {
+  AnalyticsRepository,
+  TopicAnalyticsSummary,
+  IssueAnalyticsRow,
+  ClickedUrlRow,
+  GrowthPoint,
+} from './analytics-repository.js';
 
 export { getDefaultTopic, getDefaultTopicId } from './default-topic.js';

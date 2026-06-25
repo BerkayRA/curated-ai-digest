@@ -180,6 +180,9 @@ describe('dispatchIssue', () => {
     expect(calls.every((c) => c.status === 'sent')).toBe(true);
     expect(calls.map((c) => c.subscriberId).sort()).toEqual(['sub-1', 'sub-2'].sort());
     expect(calls.every((c) => c.providerMessageId !== undefined)).toBe(true);
+    expect(calls.every((c) => typeof c.trackToken === 'string' && c.trackToken.length > 0)).toBe(
+      true,
+    );
   });
 
   it('transitions issue to sent on success', async () => {
