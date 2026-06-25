@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { prisma } from '@digest/db';
+import { prisma, createSubscriberTopicRepository } from '@digest/db';
 import { CreateSubscriberSchema } from '@digest/shared';
 import { ok, err } from '@/lib/api-response';
 import { getErrorMessage } from '@/lib/error';
+import { resolveTopicIdBySlug } from '@/lib/resolve-topic';
+import { assertSameOrigin } from '@/lib/assert-same-origin';
 import { randomUUID } from 'crypto';
 
 export const dynamic = 'force-dynamic';
@@ -36,6 +38,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const csrfCheck = assertSameOrigin(request);
+  if (csrfCheck !== null) return csrfCheck;
+
   try {
     const body: unknown = await request.json();
     const parsed = CreateSubscriberSchema.safeParse(body);
@@ -51,11 +56,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(err('Bu e-posta adresi zaten kayıtlı'), { status: 409 });
     }
 
+    const { topicSlug, ...subscriberData } = parsed.data;
+
     const subscriber = await prisma.subscriber.create({
       data: {
-        ...parsed.data,
+        ...subscriberData,
         unsubscribeToken: randomUUID(),
       },
+    });
+
+    // Scope the new subscriber to the active topic (defaults when slug absent).
+    const topicId = await resolveTopicIdBySlug(topicSlug);
+    await createSubscriberTopicRepository(prisma).upsert({
+      subscriberId: subscriber.id,
+      topicId,
     });
 
     return NextResponse.json(ok(subscriber), { status: 201 });

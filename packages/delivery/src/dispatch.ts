@@ -6,12 +6,16 @@
  * mock all I/O without hitting real DB or email infrastructure.
  */
 
-import { prisma } from '@digest/db';
+import {
+  prisma,
+  createSubscriberTopicRepository,
+  createTopicRepository,
+} from '@digest/db';
 import type { EmailProvider, EmailMessage } from '@digest/email';
 import { createEmailProvider, renderDigestEmail } from '@digest/email';
 import type { DigestEmailData, DigestItem } from '@digest/email';
 import type { IssueStatus } from '@digest/shared';
-import type { Issue, IssueItem, Subscriber, Settings } from '@digest/db';
+import type { Issue, IssueItem, Settings, TopicRecipient } from '@digest/db';
 import { transitionIssue } from './issue-transition.js';
 import type { TransitionOptions, TransitionResult } from './issue-transition.js';
 
@@ -36,11 +40,17 @@ export function scrubPii(input: string): string {
 
 export interface DispatchRepo {
   getIssueWithItems(issueId: string): Promise<(Issue & { items: IssueItem[] }) | null>;
-  getActiveSubscribers(): Promise<Subscriber[]>;
+  /** Active, per-topic dispatch recipients (global unsubscribed/bounced excluded). */
+  getTopicRecipients(topicId: string): Promise<TopicRecipient[]>;
+  /** Per-topic From/Reply-To overrides; null fields fall back to global Settings. */
+  getTopicBranding(
+    topicId: string,
+  ): Promise<{ fromAddress: string | null; replyTo: string | null } | null>;
   getSettings(): Promise<Settings | null>;
   recordSend(data: {
     issueId: string;
     subscriberId: string;
+    subscriberTopicId: string;
     status: 'queued' | 'sent' | 'failed';
     providerMessageId?: string;
     error?: string;
@@ -58,17 +68,25 @@ export const defaultDispatchRepo: DispatchRepo = {
       include: { items: { orderBy: { order: 'asc' } } },
     });
   },
-  async getActiveSubscribers() {
-    return prisma.subscriber.findMany({ where: { status: 'active' } });
+  async getTopicRecipients(topicId) {
+    return createSubscriberTopicRepository(prisma).findActiveRecipients(topicId);
+  },
+  async getTopicBranding(topicId) {
+    const topic = await createTopicRepository(prisma).findById(topicId);
+    if (!topic) {
+      return null;
+    }
+    return { fromAddress: topic.fromAddress, replyTo: topic.replyTo };
   },
   async getSettings() {
     return prisma.settings.findFirst();
   },
-  async recordSend({ issueId, subscriberId, status, providerMessageId, error }) {
+  async recordSend({ issueId, subscriberId, subscriberTopicId, status, providerMessageId, error }) {
     await prisma.send.create({
       data: {
         issueId,
         subscriberId,
+        subscriberTopicId,
         status,
         providerMessageId: providerMessageId ?? null,
         error: error !== undefined ? scrubPii(error) : null,
@@ -152,12 +170,12 @@ function buildDigestEmailData(
 // ---------------------------------------------------------------------------
 
 /**
- * Dispatches an issue to all active subscribers.
+ * Dispatches an issue to all active recipients of the issue's topic.
  *
  * Flow:
- *  1. Load issue + items + subscribers + settings
+ *  1. Load issue + items + topic recipients + settings
  *  2. Verify provider config
- *  3. For each subscriber, build a personalised EmailMessage
+ *  3. For each recipient, build a personalised EmailMessage
  *  4. sendBatch via provider
  *  5. Record Send rows
  *  6. Transition issue to 'sent' (or 'failed' if all sends failed)
@@ -180,8 +198,8 @@ export async function dispatchIssue(
     throw new Error('No settings row found — configure the application before sending');
   }
 
-  const subscribers = await repo.getActiveSubscribers();
-  if (subscribers.length === 0) {
+  const recipients = await repo.getTopicRecipients(issue.topicId);
+  if (recipients.length === 0) {
     throw new Error('No active subscribers found — nothing to send');
   }
 
@@ -195,34 +213,44 @@ export async function dispatchIssue(
     );
   }
 
+  // Resolve per-topic From/Reply-To once, falling back to global Settings.
+  const branding = await repo.getTopicBranding(issue.topicId);
+  const fromEmail = branding?.fromAddress ?? settings.fromAddress;
+  const replyTo = branding?.replyTo ?? settings.replyTo;
+
   const senderAddress = 'Mega Bilgisayar Tic. Ltd. Şti, Ankara, Türkiye';
 
-  // 3. Build per-subscriber messages
-  const messages: Array<{ message: EmailMessage; subscriberId: string }> = await Promise.all(
-    subscribers.map(async (subscriber) => {
-      const unsubscribeUrl = buildUnsubscribeUrl(subscriber.unsubscribeToken);
+  // 3. Build per-recipient messages
+  const messages: Array<{ message: EmailMessage; recipient: TopicRecipient }> = await Promise.all(
+    recipients.map(async (recipient) => {
+      const unsubscribeUrl = buildUnsubscribeUrl(recipient.unsubscribeToken);
       const data = buildDigestEmailData(issue, unsubscribeUrl, senderAddress);
       const rendered = await renderDigestEmail(data);
 
+      const headers: Record<string, string> = {
+        'List-Unsubscribe': `<${unsubscribeUrl}>`,
+        'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+      };
+      if (replyTo) {
+        headers['Reply-To'] = replyTo;
+      }
+
       const message: EmailMessage = {
         to: {
-          email: subscriber.email,
-          name: subscriber.displayName ?? undefined,
+          email: recipient.email,
+          name: recipient.displayName ?? undefined,
         },
         from: {
-          email: settings.fromAddress,
+          email: fromEmail,
           name: 'Curated AI Digest',
         },
         subject: issue.subject,
         html: rendered.html,
         text: rendered.text,
-        headers: {
-          'List-Unsubscribe': `<${unsubscribeUrl}>`,
-          'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
-        },
+        headers,
       };
 
-      return { message, subscriberId: subscriber.id };
+      return { message, recipient };
     }),
   );
 
@@ -235,10 +263,11 @@ export async function dispatchIssue(
 
     await Promise.all(
       results.map(async (result, i) => {
-        const subscriberId = messages[i]!.subscriberId;
+        const { recipient } = messages[i]!;
         await repo.recordSend({
           issueId,
-          subscriberId,
+          subscriberId: recipient.subscriberId,
+          subscriberTopicId: recipient.subscriberTopicId,
           status: 'sent',
           providerMessageId: result.providerMessageId,
         });
@@ -248,10 +277,11 @@ export async function dispatchIssue(
   } catch (batchError) {
     // Batch failed — record individual failures with PII scrubbed from error message
     const rawError = batchError instanceof Error ? batchError.message : String(batchError);
-    for (const { subscriberId } of messages) {
+    for (const { recipient } of messages) {
       await repo.recordSend({
         issueId,
-        subscriberId,
+        subscriberId: recipient.subscriberId,
+        subscriberTopicId: recipient.subscriberTopicId,
         status: 'failed',
         error: rawError,
       });
@@ -267,11 +297,11 @@ export async function dispatchIssue(
     issueId,
     to: targetStatus,
     actorId: opts.actorId ?? 'system',
-    meta: { successCount, failureCount, totalRecipients: subscribers.length },
+    meta: { successCount, failureCount, totalRecipients: recipients.length },
   });
 
   return {
-    totalRecipients: subscribers.length,
+    totalRecipients: recipients.length,
     successCount,
     failureCount,
     issueStatus: targetStatus,

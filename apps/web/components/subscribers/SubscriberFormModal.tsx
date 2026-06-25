@@ -10,6 +10,8 @@ import styles from './subscribers.module.css';
 interface SubscriberFormModalProps {
   mode: 'create' | 'edit';
   subscriber?: Subscriber;
+  /** On create, the new subscriber is opted into this topic (null → default). */
+  topicSlug?: string | null;
   onSaved: (subscriber: Subscriber) => void;
   onClose: () => void;
 }
@@ -17,6 +19,7 @@ interface SubscriberFormModalProps {
 export function SubscriberFormModal({
   mode,
   subscriber,
+  topicSlug,
   onSaved,
   onClose,
 }: SubscriberFormModalProps) {
@@ -37,7 +40,12 @@ export function SubscriberFormModal({
       const method = mode === 'create' ? 'POST' : 'PATCH';
       const body =
         mode === 'create'
-          ? { email, displayName: displayName || undefined, company: company || undefined }
+          ? {
+              email,
+              displayName: displayName || undefined,
+              company: company || undefined,
+              topicSlug: topicSlug ?? undefined,
+            }
           : { displayName: displayName || undefined, company: company || undefined, status };
 
       const res = await fetch(url, {
