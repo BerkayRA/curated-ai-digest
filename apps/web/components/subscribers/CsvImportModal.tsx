@@ -8,11 +8,15 @@ import type { ImportResult } from '@/app/api/subscribers/import/route';
 import styles from './subscribers.module.css';
 
 interface CsvImportModalProps {
+  /** Slug of the topic imported subscribers are added to (null → default topic). */
+  topicSlug?: string | null;
+  /** Display name of the target topic, for the import hint. */
+  topicName?: string | null;
   onImported: () => void;
   onClose: () => void;
 }
 
-export function CsvImportModal({ onImported, onClose }: CsvImportModalProps) {
+export function CsvImportModal({ topicSlug, topicName, onImported, onClose }: CsvImportModalProps) {
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ImportResult | null>(null);
@@ -29,7 +33,10 @@ export function CsvImportModal({ onImported, onClose }: CsvImportModalProps) {
       const formData = new FormData();
       formData.append('file', file);
 
-      const res = await fetch('/api/subscribers/import', {
+      const importUrl = topicSlug
+        ? `/api/subscribers/import?topic=${encodeURIComponent(topicSlug)}`
+        : '/api/subscribers/import';
+      const res = await fetch(importUrl, {
         method: 'POST',
         body: formData,
       });
@@ -74,6 +81,12 @@ export function CsvImportModal({ onImported, onClose }: CsvImportModalProps) {
               CSV dosyası <code className={styles.code}>email</code> sütunu içermeli;{' '}
               <code className={styles.code}>displayName</code> ve{' '}
               <code className={styles.code}>company</code> isteğe bağlıdır.
+              {topicName ? (
+                <>
+                  {' '}
+                  Aboneler <strong>{topicName}</strong> konusuna eklenir.
+                </>
+              ) : null}
             </p>
 
             {error && (

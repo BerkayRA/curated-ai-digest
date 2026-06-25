@@ -95,7 +95,13 @@ describe('runSendJob', () => {
       findIssueByWeek: vi.fn().mockResolvedValue({ ...baseIssue, status: 'approved' }),
     });
 
-    await runSendJob({ logger: makeLogger(), isoWeek: '2026-W25', repo });
+    await runSendJob({
+      logger: makeLogger(),
+      topicId: 'topic-1',
+      isoWeek: '2026-W25',
+      autoSendEnabled: true,
+      repo,
+    });
 
     expect(dispatchIssue).toHaveBeenCalledWith('issue-1', { actorId: 'worker' });
   });
@@ -105,7 +111,13 @@ describe('runSendJob', () => {
       findIssueByWeek: vi.fn().mockResolvedValue({ ...baseIssue, status: 'scheduled' }),
     });
 
-    await runSendJob({ logger: makeLogger(), isoWeek: '2026-W25', repo });
+    await runSendJob({
+      logger: makeLogger(),
+      topicId: 'topic-1',
+      isoWeek: '2026-W25',
+      autoSendEnabled: true,
+      repo,
+    });
 
     expect(dispatchIssue).toHaveBeenCalledWith('issue-1', { actorId: 'worker' });
   });
@@ -117,7 +129,13 @@ describe('runSendJob', () => {
       getSettings: vi.fn().mockResolvedValue(autoSendSettings),
     });
 
-    await runSendJob({ logger: makeLogger(), isoWeek: '2026-W25', repo });
+    await runSendJob({
+      logger: makeLogger(),
+      topicId: 'topic-1',
+      isoWeek: '2026-W25',
+      autoSendEnabled: true,
+      repo,
+    });
 
     expect(repo.markAutoSent).toHaveBeenCalledWith('issue-1');
     expect(dispatchIssue).toHaveBeenCalledWith('issue-1', { actorId: 'worker:auto' });
@@ -130,7 +148,13 @@ describe('runSendJob', () => {
       getSettings: vi.fn().mockResolvedValue(autoSendSettings),
     });
 
-    await runSendJob({ logger: makeLogger(), isoWeek: '2026-W25', repo });
+    await runSendJob({
+      logger: makeLogger(),
+      topicId: 'topic-1',
+      isoWeek: '2026-W25',
+      autoSendEnabled: true,
+      repo,
+    });
 
     expect(dispatchIssue).toHaveBeenCalledWith('issue-1', { actorId: 'worker:auto' });
   });
@@ -150,7 +174,9 @@ describe('runSendJob', () => {
 
     await runSendJob({
       logger: makeLogger(),
+      topicId: 'topic-1',
       isoWeek: '2026-W25',
+      autoSendEnabled: true,
       repo,
       onAutoSendBlocked,
     });
@@ -166,7 +192,13 @@ describe('runSendJob', () => {
       getSettings: vi.fn().mockResolvedValue(noAutoSendSettings),
     });
 
-    await runSendJob({ logger: makeLogger(), isoWeek: '2026-W25', repo });
+    await runSendJob({
+      logger: makeLogger(),
+      topicId: 'topic-1',
+      isoWeek: '2026-W25',
+      autoSendEnabled: false,
+      repo,
+    });
 
     expect(dispatchIssue).not.toHaveBeenCalled();
   });
@@ -176,7 +208,7 @@ describe('runSendJob', () => {
       findIssueByWeek: vi.fn().mockResolvedValue({ ...baseIssue, status: 'sent' }),
     });
 
-    await runSendJob({ logger: makeLogger(), isoWeek: '2026-W25', repo });
+    await runSendJob({ logger: makeLogger(), topicId: 'topic-1', isoWeek: '2026-W25', autoSendEnabled: true, repo });
 
     expect(dispatchIssue).not.toHaveBeenCalled();
   });
@@ -186,7 +218,7 @@ describe('runSendJob', () => {
       findIssueByWeek: vi.fn().mockResolvedValue({ ...baseIssue, status: 'cancelled' }),
     });
 
-    await runSendJob({ logger: makeLogger(), isoWeek: '2026-W25', repo });
+    await runSendJob({ logger: makeLogger(), topicId: 'topic-1', isoWeek: '2026-W25', autoSendEnabled: true, repo });
 
     expect(dispatchIssue).not.toHaveBeenCalled();
   });
@@ -196,7 +228,7 @@ describe('runSendJob', () => {
       findIssueByWeek: vi.fn().mockResolvedValue({ ...baseIssue, status: 'failed' }),
     });
 
-    await runSendJob({ logger: makeLogger(), isoWeek: '2026-W25', repo });
+    await runSendJob({ logger: makeLogger(), topicId: 'topic-1', isoWeek: '2026-W25', autoSendEnabled: true, repo });
 
     expect(dispatchIssue).not.toHaveBeenCalled();
   });
@@ -207,13 +239,24 @@ describe('runSendJob', () => {
     });
     const logger = makeLogger();
 
-    await runSendJob({ logger, isoWeek: '2026-W25', repo });
+    await runSendJob({ logger, topicId: 'topic-1', isoWeek: '2026-W25', autoSendEnabled: true, repo });
 
     expect(dispatchIssue).not.toHaveBeenCalled();
     expect(logger.warn).toHaveBeenCalledWith(
       'job.send.no_issue',
-      expect.objectContaining({ isoWeek: '2026-W25' }),
+      expect.objectContaining({ topicId: 'topic-1', isoWeek: '2026-W25' }),
     );
+  });
+
+  it('looks up the issue by the (topicId, isoWeek) composite key', async () => {
+    const findIssueByWeek = vi
+      .fn()
+      .mockResolvedValue({ ...baseIssue, status: 'approved' });
+    const repo = makeRepo({ findIssueByWeek });
+
+    await runSendJob({ logger: makeLogger(), topicId: 'topic-1', isoWeek: '2026-W25', autoSendEnabled: true, repo });
+
+    expect(findIssueByWeek).toHaveBeenCalledWith('topic-1', '2026-W25');
   });
 
   it('passes correct provider kind to createEmailProvider for guardrail check', async () => {
@@ -223,7 +266,7 @@ describe('runSendJob', () => {
       getSettings: vi.fn().mockResolvedValue({ autoSendEnabled: true, activeProvider: 'acs_email' }),
     });
 
-    await runSendJob({ logger: makeLogger(), isoWeek: '2026-W25', repo });
+    await runSendJob({ logger: makeLogger(), topicId: 'topic-1', isoWeek: '2026-W25', autoSendEnabled: true, repo });
 
     expect(createEmailProvider).toHaveBeenCalledWith('acs_email');
   });

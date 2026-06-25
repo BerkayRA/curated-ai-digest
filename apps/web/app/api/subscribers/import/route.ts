@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@digest/db';
+import { prisma, createSubscriberTopicRepository } from '@digest/db';
 import { ok, err } from '@/lib/api-response';
 import { parseCsvImport } from '@/lib/csv-import';
 import { getErrorMessage } from '@/lib/error';
+import { resolveTopicIdFromRequest } from '@/lib/resolve-topic';
+import { assertSameOrigin } from '@/lib/assert-same-origin';
 import { randomUUID } from 'crypto';
 
 export const dynamic = 'force-dynamic';
@@ -13,11 +15,17 @@ const MAX_CSV_BYTES = 5 * 1024 * 1024;
 export interface ImportResult {
   imported: number;
   skippedDuplicates: number;
+  /** Existing subscribers that were instead added to the target topic. */
   skippedExisting: number;
+  /** Memberships added to the target topic (new + existing subscribers). */
+  membershipsAdded: number;
   rowErrors: Record<number, string>;
 }
 
 export async function POST(request: NextRequest) {
+  const csrfCheck = assertSameOrigin(request);
+  if (csrfCheck !== null) return csrfCheck;
+
   try {
     const contentType = request.headers.get('content-type') ?? '';
 
@@ -48,17 +56,26 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(err('CSV dosyası boş veya geçersiz'), { status: 400 });
     }
 
+    // Resolve the target topic from `?topic=<slug>` (defaults when absent).
+    const topicId = await resolveTopicIdFromRequest(request);
+    const subscriberTopics = createSubscriberTopicRepository(prisma);
+
     let imported = 0;
     let skippedExisting = 0;
+    let membershipsAdded = 0;
 
     for (const row of valid) {
       const existing = await prisma.subscriber.findUnique({ where: { email: row.email } });
+
       if (existing) {
+        // Re-importing into a new topic still adds the membership.
+        await subscriberTopics.upsert({ subscriberId: existing.id, topicId });
         skippedExisting++;
+        membershipsAdded++;
         continue;
       }
 
-      await prisma.subscriber.create({
+      const created = await prisma.subscriber.create({
         data: {
           email: row.email,
           displayName: row.displayName,
@@ -67,13 +84,16 @@ export async function POST(request: NextRequest) {
           unsubscribeToken: randomUUID(),
         },
       });
+      await subscriberTopics.upsert({ subscriberId: created.id, topicId });
       imported++;
+      membershipsAdded++;
     }
 
     const result: ImportResult = {
       imported,
       skippedDuplicates: duplicatesSkipped,
       skippedExisting,
+      membershipsAdded,
       rowErrors,
     };
 

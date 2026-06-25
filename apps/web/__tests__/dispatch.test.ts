@@ -27,35 +27,27 @@ const mockSettings = {
   updatedAt: new Date(),
 };
 
-const mockSubscribers = [
+// Per-topic recipients (TopicRecipient shape) — what getTopicRecipients returns.
+const mockRecipients = [
   {
-    id: 'sub-1',
+    subscriberTopicId: 'st-1',
+    subscriberId: 'sub-1',
     email: 'alice@example.com',
     displayName: 'Alice',
-    company: null,
-    status: 'active' as const,
-    locale: 'tr-TR',
     unsubscribeToken: 'token-alice-abc123',
-    source: 'manual',
-    createdAt: new Date(),
-    updatedAt: new Date(),
   },
   {
-    id: 'sub-2',
+    subscriberTopicId: 'st-2',
+    subscriberId: 'sub-2',
     email: 'bob@example.com',
     displayName: null,
-    company: null,
-    status: 'active' as const,
-    locale: 'tr-TR',
     unsubscribeToken: 'token-bob-def456',
-    source: 'import',
-    createdAt: new Date(),
-    updatedAt: new Date(),
   },
 ];
 
 const mockIssue = {
   id: 'issue-1',
+  topicId: 'topic-1',
   isoWeek: '2026-W25',
   status: 'approved' as IssueStatus,
   subject: 'Test Digest Konusu',
@@ -103,7 +95,8 @@ const mockIssue = {
 function makeMockRepo(overrides: Partial<DispatchRepo> = {}): DispatchRepo {
   return {
     getIssueWithItems: vi.fn().mockResolvedValue(mockIssue),
-    getActiveSubscribers: vi.fn().mockResolvedValue(mockSubscribers),
+    getTopicRecipients: vi.fn().mockResolvedValue(mockRecipients),
+    getTopicBranding: vi.fn().mockResolvedValue({ fromAddress: null, replyTo: null }),
     getSettings: vi.fn().mockResolvedValue(mockSettings),
     recordSend: vi.fn().mockResolvedValue(undefined),
     ...overrides,
@@ -111,7 +104,7 @@ function makeMockRepo(overrides: Partial<DispatchRepo> = {}): DispatchRepo {
 }
 
 function makeMockProvider(overrides: Partial<EmailProvider> = {}): EmailProvider {
-  const sendResults: SendResult[] = mockSubscribers.map((_, i) => ({
+  const sendResults: SendResult[] = mockRecipients.map((_, i) => ({
     providerMessageId: `msg-${i + 1}`,
     status: 'sent' as const,
   }));
@@ -252,7 +245,7 @@ describe('dispatchIssue', () => {
   });
 
   it('throws when there are no active subscribers', async () => {
-    const repo = makeMockRepo({ getActiveSubscribers: vi.fn().mockResolvedValue([]) });
+    const repo = makeMockRepo({ getTopicRecipients: vi.fn().mockResolvedValue([]) });
     const provider = makeMockProvider();
 
     await expect(
