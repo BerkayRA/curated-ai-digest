@@ -7,7 +7,8 @@
 > growth, send optimization, and white‑label reach.
 >
 > **Progress:** Phase 0 ✅ · Phase 1a ✅ (Topic entity + isolation) · Phase 1b ✅
-> (Topic management + switcher) · Phase 1c → next.
+> (Topic management + switcher) · Phase 1c ✅ (per-topic subscribers, schedules &
+> sending) · Phase 2 → next.
 
 ## Where we are today (v1)
 
@@ -40,7 +41,7 @@ Stabilize the flaky `web#test` source tests; baseline visual snapshots and make 
 
 - **1a ✅ — Topic entity + data isolation (invisible):** `Topic` is a first‑class model; `topicId` is added across sources, candidates, ingest runs, issues, and pipeline runs, with composite `(topic, week)` / `(topic, url)` keys. A backfill migration attached all existing data to a seed `enterprise-ai` topic — zero change to today's newsletter. The pipeline and prompts are parameterized by topic.
 - **1b ✅ — Topic management:** a Topics admin page (create/edit/pause) and a topic switcher that scopes sources, the archive, and curation via `?topic=<slug>`. Verified: a second newsletter (`edge-ai`) created end‑to‑end, with the first topic untouched and its sources isolated.
-- **1c — Per‑topic audience & delivery:** subscribers opt into topics individually; each topic runs its own schedule and sends only to its own subscribers, from its own address.
+- **1c ✅ — Per‑topic audience & delivery:** subscribers opt into topics individually (a `SubscriberTopic` join with per‑topic status + unsubscribe token); dispatch sends only to the issue topic's active members, from the topic's own address (falling back to global Settings); the worker runs one schedule per active topic, reloading every ~5 min so pause/schedule changes apply automatically. Existing subscribers were backfilled into the seed topic with zero behavior change.
 
 ## Phase 2 — Engagement analytics
 

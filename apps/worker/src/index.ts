@@ -5,7 +5,7 @@
  * Handles SIGTERM / SIGINT for graceful shutdown.
  */
 
-import { prisma } from '@digest/db';
+import { prisma, createTopicRepository } from '@digest/db';
 import { logger } from './logger.js';
 import { startScheduler } from './scheduler.js';
 
@@ -49,12 +49,18 @@ async function bootstrap(): Promise<void> {
     autoSendEnabled: settings.autoSendEnabled,
   });
 
+  // Load active topics so the scheduler can register one cron pair per topic.
+  const topics = await createTopicRepository(prisma).findActive();
+  logger.info('worker.topics.loaded', { topicCount: topics.length });
+
   const scheduler = startScheduler({
+    topics,
     settings: {
       sendDayOfWeek: settings.sendDayOfWeek,
       sendTime: settings.sendTime,
       timezone: settings.timezone,
       pipelineLeadDays: settings.pipelineLeadDays,
+      autoSendEnabled: settings.autoSendEnabled,
     },
     logger,
   });

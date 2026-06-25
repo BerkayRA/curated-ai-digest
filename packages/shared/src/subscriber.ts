@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { SubscriberStatusSchema } from './enums.js';
 import { emailSchema } from './primitives.js';
+import { TopicSlugSchema } from './topic.js';
 
 // ---------------------------------------------------------------------------
 // Subscriber DTOs
@@ -12,6 +13,8 @@ export const CreateSubscriberSchema = z.object({
   company: z.string().min(1).optional(),
   locale: z.string().default('tr-TR'),
   source: z.enum(['manual', 'import']).default('manual'),
+  /** Active topic slug — scopes the new subscriber's membership. */
+  topicSlug: TopicSlugSchema.optional(),
 });
 export type CreateSubscriberDto = z.infer<typeof CreateSubscriberSchema>;
 

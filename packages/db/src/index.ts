@@ -45,6 +45,7 @@ export type {
   AuditLog,
   Source,
   Topic,
+  SubscriberTopic,
 } from '@prisma/client';
 
 export { createSourceRepository } from './source-repository.js';
@@ -61,5 +62,13 @@ export type {
   CreateTopicData,
   UpdateTopicData,
 } from './topic-repository.js';
+
+export { createSubscriberTopicRepository } from './subscriber-topic-repository.js';
+export type {
+  SubscriberTopicRepository,
+  SubscriberTopicSummary,
+  UpsertSubscriberTopicData,
+  TopicRecipient,
+} from './subscriber-topic-repository.js';
 
 export { getDefaultTopic, getDefaultTopicId } from './default-topic.js';

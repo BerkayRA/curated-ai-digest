@@ -12,7 +12,7 @@
  *   5. If no issue exists for the week → log a warning and return.
  */
 
-import { prisma } from '@digest/db';
+import { prisma, createSubscriberTopicRepository } from '@digest/db';
 import type { IssueStatus } from '@digest/shared';
 import { dispatchIssue, evaluateAutoSend } from '@digest/delivery';
 import { createEmailProvider } from '@digest/email';
@@ -24,13 +24,15 @@ import type { Logger } from '../logger.js';
 
 export interface SendJobRepo {
   findIssueByWeek(
+    topicId: string,
     isoWeek: string,
   ): Promise<{
     id: string;
     status: IssueStatus;
     items: Array<{ id: string; qaFlags: unknown }>;
   } | null>;
-  getActiveSubscriberCount(): Promise<number>;
+  /** Active recipient count scoped to the topic being dispatched. */
+  getActiveSubscriberCount(topicId: string): Promise<number>;
   getSettings(): Promise<{
     autoSendEnabled: boolean;
     activeProvider: string;
@@ -39,11 +41,10 @@ export interface SendJobRepo {
 }
 
 export const defaultSendJobRepo: SendJobRepo = {
-  async findIssueByWeek(isoWeek) {
-    // Single-topic today (Phase 1c scopes the send job by topic); one topic →
-    // isoWeek is effectively unique, so findFirst is correct and safe here.
-    const issue = await prisma.issue.findFirst({
-      where: { isoWeek },
+  async findIssueByWeek(topicId, isoWeek) {
+    // Select the issue via the (topicId, isoWeek) composite unique.
+    const issue = await prisma.issue.findUnique({
+      where: { topicId_isoWeek: { topicId, isoWeek } },
       select: {
         id: true,
         status: true,
@@ -57,8 +58,8 @@ export const defaultSendJobRepo: SendJobRepo = {
       items: issue.items.map((item) => ({ id: item.id, qaFlags: item.qaFlags })),
     };
   },
-  async getActiveSubscriberCount() {
-    return prisma.subscriber.count({ where: { status: 'active' } });
+  async getActiveSubscriberCount(topicId) {
+    return createSubscriberTopicRepository(prisma).countByTopicId(topicId);
   },
   async getSettings() {
     const s = await prisma.settings.findFirst();
@@ -82,7 +83,13 @@ export const defaultSendJobRepo: SendJobRepo = {
 
 export interface SendJobOptions {
   readonly logger: Logger;
+  readonly topicId: string;
   readonly isoWeek: string;
+  /**
+   * Per-topic auto-send flag, already resolved (topic value ?? global) by the
+   * scheduler. Governs whether draft/in_review issues may be auto-dispatched.
+   */
+  readonly autoSendEnabled: boolean;
   readonly repo?: SendJobRepo;
   /**
    * Alert hook called when auto-send is blocked. Worker logs the blocking
@@ -100,13 +107,13 @@ export interface SendJobOptions {
  * All state decisions are made synchronously; dispatch is the only async side effect.
  */
 export async function runSendJob(opts: SendJobOptions): Promise<void> {
-  const { logger, isoWeek, repo = defaultSendJobRepo } = opts;
+  const { logger, topicId, isoWeek, autoSendEnabled, repo = defaultSendJobRepo } = opts;
 
-  logger.info('job.send.start', { isoWeek });
+  logger.info('job.send.start', { topicId, isoWeek });
 
-  const issue = await repo.findIssueByWeek(isoWeek);
+  const issue = await repo.findIssueByWeek(topicId, isoWeek);
   if (!issue) {
-    logger.warn('job.send.no_issue', { isoWeek });
+    logger.warn('job.send.no_issue', { topicId, isoWeek });
     return;
   }
 
@@ -126,9 +133,9 @@ export async function runSendJob(opts: SendJobOptions): Promise<void> {
     return;
   }
 
-  // Draft / in_review — only proceed if autoSendEnabled
-  const settings = await repo.getSettings();
-  if (!settings?.autoSendEnabled) {
+  // Draft / in_review — only proceed if auto-send is enabled for this topic
+  // (resolved by the scheduler as topic value ?? global Settings).
+  if (!autoSendEnabled) {
     logger.info('job.send.skip', {
       issueId,
       status,
@@ -137,8 +144,19 @@ export async function runSendJob(opts: SendJobOptions): Promise<void> {
     return;
   }
 
+  // Settings still needed for the active provider (and to confirm config exists).
+  const settings = await repo.getSettings();
+  if (!settings) {
+    logger.info('job.send.skip', {
+      issueId,
+      status,
+      reason: 'no settings row; cannot resolve provider',
+    });
+    return;
+  }
+
   // Run guardrails
-  const activeSubscriberCount = await repo.getActiveSubscriberCount();
+  const activeSubscriberCount = await repo.getActiveSubscriberCount(topicId);
   const activeProvider = settings.activeProvider;
 
   let providerOk = false;
