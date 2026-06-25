@@ -31,6 +31,14 @@ export interface IngestOptions {
    * (and will eventually source it from Settings).
    */
   topic?: string;
+  /**
+   * Topic id used to scope dedup queries and the persisted IngestRun + candidates.
+   * When omitted on the production (Prisma) path, the default active topic is
+   * resolved lazily from the DB. When a repository is injected (tests / the
+   * topic-unaware file pool), it is not resolved — the injected repository
+   * either ignores topicId or receives the value passed here.
+   */
+  topicId?: string;
 }
 
 /** A no-op logger used when no logger is provided. */
@@ -77,6 +85,20 @@ export async function runIngest(opts: IngestOptions = {}): Promise<IngestResult>
   const providers = opts.providers ?? defaultProviders();
   const topic = opts.topic ?? DEFAULT_TOPIC;
 
+  // Resolve the topic id for dedup-scoping + persistence. On the production
+  // path (no injected repository) we resolve the default active topic from the
+  // DB. When a repository is injected (tests, or the topic-unaware file pool),
+  // we skip DB access and use the provided id (or '' — injected repos ignore it).
+  let topicId = opts.topicId;
+  if (topicId === undefined) {
+    if (opts.repository) {
+      topicId = '';
+    } else {
+      const db = await import('@digest/db');
+      topicId = await db.getDefaultTopicId(db.prisma);
+    }
+  }
+
   logger.info('ingest.start', { providers: providers.length, topic });
 
   // 1. Fetch from all providers concurrently, each isolated.
@@ -117,8 +139,8 @@ export async function runIngest(opts: IngestOptions = {}): Promise<IngestResult>
   const hashes = deduped.map((c) => c.contentHash);
 
   const [existingUrls, existingHashes] = await Promise.all([
-    repo.findExistingUrls(urls),
-    repo.findExistingHashes(hashes),
+    repo.findExistingUrls(urls, topicId),
+    repo.findExistingHashes(hashes, topicId),
   ]);
 
   const newCandidates = filterAgainstExisting(deduped, existingUrls, existingHashes);
@@ -129,6 +151,7 @@ export async function runIngest(opts: IngestOptions = {}): Promise<IngestResult>
   const source = providers.map((p) => p.id).join('+') || 'none';
 
   const ingestRunId = await repo.persistRun({
+    topicId,
     source,
     candidates: newCandidates,
     errors: allErrors,

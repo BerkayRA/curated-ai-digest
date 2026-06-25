@@ -85,10 +85,16 @@ export interface Logger {
 
 /** Minimal repository surface needed by the orchestrator — mockable in tests. */
 export interface IngestRepository {
-  /** Returns the set of canonical URLs already in the DB. */
-  findExistingUrls(urls: readonly string[]): Promise<Set<string>>;
-  /** Returns the set of content hashes already in the DB. */
-  findExistingHashes(hashes: readonly string[]): Promise<Set<string>>;
+  /**
+   * Returns the set of canonical URLs already in the DB for the given topic.
+   * The file-backed repository is topic-unaware and ignores `topicId`.
+   */
+  findExistingUrls(urls: readonly string[], topicId: string): Promise<Set<string>>;
+  /**
+   * Returns the set of content hashes already in the DB for the given topic.
+   * The file-backed repository is topic-unaware and ignores `topicId`.
+   */
+  findExistingHashes(hashes: readonly string[], topicId: string): Promise<Set<string>>;
   /**
    * Creates an IngestRun row, bulk-upserts the candidates, marks the run
    * finished, and returns the run id.
@@ -97,6 +103,8 @@ export interface IngestRepository {
 }
 
 export interface PersistRunOpts {
+  /** Topic the run + candidates belong to. */
+  readonly topicId: string;
   readonly source: string;
   readonly candidates: readonly EnrichedCandidate[];
   readonly errors: readonly SourceError[];

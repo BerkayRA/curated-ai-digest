@@ -4,6 +4,7 @@ import type {
   StageOptions,
   PipelineRepository,
   CopywriteOutput,
+  TopicContext,
 } from '../pipeline/types.js';
 import type { Logger } from '../ingest/types.js';
 import type { RenderFn } from '../pipeline/stage5-render.js';
@@ -16,6 +17,13 @@ const noopLogger: Logger = {
   info: () => undefined,
   warn: () => undefined,
   error: () => undefined,
+};
+
+const topicContext: TopicContext = {
+  topicId: 'topic_enterprise_ai',
+  name: 'on-prem & enterprise AI workflows',
+  audience: null,
+  voice: null,
 };
 
 function makeRepo(overrides: Partial<PipelineRepository> = {}): PipelineRepository {
@@ -65,7 +73,7 @@ const baseCopywrite: CopywriteOutput = {
 describe('runRenderStage', () => {
   it('upserts issue, calls renderFn, updates body, upserts items', async () => {
     const repo = makeRepo();
-    const opts: StageOptions = { client: {} as StageOptions['client'], repository: repo, logger: noopLogger };
+    const opts: StageOptions = { client: {} as StageOptions['client'], repository: repo, logger: noopLogger, topicContext };
 
     const result = await runRenderStage(
       {
@@ -84,6 +92,7 @@ describe('runRenderStage', () => {
 
     expect(repo.upsertIssue).toHaveBeenCalledWith(
       expect.objectContaining({
+        topicId: 'topic_enterprise_ai',
         isoWeek: '2026-W24',
         subject: 'Test Konu',
         status: 'draft',
@@ -102,7 +111,7 @@ describe('runRenderStage', () => {
   it('passes isoWeek and items to renderFn', async () => {
     const renderFn: RenderFn = vi.fn().mockResolvedValue({ html: '<html>', text: '' });
     const repo = makeRepo();
-    const opts: StageOptions = { client: {} as StageOptions['client'], repository: repo, logger: noopLogger };
+    const opts: StageOptions = { client: {} as StageOptions['client'], repository: repo, logger: noopLogger, topicContext };
 
     await runRenderStage(
       { isoWeek: '2026-W24', copywrite: baseCopywrite, qaFlags: [], factCheckNotes: [], renderFn },
@@ -122,7 +131,7 @@ describe('runRenderStage', () => {
 
   it('logs pipeline run with render stage', async () => {
     const repo = makeRepo();
-    const opts: StageOptions = { client: {} as StageOptions['client'], repository: repo, logger: noopLogger };
+    const opts: StageOptions = { client: {} as StageOptions['client'], repository: repo, logger: noopLogger, topicContext };
 
     const result = await runRenderStage(
       { isoWeek: '2026-W24', copywrite: baseCopywrite, qaFlags: [], factCheckNotes: [], renderFn: stubRenderFn },
@@ -138,7 +147,7 @@ describe('runRenderStage', () => {
   it('logs error run and rethrows when renderFn throws', async () => {
     const renderFn: RenderFn = vi.fn().mockRejectedValue(new Error('Render failed'));
     const repo = makeRepo();
-    const opts: StageOptions = { client: {} as StageOptions['client'], repository: repo, logger: noopLogger };
+    const opts: StageOptions = { client: {} as StageOptions['client'], repository: repo, logger: noopLogger, topicContext };
 
     await expect(
       runRenderStage(
@@ -159,7 +168,7 @@ describe('runRenderStage', () => {
     };
     const renderFn: RenderFn = vi.fn().mockResolvedValue({ html: '', text: '' });
     const repo = makeRepo();
-    const opts: StageOptions = { client: {} as StageOptions['client'], repository: repo, logger: noopLogger };
+    const opts: StageOptions = { client: {} as StageOptions['client'], repository: repo, logger: noopLogger, topicContext };
 
     await expect(
       runRenderStage(

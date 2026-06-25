@@ -69,6 +69,7 @@ function makeRun(stage: string): PipelineRunRecord {
 function makeArticle(id: string): CandidateArticle {
   return {
     id,
+    topicId: 'topic_enterprise_ai',
     sourceUrl: `https://example.com/${id}`,
     sourceName: 'Test',
     title: `Article ${id}`,
@@ -279,6 +280,51 @@ describe('runWeeklyPipeline', () => {
     });
 
     expect(callOrder).toEqual(['rank', 'curate', 'copywrite', 'editor_qa', 'render']);
+  });
+
+  it('threads the resolved topicId into findIssueByWeek and findCandidates', async () => {
+    const findIssueByWeek = vi.fn().mockResolvedValue(null);
+    const findCandidates = vi
+      .fn()
+      .mockResolvedValue([makeArticle('c1'), makeArticle('c2'), makeArticle('c3')]);
+    const repo = makeRepo({ findIssueByWeek, findCandidates });
+
+    await runWeeklyPipeline({
+      isoWeek: '2026-W24',
+      topicId: 'topic_enterprise_ai',
+      runIngestFirst: false,
+      repository: repo,
+      anthropicClient: mockAnthropicClient,
+      logger: noopLogger,
+    });
+
+    expect(findIssueByWeek).toHaveBeenCalledWith('topic_enterprise_ai', '2026-W24');
+    expect(findCandidates).toHaveBeenCalledWith(
+      expect.objectContaining({ topicId: 'topic_enterprise_ai', isoWeek: '2026-W24' }),
+    );
+  });
+
+  it('passes the topicContext into every stage', async () => {
+    const repo = makeRepo();
+    const topicContext = {
+      topicId: 'topic_enterprise_ai',
+      name: 'on-prem & enterprise AI workflows',
+      audience: null,
+      voice: null,
+    };
+
+    await runWeeklyPipeline({
+      isoWeek: '2026-W24',
+      topicContext,
+      runIngestFirst: false,
+      repository: repo,
+      anthropicClient: mockAnthropicClient,
+      logger: noopLogger,
+    });
+
+    // Stage 1 receives the topicContext via its StageOptions.
+    const rankOpts = vi.mocked(runRankStage).mock.calls[0]?.[1];
+    expect(rankOpts?.topicContext).toEqual(topicContext);
   });
 
   it('idempotent: re-running for same week in draft status proceeds normally', async () => {

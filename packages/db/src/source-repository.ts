@@ -5,6 +5,8 @@ import { Prisma, type PrismaClient, type Source, type SourceType } from '@prisma
 // ---------------------------------------------------------------------------
 
 export interface CreateSourceData {
+  /** Topic the source belongs to (required by the schema relation). */
+  topicId: string;
   type: SourceType;
   label: string;
   url?: string | null;
@@ -14,6 +16,7 @@ export interface CreateSourceData {
 }
 
 export interface UpdateSourceData {
+  topicId?: string;
   type?: SourceType;
   label?: string;
   url?: string | null;
@@ -32,6 +35,8 @@ export interface HealthData {
 export interface SourceRepository {
   findAll(): Promise<Source[]>;
   findEnabled(): Promise<Source[]>;
+  /** Enabled sources scoped to a single topic. */
+  findEnabledByTopic(topicId: string): Promise<Source[]>;
   findById(id: string): Promise<Source | null>;
   create(data: CreateSourceData): Promise<Source>;
   update(id: string, data: UpdateSourceData): Promise<Source>;
@@ -57,16 +62,23 @@ export function createSourceRepository(client: PrismaClient): SourceRepository {
       return client.source.findMany({ where: { enabled: true } });
     },
 
+    findEnabledByTopic(topicId: string): Promise<Source[]> {
+      return client.source.findMany({ where: { enabled: true, topicId } });
+    },
+
     findById(id: string): Promise<Source | null> {
       return client.source.findUnique({ where: { id } });
     },
 
     create(data: CreateSourceData): Promise<Source> {
-      return client.source.create({ data });
+      return client.source.create({ data: data as Prisma.SourceUncheckedCreateInput });
     },
 
     update(id: string, data: UpdateSourceData): Promise<Source> {
-      return client.source.update({ where: { id }, data });
+      return client.source.update({
+        where: { id },
+        data: data as Prisma.SourceUncheckedUpdateInput,
+      });
     },
 
     delete(id: string): Promise<Source> {

@@ -36,6 +36,12 @@ export interface ImportPoolOptions {
   readonly repository?: IngestRepository;
 
   /**
+   * Topic id the imported candidates belong to. When omitted, the default
+   * active topic is resolved lazily from the DB (Phase 1a single-topic behavior).
+   */
+  readonly topicId?: string;
+
+  /**
    * Injectable logger.  Defaults to a no-op silent logger.
    */
   readonly logger?: Logger;
@@ -104,14 +110,28 @@ export async function importCommittedCandidates(
     opts.repository ??
     (await import('./repository.js')).createPrismaRepository();
 
+  // Resolve the topic id for dedup-scoping + persistence. On the production
+  // path (no injected repository) resolve the default active topic from the DB;
+  // when a repository is injected (tests) skip DB access and use the provided
+  // id, defaulting to '' (injected repos ignore topicId).
+  let topicId = opts.topicId;
+  if (topicId === undefined) {
+    if (opts.repository) {
+      topicId = '';
+    } else {
+      const db = await import('@digest/db');
+      topicId = await db.getDefaultTopicId(db.prisma);
+    }
+  }
+
   const candidates: readonly EnrichedCandidate[] = pool.map(storedToEnriched);
 
   // Pre-filter against rows already in the DB so the IngestRun audit log reflects
   // only genuinely-new candidates. The article upsert is idempotent regardless,
   // but re-importing the full pool every day would otherwise log phantom ingests.
   const [existingUrls, existingHashes] = await Promise.all([
-    repo.findExistingUrls(candidates.map((c) => c.canonicalUrl)),
-    repo.findExistingHashes(candidates.map((c) => c.contentHash)),
+    repo.findExistingUrls(candidates.map((c) => c.canonicalUrl), topicId),
+    repo.findExistingHashes(candidates.map((c) => c.contentHash), topicId),
   ]);
   const fresh = candidates.filter(
     (c) => !existingUrls.has(c.canonicalUrl) && !existingHashes.has(c.contentHash),
@@ -122,7 +142,7 @@ export async function importCommittedCandidates(
     return { poolSize: pool.length, imported: 0 };
   }
 
-  await repo.persistRun({ source: 'committed-pool', candidates: fresh, errors: [] });
+  await repo.persistRun({ topicId, source: 'committed-pool', candidates: fresh, errors: [] });
 
   logger.info('import-pool.done', { poolSize: pool.length, imported: fresh.length });
 

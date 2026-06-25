@@ -236,8 +236,12 @@ async function runDraft(args: readonly string[]): Promise<void> {
   // Dynamic imports keep this module independently testable
   const { runRenderStage, createPipelinePrismaRepository } = await import('@digest/curation');
   const { renderDigestEmail } = await import('@digest/email');
+  const { prisma, getDefaultTopic } = await import('@digest/db');
 
   const repository = createPipelinePrismaRepository();
+
+  // Resolve the default topic so the manual draft is scoped like the pipeline.
+  const topic = await getDefaultTopic(prisma);
 
   const { render } = await runRenderStage(
     {
@@ -252,6 +256,12 @@ async function runDraft(args: readonly string[]): Promise<void> {
       client: undefined as never,
       repository,
       logger,
+      topicContext: {
+        topicId: topic.id,
+        name: topic.name,
+        audience: topic.audience,
+        voice: topic.voice,
+      },
     },
   );
 

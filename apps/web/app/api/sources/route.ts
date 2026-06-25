@@ -7,7 +7,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma, createSourceRepository, Prisma } from '@digest/db';
+import { prisma, createSourceRepository, getDefaultTopicId, Prisma } from '@digest/db';
 import { CreateSourceSchema } from '@digest/shared';
 import { ok, err } from '@/lib/api-response.js';
 import { getErrorMessage } from '@/lib/error.js';
@@ -39,8 +39,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     const { type, label, url, enabled, config } = parsed.data;
 
+    // Phase 1a: a single newsletter. New sources belong to the default topic.
+    const topicId = await getDefaultTopicId(prisma);
+
     const repo = createSourceRepository(prisma);
     const source = await repo.create({
+      topicId,
       type,
       label,
       url: url ?? null,

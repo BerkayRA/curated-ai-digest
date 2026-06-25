@@ -1,6 +1,11 @@
 import { describe, it, expect, vi } from 'vitest';
-import { runCopywriteStage } from '../pipeline/stage3-copywrite.js';
-import type { StageOptions, PipelineRepository, ScoredCandidate } from '../pipeline/types.js';
+import { runCopywriteStage, buildSystemPrompt } from '../pipeline/stage3-copywrite.js';
+import type {
+  StageOptions,
+  PipelineRepository,
+  ScoredCandidate,
+  TopicContext,
+} from '../pipeline/types.js';
 import type { Logger } from '../ingest/types.js';
 import type { AnthropicClient } from '../pipeline/types.js';
 
@@ -12,6 +17,13 @@ const noopLogger: Logger = {
   info: () => undefined,
   warn: () => undefined,
   error: () => undefined,
+};
+
+const topicContext: TopicContext = {
+  topicId: 'topic_enterprise_ai',
+  name: 'on-prem & enterprise AI workflows',
+  audience: null,
+  voice: null,
 };
 
 function makeRepo(): PipelineRepository {
@@ -87,7 +99,7 @@ describe('runCopywriteStage', () => {
     const candidates = [makeCandidate('a1'), makeCandidate('a2')];
     const client = makeClient(validCopyOutput);
     const repo = makeRepo();
-    const opts: StageOptions = { client, repository: repo, logger: noopLogger };
+    const opts: StageOptions = { client, repository: repo, logger: noopLogger, topicContext };
 
     const result = await runCopywriteStage(candidates, opts);
 
@@ -100,7 +112,7 @@ describe('runCopywriteStage', () => {
     const candidates = [makeCandidate('a1'), makeCandidate('a2')];
     const client = makeClient(validCopyOutput);
     const repo = makeRepo();
-    const opts: StageOptions = { client, repository: repo, logger: noopLogger };
+    const opts: StageOptions = { client, repository: repo, logger: noopLogger, topicContext };
 
     const result = await runCopywriteStage(candidates, opts);
 
@@ -115,7 +127,7 @@ describe('runCopywriteStage', () => {
     const candidates = [makeCandidate('a1'), makeCandidate('a2')];
     const client = makeClient(validCopyOutput);
     const repo = makeRepo();
-    const opts: StageOptions = { client, repository: repo, logger: noopLogger };
+    const opts: StageOptions = { client, repository: repo, logger: noopLogger, topicContext };
     const feedback = 'Fix hype words and verify claim about 40% improvement';
 
     await runCopywriteStage(candidates, opts, feedback);
@@ -133,11 +145,31 @@ describe('runCopywriteStage', () => {
       },
     } as unknown as AnthropicClient;
     const repo = makeRepo();
-    const opts: StageOptions = { client, repository: repo, logger: noopLogger };
+    const opts: StageOptions = { client, repository: repo, logger: noopLogger, topicContext };
 
     await expect(runCopywriteStage(candidates, opts)).rejects.toThrow('API error');
     expect(repo.logPipelineRun).toHaveBeenCalledWith(
       expect.objectContaining({ status: 'error' }),
     );
+  });
+});
+
+describe('buildSystemPrompt (copywrite)', () => {
+  it('preserves the original brand-voice block when voice is null', () => {
+    const prompt = buildSystemPrompt(topicContext);
+    expect(prompt).toContain('Brand voice:');
+    expect(prompt).toContain('- Language: Turkish (TR)');
+    expect(prompt).toContain(
+      '- Tone: Confident, clear, professional — like a knowledgeable colleague sharing a finding, not a salesperson.',
+    );
+    expect(prompt).toContain(
+      '- Summaries should provide genuine insight, not just restate the headline.',
+    );
+  });
+
+  it('injects a custom voice block when provided', () => {
+    const prompt = buildSystemPrompt({ ...topicContext, voice: '- Playful and bold.' });
+    expect(prompt).toContain('- Playful and bold.');
+    expect(prompt).not.toContain('- Language: Turkish (TR)');
   });
 });
