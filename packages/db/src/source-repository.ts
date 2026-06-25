@@ -34,6 +34,8 @@ export interface HealthData {
 
 export interface SourceRepository {
   findAll(): Promise<Source[]>;
+  /** All sources (enabled or not) scoped to a single topic. */
+  findAllByTopic(topicId: string): Promise<Source[]>;
   findEnabled(): Promise<Source[]>;
   /** Enabled sources scoped to a single topic. */
   findEnabledByTopic(topicId: string): Promise<Source[]>;
@@ -56,6 +58,10 @@ export function createSourceRepository(client: PrismaClient): SourceRepository {
   return {
     findAll(): Promise<Source[]> {
       return client.source.findMany({});
+    },
+
+    findAllByTopic(topicId: string): Promise<Source[]> {
+      return client.source.findMany({ where: { topicId } });
     },
 
     findEnabled(): Promise<Source[]> {

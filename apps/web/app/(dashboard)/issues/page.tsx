@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { prisma } from '@digest/db';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { IssueArchiveTable } from '@/components/issues/IssueArchiveTable';
+import { resolveTopicIdBySlug } from '@/lib/resolve-topic';
 import styles from './issues.module.css';
 
 export const dynamic = 'force-dynamic';
@@ -10,8 +11,14 @@ export const metadata = {
   title: 'Arşiv — Curated AI Digest',
 };
 
-export default async function IssuesPage() {
+export default async function IssuesPage({
+  searchParams,
+}: {
+  searchParams: { topic?: string };
+}) {
+  const topicId = await resolveTopicIdBySlug(searchParams.topic);
   const issues = await prisma.issue.findMany({
+    where: { topicId },
     orderBy: { createdAt: 'desc' },
     select: {
       id: true,

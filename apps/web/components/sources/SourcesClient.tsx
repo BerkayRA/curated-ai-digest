@@ -23,13 +23,14 @@ interface RunSummary {
 interface SourcesClientProps {
   sources: Source[];
   exaConfigured: boolean;
+  topicSlug?: string;
 }
 
 // ---------------------------------------------------------------------------
 // SourcesClient
 // ---------------------------------------------------------------------------
 
-export function SourcesClient({ sources: initialSources, exaConfigured }: SourcesClientProps) {
+export function SourcesClient({ sources: initialSources, exaConfigured, topicSlug }: SourcesClientProps) {
   const router = useRouter();
   const [sources, setSources] = useState<Source[]>(initialSources);
   const [panelOpen, setPanelOpen] = useState(false);
@@ -166,6 +167,7 @@ export function SourcesClient({ sources: initialSources, exaConfigured }: Source
         open={panelOpen}
         source={editingSource}
         exaConfigured={exaConfigured}
+        topicSlug={topicSlug}
         onClose={closePanel}
         onSaved={handleSaved}
       />

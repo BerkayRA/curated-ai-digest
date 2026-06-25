@@ -7,18 +7,20 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma, createSourceRepository, getDefaultTopicId, Prisma } from '@digest/db';
+import { prisma, createSourceRepository, Prisma } from '@digest/db';
 import { CreateSourceSchema } from '@digest/shared';
 import { ok, err } from '@/lib/api-response.js';
 import { getErrorMessage } from '@/lib/error.js';
 import { assertSameOrigin } from '@/lib/assert-same-origin.js';
+import { resolveTopicIdBySlug, resolveTopicIdFromRequest } from '@/lib/resolve-topic.js';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(_request: NextRequest): Promise<NextResponse> {
+export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
+    const topicId = await resolveTopicIdFromRequest(request);
     const repo = createSourceRepository(prisma);
-    const sources = await repo.findAll();
+    const sources = await repo.findAllByTopic(topicId);
     return NextResponse.json(ok(sources));
   } catch (error) {
     return NextResponse.json(err(getErrorMessage(error)), { status: 500 });
@@ -39,8 +41,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     const { type, label, url, enabled, config } = parsed.data;
 
-    // Phase 1a: a single newsletter. New sources belong to the default topic.
-    const topicId = await getDefaultTopicId(prisma);
+    // The active topic travels in the mutation body as `topicSlug`. It's read
+    // from the raw JSON (not the schema), since CreateSourceSchema is a
+    // discriminatedUnion that doesn't carry the field. A missing/unknown slug
+    // degrades to the default topic — preserving single-topic behavior.
+    const rawSlug = (body as Record<string, unknown> | null)?.['topicSlug'];
+    const topicSlug = typeof rawSlug === 'string' ? rawSlug : undefined;
+    const topicId = await resolveTopicIdBySlug(topicSlug);
 
     const repo = createSourceRepository(prisma);
     const source = await repo.create({

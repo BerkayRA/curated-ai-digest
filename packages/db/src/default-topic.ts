@@ -6,6 +6,10 @@ import type { PrismaClient, Topic } from '@prisma/client';
 // Phase 1a runs a single newsletter (slug `enterprise-ai`). Library code that
 // is not yet topic-aware resolves "the topic" through these helpers so the
 // behavior stays identical until multiple active topics exist.
+//
+// NOTE: the seed slug is intentionally duplicated as `DEFAULT_TOPIC_SLUG` in
+// @digest/shared (for the web topic switcher). @digest/db has no workspace deps
+// by design, so we do not import it here; keep the two values in sync.
 // ---------------------------------------------------------------------------
 
 /** The seed topic slug — preferred when several active topics exist. */
