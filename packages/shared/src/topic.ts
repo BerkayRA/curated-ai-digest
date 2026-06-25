@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { ConsentModeSchema } from './enums.js';
+
 // ---------------------------------------------------------------------------
 // Topic status enum — values MUST match the Prisma TopicStatus enum exactly.
 // ---------------------------------------------------------------------------
@@ -43,6 +45,8 @@ export const CreateTopicSchema = z.object({
   /** Voice/tone descriptor injected into copywrite/QA prompts. */
   voice: z.string().max(2000).nullable().optional(),
   status: TopicStatusSchema.default('active'),
+  // Default `business`: opening a public signup page is an explicit choice.
+  consentMode: ConsentModeSchema.default('business'),
 });
 export type CreateTopicDto = z.infer<typeof CreateTopicSchema>;
 
@@ -57,5 +61,6 @@ export const UpdateTopicSchema = z.object({
   audience: z.string().max(2000).nullable().optional(),
   voice: z.string().max(2000).nullable().optional(),
   status: TopicStatusSchema.optional(),
+  consentMode: ConsentModeSchema.optional(),
 });
 export type UpdateTopicDto = z.infer<typeof UpdateTopicSchema>;

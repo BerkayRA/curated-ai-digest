@@ -167,6 +167,12 @@
   border-radius: var(--radius-pill);
 }
 
+.consentBasis {
+  font-size: var(--text-xs);
+  color: var(--color-ink-muted);
+  white-space: nowrap;
+}
+
 .rowActions {
   display: flex;
   align-items: center;

@@ -12,6 +12,11 @@ export { DigestEmail } from './templates/DigestEmail.js';
 export { renderDigestEmail } from './render.js';
 export type { DigestEmailData, DigestItem, RenderedEmail } from './types.js';
 
+// Transactional (double opt-in confirmation) — single-message send path.
+export { ConfirmEmail } from './templates/ConfirmEmail.js';
+export { renderConfirmEmail, sendTransactionalEmail } from './transactional.js';
+export type { ConfirmEmailData } from './types.js';
+
 // ---------------------------------------------------------------------------
 // Phase 8 — delivery providers
 // ---------------------------------------------------------------------------

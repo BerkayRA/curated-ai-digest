@@ -1,4 +1,10 @@
-import { Prisma, type PrismaClient, type Topic, type TopicStatus } from '@prisma/client';
+import {
+  Prisma,
+  type ConsentMode,
+  type PrismaClient,
+  type Topic,
+  type TopicStatus,
+} from '@prisma/client';
 
 import { prisma as defaultClient } from './index.js';
 
@@ -15,6 +21,8 @@ export interface CreateTopicData {
   /** Voice descriptor injected into copywrite/QA prompts; null → default copy. */
   voice?: string | null;
   status?: TopicStatus;
+  /** Consent mode; defaults to `business` at the DB level when omitted. */
+  consentMode?: ConsentMode;
   sendDayOfWeek?: string | null;
   sendTime?: string | null;
   timezone?: string | null;
@@ -33,6 +41,7 @@ export interface UpdateTopicData {
   audience?: string | null;
   voice?: string | null;
   status?: TopicStatus;
+  consentMode?: ConsentMode;
   sendDayOfWeek?: string | null;
   sendTime?: string | null;
   timezone?: string | null;
