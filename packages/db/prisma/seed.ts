@@ -18,6 +18,8 @@ async function main(): Promise<void> {
       name: 'on-prem & enterprise AI workflows',
       // audience/voice intentionally left null → stages use their default copy.
       status: 'active',
+      // B2B by construction — no public signup; admin/CSV import only.
+      consentMode: 'business',
     },
   });
 
@@ -75,7 +77,7 @@ async function main(): Promise<void> {
     });
   }
 
-  console.log('Seed complete: 1 Settings row + 3 sample subscribers upserted.');
+  process.stdout.write('Seed complete: 1 Settings row + 3 sample subscribers upserted.\n');
 
   // -------------------------------------------------------------------------
   // Sources — upsert all static ingest sources from curation constants

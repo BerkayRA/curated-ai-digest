@@ -30,6 +30,8 @@ export {
   SubscriberStatus,
   SourceType,
   TopicStatus,
+  ConsentMode,
+  ConsentBasis,
   Prisma,
 } from '@prisma/client';
 

@@ -55,7 +55,7 @@ export async function PATCH(request: Request, { params }: RouteParams): Promise<
       return NextResponse.json(err('Topic not found'), { status: 404 });
     }
 
-    const { slug, name, description, audience, voice, status } = parsed.data;
+    const { slug, name, description, audience, voice, status, consentMode } = parsed.data;
 
     const updated = await repo.update(params.id, {
       ...(slug !== undefined ? { slug } : {}),
@@ -64,6 +64,7 @@ export async function PATCH(request: Request, { params }: RouteParams): Promise<
       ...(audience !== undefined ? { audience } : {}),
       ...(voice !== undefined ? { voice } : {}),
       ...(status !== undefined ? { status } : {}),
+      ...(consentMode !== undefined ? { consentMode } : {}),
     });
 
     return NextResponse.json(ok(updated));

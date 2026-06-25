@@ -1,0 +1,248 @@
+/* ============================================================
+   Preference center — /preferences/[token]
+   Standalone branded shell + a token list with per-row toggles.
+   ============================================================ */
+
+.page {
+  min-height: 100dvh;
+  display: flex;
+  align-items: safe center;
+  justify-content: center;
+  background-color: var(--color-gray-light);
+  padding: var(--space-xl);
+  position: relative;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.page::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(160deg, var(--color-brand-tint) 0%, transparent 55%);
+  pointer-events: none;
+}
+
+.card {
+  position: relative;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-gray-light);
+  max-width: 480px;
+  width: 100%;
+  overflow: hidden;
+  box-shadow:
+    0 2px 8px rgba(0, 137, 207, 0.06),
+    0 18px 50px rgba(12, 17, 24, 0.1);
+}
+
+.cardHeader {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xl);
+  background: linear-gradient(135deg, var(--color-brand) 0%, var(--color-brand-dark) 100%);
+  overflow: hidden;
+}
+
+.dots {
+  position: absolute;
+  inset: 0;
+  background-image: var(--dot-hero);
+  background-size: var(--dot-size);
+  pointer-events: none;
+}
+
+.logo {
+  position: relative;
+  height: 46px;
+  width: auto;
+}
+
+.cardBody {
+  padding: var(--space-xl);
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-brand);
+  margin-bottom: var(--space-sm);
+}
+
+.heading {
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--color-ink);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin-bottom: var(--space-xs);
+}
+
+.subheading {
+  font-size: var(--text-sm);
+  color: var(--color-ink-muted);
+  line-height: 1.5;
+  margin-bottom: var(--space-lg);
+  word-break: break-word;
+}
+
+/* ── List ──────────────────────────────────────────────────── */
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.topicList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.topicRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  transition: border-color var(--duration-fast) var(--ease-out-expo);
+}
+
+.topicRow:hover {
+  border-color: var(--color-border-mid);
+}
+
+.topicMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.topicName {
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.stateOn {
+  font-size: var(--text-xs);
+  color: var(--color-brand);
+}
+
+.stateOff {
+  font-size: var(--text-xs);
+  color: var(--color-ink-muted);
+}
+
+/* ── Toggle switch ─────────────────────────────────────────── */
+
+.toggleOn,
+.toggleOff {
+  position: relative;
+  flex-shrink: 0;
+  width: 46px;
+  height: 26px;
+  border: none;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  padding: 0;
+  transition: background-color var(--duration-normal) var(--ease-out-expo);
+}
+
+.toggleOn {
+  background-color: var(--color-brand);
+}
+
+.toggleOff {
+  background-color: var(--color-gray);
+}
+
+.toggleOn:focus-visible,
+.toggleOff:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 137, 207, 0.3);
+}
+
+.toggleOn:disabled,
+.toggleOff:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.toggleKnob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  transition: transform var(--duration-normal) var(--ease-out-expo);
+}
+
+.toggleOn .toggleKnob {
+  transform: translateX(20px);
+}
+
+/* ── Leave-all + states ────────────────────────────────────── */
+
+.leaveAll {
+  align-self: flex-start;
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-ink-muted);
+  cursor: pointer;
+  text-decoration: underline;
+  transition: color var(--duration-fast) var(--ease-out-expo);
+}
+
+.leaveAll:hover:not(:disabled) {
+  color: var(--ring-avoid-text);
+}
+
+.leaveAll:focus-visible {
+  outline: none;
+  color: var(--ring-avoid-text);
+}
+
+.leaveAll:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.errorText {
+  font-size: var(--text-sm);
+  color: #b91c1c;
+  line-height: 1.5;
+}
+
+.empty {
+  font-size: var(--text-base);
+  color: var(--color-ink-muted);
+  line-height: 1.5;
+}
+
+.cardFooter {
+  padding: var(--space-md) var(--space-xl);
+  border-top: 1px solid var(--color-border);
+  font-size: var(--text-xs);
+  color: var(--color-ink-muted);
+  text-align: center;
+}

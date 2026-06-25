@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import type { Subscriber, SubscriberStatus } from '@digest/db';
+import type { Subscriber, SubscriberStatus, ConsentBasis } from '@digest/db';
 import { Button } from '@/components/ui/Button';
 import { StatusPill, subscriberStatusTone } from '@/components/ui/StatusPill';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -24,12 +24,22 @@ interface SubscribersClientProps {
   activeTopicName: string | null;
   /** subscriberId → active topicId[] */
   topicsBySubscriber: Record<string, string[]>;
+  /** subscriberId → consent basis for the active-topic membership */
+  consentBySubscriber: Record<string, ConsentBasis>;
 }
 
 const STATUS_LABELS: Record<SubscriberStatus, string> = {
   active: 'Aktif',
+  pending: 'Onay Bekliyor',
   unsubscribed: 'İptal',
   bounced: 'Geri Döndü',
+};
+
+const CONSENT_BASIS_LABELS: Record<ConsentBasis, string> = {
+  import: 'İçe Aktarma',
+  double_opt_in: 'Çift Onay',
+  business_relationship: 'İş İlişkisi',
+  single_opt_in: 'Tek Onay',
 };
 
 type StatusFilter = 'all' | SubscriberStatus;
@@ -49,6 +59,7 @@ export function SubscribersClient({
   activeTopicSlug,
   activeTopicName,
   topicsBySubscriber,
+  consentBySubscriber,
 }: SubscribersClientProps) {
   const [subscribers, setSubscribers] = useState<Subscriber[]>(initialSubscribers);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
@@ -220,6 +231,9 @@ export function SubscribersClient({
                   Konular
                 </th>
                 <th scope="col" className={styles.th}>
+                  Onay
+                </th>
+                <th scope="col" className={styles.th}>
                   Eklenme
                 </th>
                 <th scope="col" className={styles.th}>
@@ -256,6 +270,16 @@ export function SubscribersClient({
                         ))
                       )}
                     </div>
+                  </td>
+                  <td className={styles.td}>
+                    {(() => {
+                      const basis = consentBySubscriber[sub.id];
+                      return (
+                        <span className={styles.consentBasis}>
+                          {basis ? CONSENT_BASIS_LABELS[basis] : '—'}
+                        </span>
+                      );
+                    })()}
                   </td>
                   <td className={styles.td}>{formatDate(sub.createdAt)}</td>
                   <td className={styles.td}>

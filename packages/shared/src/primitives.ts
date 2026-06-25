@@ -8,6 +8,9 @@ import { z } from 'zod';
 export const emailSchema = z
   .string()
   .trim()
+  // RFC 5321 caps an address at 320 chars; bound it so untrusted public input
+  // (the self-serve signup endpoint) can't push oversized payloads to the DB.
+  .max(320, 'E-mail address is too long')
   .email('Invalid e-mail address')
   .transform((v) => v.toLowerCase());
 export type Email = z.infer<typeof emailSchema>;
