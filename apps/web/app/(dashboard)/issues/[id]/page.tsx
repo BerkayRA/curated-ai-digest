@@ -11,7 +11,7 @@ import { issueStatusLabel } from '@/components/ui/Badge';
 import { StatusPill, issueStatusTone } from '@/components/ui/StatusPill';
 import { IssueEditor } from '@/components/issue-editor/IssueEditor';
 import { AuditPanel } from '@/components/issue-editor/AuditPanel';
-import type { IssueStatus } from '@digest/shared';
+import type { IssueStatus, AbStatusValue } from '@digest/shared';
 import styles from './issue-detail.module.css';
 
 export const dynamic = 'force-dynamic';
@@ -38,6 +38,7 @@ export default async function IssueDetailPage({ params }: IssueDetailPageProps) 
     where: { id: params.id },
     include: {
       items: { orderBy: { order: 'asc' } },
+      variants: { orderBy: { variantIndex: 'asc' } },
     },
   });
 
@@ -51,6 +52,14 @@ export default async function IssueDetailPage({ params }: IssueDetailPageProps) 
     status: issue.status as IssueStatus,
     subject: issue.subject,
     preheader: issue.preheader,
+    abStatus: issue.abStatus as AbStatusValue,
+    abWinnerVariantIndex: issue.abWinnerVariantIndex,
+    variants: issue.variants.map((v) => ({
+      variantIndex: v.variantIndex,
+      subject: v.subject,
+      sentCount: v.sentCount,
+      openCount: v.openCount,
+    })),
     items: issue.items.map((item) => ({
       id: item.id,
       order: item.order,

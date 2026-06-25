@@ -1,0 +1,223 @@
+/* ============================================================
+   Teslimat Sağlığı — deliverability (SPF/DMARC/DKIM) card.
+   Matches the settings section card tell: surface, 1px border,
+   --shadow-sm, radius-md, 3px Process-Blue top-rail. Status chips
+   carry semantic colors (pass=green, warn=amber, fail=red,
+   unknown=gray) with local fallbacks since brand has no warn token.
+   ============================================================ */
+
+.card {
+  position: relative;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  overflow: hidden;
+
+  /* Semantic status palette — local, theme-aware. */
+  --status-pass-bg: rgba(22, 163, 74, 0.12);
+  --status-pass-fg: #157f3b;
+  --status-pass-dot: #16a34a;
+  --status-warn-bg: rgba(202, 138, 4, 0.14);
+  --status-warn-fg: #a06a00;
+  --status-warn-dot: #ca8a04;
+  --status-fail-bg: var(--ring-avoid-bg);
+  --status-fail-fg: var(--ring-avoid-text);
+  --status-fail-dot: #b93025;
+  --status-unknown-bg: var(--color-surface-30);
+  --status-unknown-fg: var(--color-ink-muted);
+  --status-unknown-dot: var(--color-border-mid);
+}
+
+@media (prefers-color-scheme: dark) {
+  .card {
+    --status-pass-fg: #4ade80;
+    --status-warn-fg: #fbbf24;
+  }
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: var(--color-brand);
+}
+
+.head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.headText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.title {
+  font-size: var(--text-lg);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--color-ink);
+}
+
+.domain {
+  font-size: var(--text-sm);
+  color: var(--color-ink-muted);
+}
+
+.error {
+  background: var(--ring-avoid-bg);
+  border: 1px solid var(--ring-avoid-border);
+  color: var(--ring-avoid-text);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+}
+
+/* ── Status chips ─────────────────────────────────────── */
+
+.chipList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.chipItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  flex: 1 1 200px;
+  min-width: 0;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--color-border-mid);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  text-align: left;
+  transition:
+    border-color var(--duration-fast),
+    box-shadow var(--duration-fast),
+    transform var(--duration-fast);
+}
+
+.chip:hover {
+  transform: translateY(-1px);
+  border-color: var(--color-brand);
+}
+
+.chip:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 159, 218, 0.16);
+}
+
+.chipDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.chipName {
+  font-weight: 700;
+  color: var(--color-ink);
+}
+
+.chipStatus {
+  margin-left: auto;
+  font-weight: 600;
+  font-size: var(--text-xs);
+  padding: 2px var(--space-sm);
+  border-radius: var(--radius-pill);
+}
+
+.chipPass {
+  background: var(--status-pass-bg);
+}
+.chipPass .chipStatus {
+  color: var(--status-pass-fg);
+}
+.chipPass .chipDot {
+  background: var(--status-pass-dot);
+}
+
+.chipWarn {
+  background: var(--status-warn-bg);
+}
+.chipWarn .chipStatus {
+  color: var(--status-warn-fg);
+}
+.chipWarn .chipDot {
+  background: var(--status-warn-dot);
+}
+
+.chipFail {
+  background: var(--status-fail-bg);
+}
+.chipFail .chipStatus {
+  color: var(--status-fail-fg);
+}
+.chipFail .chipDot {
+  background: var(--status-fail-dot);
+}
+
+.chipUnknown {
+  background: var(--status-unknown-bg);
+}
+.chipUnknown .chipStatus {
+  color: var(--status-unknown-fg);
+}
+.chipUnknown .chipDot {
+  background: var(--status-unknown-dot);
+}
+
+/* ── Expanded detail ──────────────────────────────────── */
+
+.chipDetail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-20);
+}
+
+.detailText {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: var(--text-xs);
+  color: var(--color-ink);
+  word-break: break-all;
+}
+
+.detailHint {
+  font-size: var(--text-xs);
+  color: var(--color-ink-muted);
+  line-height: 1.5;
+}
+
+.timestamp {
+  font-size: var(--text-xs);
+  color: var(--color-ink-muted);
+}

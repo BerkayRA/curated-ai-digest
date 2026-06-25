@@ -28,6 +28,8 @@ vi.mock('@digest/delivery', () => ({
     issueStatus: 'sent',
   }),
   evaluateAutoSend: vi.fn().mockReturnValue({ canSend: true, reasons: [] }),
+  transitionIssue: vi.fn().mockResolvedValue({ id: 'issue-1', status: 'failed' }),
+  scrubPii: (s: string) => s,
 }));
 
 vi.mock('@digest/email', () => ({
@@ -37,7 +39,7 @@ vi.mock('@digest/email', () => ({
 }));
 
 const { runSendJob } = await import('../jobs/send.js');
-const { dispatchIssue, evaluateAutoSend } = await import('@digest/delivery');
+const { dispatchIssue, evaluateAutoSend, transitionIssue } = await import('@digest/delivery');
 const { createEmailProvider } = await import('@digest/email');
 
 // ---------------------------------------------------------------------------
@@ -77,6 +79,9 @@ function makeRepo(overrides: Partial<SendJobRepo> = {}): SendJobRepo {
     getActiveSubscriberCount: vi.fn().mockResolvedValue(50),
     getSettings: vi.fn().mockResolvedValue(autoSendSettings),
     markAutoSent: vi.fn().mockResolvedValue(undefined),
+    // Phase 4 A/B defaults: no variants → single full dispatch (legacy behaviour).
+    hasVariants: vi.fn().mockResolvedValue(false),
+    setAbTesting: vi.fn().mockResolvedValue(undefined),
     ...overrides,
   };
 }
@@ -257,6 +262,72 @@ describe('runSendJob', () => {
     await runSendJob({ logger: makeLogger(), topicId: 'topic-1', isoWeek: '2026-W25', autoSendEnabled: true, repo });
 
     expect(findIssueByWeek).toHaveBeenCalledWith('topic-1', '2026-W25');
+  });
+
+  it('A/B: approved issue with variants sends test-fraction only and marks testing', async () => {
+    const repo = makeRepo({
+      findIssueByWeek: vi.fn().mockResolvedValue({ ...baseIssue, status: 'approved' }),
+      hasVariants: vi.fn().mockResolvedValue(true),
+    });
+
+    await runSendJob({
+      logger: makeLogger(),
+      topicId: 'topic-1',
+      isoWeek: '2026-W25',
+      autoSendEnabled: true,
+      repo,
+    });
+
+    expect(dispatchIssue).toHaveBeenCalledWith('issue-1', {
+      actorId: 'worker',
+      testFractionOnly: true,
+    });
+    expect(repo.setAbTesting).toHaveBeenCalledWith('issue-1');
+  });
+
+  it('A/B: auto-send issue with variants uses test-fraction split + worker:auto actor', async () => {
+    vi.mocked(evaluateAutoSend).mockReturnValueOnce({ canSend: true, reasons: [] });
+    const repo = makeRepo({
+      findIssueByWeek: vi.fn().mockResolvedValue({ ...baseIssue, status: 'draft' }),
+      hasVariants: vi.fn().mockResolvedValue(true),
+    });
+
+    await runSendJob({
+      logger: makeLogger(),
+      topicId: 'topic-1',
+      isoWeek: '2026-W25',
+      autoSendEnabled: true,
+      repo,
+    });
+
+    expect(dispatchIssue).toHaveBeenCalledWith('issue-1', {
+      actorId: 'worker:auto',
+      testFractionOnly: true,
+    });
+    expect(repo.setAbTesting).toHaveBeenCalledWith('issue-1');
+  });
+
+  it('A/B: dispatch throw transitions the issue to failed and skips setAbTesting', async () => {
+    vi.mocked(dispatchIssue).mockRejectedValueOnce(new Error('provider down'));
+    const repo = makeRepo({
+      findIssueByWeek: vi.fn().mockResolvedValue({ ...baseIssue, status: 'approved' }),
+      hasVariants: vi.fn().mockResolvedValue(true),
+    });
+
+    await expect(
+      runSendJob({
+        logger: makeLogger(),
+        topicId: 'topic-1',
+        isoWeek: '2026-W25',
+        autoSendEnabled: true,
+        repo,
+      }),
+    ).rejects.toThrow('provider down');
+
+    expect(vi.mocked(transitionIssue)).toHaveBeenCalledWith(
+      expect.objectContaining({ issueId: 'issue-1', to: 'failed' }),
+    );
+    expect(repo.setAbTesting).not.toHaveBeenCalled();
   });
 
   it('passes correct provider kind to createEmailProvider for guardrail check', async () => {

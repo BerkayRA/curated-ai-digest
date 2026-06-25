@@ -16,6 +16,9 @@ export const UpdateSettingsSchema = z.object({
   activeProvider: EmailProviderKindSchema.optional(),
   fromAddress: emailSchema.optional(),
   replyTo: emailSchema.optional(),
+  // DKIM selector for deliverability checks; empty/omitted falls back to the
+  // active provider's default selector at check time.
+  dkimSelector: z.string().trim().max(63).optional(),
   pipelineLeadDays: z.number().int().min(0).max(14).optional(),
 });
 export type UpdateSettingsDto = z.infer<typeof UpdateSettingsSchema>;

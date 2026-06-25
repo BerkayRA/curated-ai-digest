@@ -2,7 +2,14 @@
  * Shared types for the issue editor components.
  */
 
-import type { IssueStatus } from '@digest/shared';
+import type { IssueStatus, AbStatusValue } from '@digest/shared';
+
+export interface AbVariantData {
+  readonly variantIndex: number;
+  readonly subject: string;
+  readonly sentCount: number;
+  readonly openCount: number;
+}
 
 export interface EditableItem {
   readonly id: string;
@@ -22,4 +29,7 @@ export interface IssueEditorData {
   readonly subject: string;
   readonly preheader: string | null;
   readonly items: readonly EditableItem[];
+  readonly abStatus: AbStatusValue;
+  readonly abWinnerVariantIndex: number | null;
+  readonly variants: readonly AbVariantData[];
 }

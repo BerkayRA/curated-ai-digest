@@ -1,4 +1,9 @@
-import { prisma, createAnalyticsRepository, createTopicRepository } from '@digest/db';
+import {
+  prisma,
+  createAnalyticsRepository,
+  createTopicRepository,
+  createSendTimeRepository,
+} from '@digest/db';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { AnalyticsClient } from '@/components/analytics/AnalyticsClient';
 import { resolveTopicIdBySlug } from '@/lib/resolve-topic';
@@ -17,12 +22,13 @@ export default async function AnalyticsPage({
   const topicId = await resolveTopicIdBySlug(searchParams?.topic);
   const analytics = createAnalyticsRepository(prisma);
 
-  const [summary, issues, topClicks, growth, topic] = await Promise.all([
+  const [summary, issues, topClicks, growth, topic, sendTimeHint] = await Promise.all([
     analytics.getTopicSummary(topicId),
     analytics.getIssueHistory(topicId),
     analytics.getTopClickedUrls(topicId),
     analytics.getSubscriberGrowth(topicId),
     createTopicRepository(prisma).findById(topicId),
+    createSendTimeRepository(prisma).getOptimalSendWindow(topicId),
   ]);
 
   return (
@@ -37,6 +43,7 @@ export default async function AnalyticsPage({
         topClicks={topClicks}
         growth={growth}
         topicName={topic?.name ?? null}
+        sendTimeHint={sendTimeHint}
       />
     </section>
   );

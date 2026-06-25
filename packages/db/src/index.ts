@@ -32,6 +32,8 @@ export {
   TopicStatus,
   ConsentMode,
   ConsentBasis,
+  AbStatus,
+  SuppressionReason,
   Prisma,
 } from '@prisma/client';
 
@@ -49,6 +51,8 @@ export type {
   Topic,
   SubscriberTopic,
   EmailEvent,
+  SubjectVariant,
+  Suppression,
 } from '@prisma/client';
 
 export { EmailEventType } from '@prisma/client';
@@ -90,5 +94,24 @@ export type {
   ClickedUrlRow,
   GrowthPoint,
 } from './analytics-repository.js';
+
+export { createSuppressionRepository } from './suppression-repository.js';
+export type {
+  SuppressionRepository,
+  ListSuppressionsOptions,
+} from './suppression-repository.js';
+
+export { createSubjectVariantRepository } from './subject-variant-repository.js';
+export type {
+  SubjectVariantRepository,
+  CreateSubjectVariantData,
+  VariantStatsRow,
+} from './subject-variant-repository.js';
+
+export {
+  createSendTimeRepository,
+  MIN_OPENS_FOR_RECOMMENDATION,
+} from './send-time-repository.js';
+export type { SendTimeRepository, HourlyOpenBucket } from './send-time-repository.js';
 
 export { getDefaultTopic, getDefaultTopicId } from './default-topic.js';

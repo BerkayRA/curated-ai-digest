@@ -8,13 +8,20 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
 
 const findFirst = vi.fn();
+const subscriberFindUnique = vi.fn();
 const recordOnce = vi.fn();
 const setStatus = vi.fn();
+const insertHardBounce = vi.fn();
+const insertComplaint = vi.fn();
 
 vi.mock('@digest/db', () => ({
-  prisma: { send: { findFirst: (...args: unknown[]) => findFirst(...args) } },
+  prisma: {
+    send: { findFirst: (...args: unknown[]) => findFirst(...args) },
+    subscriber: { findUnique: (...args: unknown[]) => subscriberFindUnique(...args) },
+  },
   createEmailEventRepository: () => ({ recordOnce }),
   createSubscriberTopicRepository: () => ({ setStatus }),
+  createSuppressionRepository: () => ({ insertHardBounce, insertComplaint }),
 }));
 
 import { POST } from '../app/api/webhooks/acs/route';
@@ -45,6 +52,9 @@ describe('POST /api/webhooks/acs', () => {
     vi.stubEnv('ACS_WEBHOOK_KEY', KEY);
     recordOnce.mockResolvedValue({ id: 'evt-1' });
     setStatus.mockResolvedValue(undefined);
+    subscriberFindUnique.mockResolvedValue({ email: 'recipient@x.test' });
+    insertHardBounce.mockResolvedValue({ id: 'sup-1' });
+    insertComplaint.mockResolvedValue({ id: 'sup-2' });
   });
 
   it('echoes the validation code on the subscription handshake (no key needed)', async () => {

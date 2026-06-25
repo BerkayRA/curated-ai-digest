@@ -20,6 +20,7 @@ import { randomUUID } from 'node:crypto';
 import { transitionIssue } from './issue-transition.js';
 import type { TransitionOptions, TransitionResult } from './issue-transition.js';
 import { injectTrackingHooks } from './track.js';
+import { assignVariant } from './ab-split.js';
 
 // ---------------------------------------------------------------------------
 // PII scrubbing
@@ -49,6 +50,12 @@ export interface DispatchRepo {
     topicId: string,
   ): Promise<{ fromAddress: string | null; replyTo: string | null } | null>;
   getSettings(): Promise<Settings | null>;
+  /** A/B subject variants for an issue (empty → no test; the default path). */
+  getSubjectVariants(issueId: string): Promise<SubjectVariantRow[]>;
+  /** Of the given emails, the subset on the global suppression list. */
+  isSuppressedBatch(emails: readonly string[]): Promise<Set<string>>;
+  /** subscriberTopicIds that already received a Send for this issue (A/B remainder skip). */
+  getAlreadySentRecipientIds(issueId: string): Promise<Set<string>>;
   recordSend(data: {
     issueId: string;
     subscriberId: string;
@@ -56,8 +63,16 @@ export interface DispatchRepo {
     trackToken: string;
     status: 'queued' | 'sent' | 'failed';
     providerMessageId?: string;
+    variantIndex?: number | null;
     error?: string;
   }): Promise<void>;
+}
+
+/** Minimal A/B variant shape the dispatcher needs (subject + split fraction). */
+export interface SubjectVariantRow {
+  readonly variantIndex: number;
+  readonly subject: string;
+  readonly testFraction: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -84,6 +99,29 @@ export const defaultDispatchRepo: DispatchRepo = {
   async getSettings() {
     return prisma.settings.findFirst();
   },
+  async getSubjectVariants(issueId) {
+    const rows = await prisma.subjectVariant.findMany({
+      where: { issueId },
+      orderBy: { variantIndex: 'asc' },
+      select: { variantIndex: true, subject: true, testFraction: true },
+    });
+    return rows;
+  },
+  async isSuppressedBatch(emails) {
+    if (emails.length === 0) return new Set();
+    const rows = await prisma.suppression.findMany({
+      where: { email: { in: [...emails] } },
+      select: { email: true },
+    });
+    return new Set(rows.map((r) => r.email));
+  },
+  async getAlreadySentRecipientIds(issueId) {
+    const rows = await prisma.send.findMany({
+      where: { issueId, subscriberTopicId: { not: null } },
+      select: { subscriberTopicId: true },
+    });
+    return new Set(rows.flatMap((r) => (r.subscriberTopicId ? [r.subscriberTopicId] : [])));
+  },
   async recordSend({
     issueId,
     subscriberId,
@@ -91,6 +129,7 @@ export const defaultDispatchRepo: DispatchRepo = {
     trackToken,
     status,
     providerMessageId,
+    variantIndex,
     error,
   }) {
     await prisma.send.create({
@@ -101,6 +140,7 @@ export const defaultDispatchRepo: DispatchRepo = {
         trackToken,
         status,
         providerMessageId: providerMessageId ?? null,
+        variantIndex: variantIndex ?? null,
         error: error !== undefined ? scrubPii(error) : null,
         sentAt: status === 'sent' ? new Date() : null,
       },
@@ -127,6 +167,17 @@ export interface DispatchOptions {
    * Pass a mock in tests to avoid hitting the database.
    */
   readonly transitionFn?: TransitionFn;
+  /**
+   * A/B remainder send: overrides the per-recipient subject with the winning
+   * variant's subject and records no variantIndex. Implies skipping recipients
+   * who already received the test send.
+   */
+  readonly overrideSubject?: string;
+  /**
+   * A/B test send: only dispatch to the test-fraction recipients (the remainder
+   * is sent later by the winner job). Ignored when no variants exist.
+   */
+  readonly testFractionOnly?: boolean;
 }
 
 export interface DispatchResult {
@@ -150,6 +201,7 @@ function buildDigestEmailData(
   issue: Issue & { items: IssueItem[] },
   unsubscribeUrl: string,
   senderAddress: string,
+  subject: string,
 ): DigestEmailData {
   const items = issue.items.map((item) => ({
     titleTr: item.titleTr,
@@ -165,7 +217,7 @@ function buildDigestEmailData(
   const issueDate = issue.createdAt.toISOString().split('T')[0] ?? issue.createdAt.toISOString();
 
   return {
-    subject: issue.subject,
+    subject,
     preheader: issue.preheader ?? '',
     issueDate,
     issueLabel: issue.isoWeek,
@@ -210,9 +262,48 @@ export async function dispatchIssue(
     throw new Error('No settings row found — configure the application before sending');
   }
 
-  const recipients = await repo.getTopicRecipients(issue.topicId);
-  if (recipients.length === 0) {
+  const allRecipients = await repo.getTopicRecipients(issue.topicId);
+  if (allRecipients.length === 0) {
     throw new Error('No active subscribers found — nothing to send');
+  }
+
+  // Global suppression firewall — exclude hard-bounced/complained/manual addresses
+  // across ALL topics (distinct from per-topic unsubscribe). Empty list (the
+  // default) removes nobody, so the legacy send path is unchanged.
+  const suppressed = await repo.isSuppressedBatch(allRecipients.map((r) => r.email));
+  let recipients = allRecipients.filter((r) => !suppressed.has(r.email));
+
+  // A/B remainder send: skip recipients who already received the test send.
+  if (opts.overrideSubject) {
+    const alreadySent = await repo.getAlreadySentRecipientIds(issueId);
+    recipients = recipients.filter((r) => !alreadySent.has(r.subscriberTopicId));
+  }
+
+  if (recipients.length === 0) {
+    throw new Error('No eligible recipients — all suppressed or already sent for this issue');
+  }
+
+  // A/B variants for this issue. Empty (or an override/remainder send) → no split.
+  const variants = opts.overrideSubject ? [] : await repo.getSubjectVariants(issueId);
+  const variantCount = variants.length;
+  const testFraction = variantCount > 0 ? (variants[0]?.testFraction ?? 0.5) : 0;
+
+  // Pair each recipient with its assigned variant (null = remainder / no test).
+  // Build pairs BEFORE any filtering so positions stay aligned with assignVariant.
+  let dispatchList: Array<{ recipient: TopicRecipient; variantIndex: number | null }> =
+    recipients.map((recipient, i) => ({
+      recipient,
+      variantIndex:
+        variantCount > 0 ? assignVariant(i, recipients.length, testFraction, variantCount) : null,
+    }));
+
+  // In test mode, send only to the test-fraction recipients (remainder deferred
+  // to the winner job).
+  if (opts.testFractionOnly && variantCount > 0) {
+    dispatchList = dispatchList.filter((d) => d.variantIndex !== null);
+    if (dispatchList.length === 0) {
+      throw new Error('A/B test fraction resolved to zero recipients');
+    }
   }
 
   // 2. Resolve provider
@@ -232,15 +323,21 @@ export async function dispatchIssue(
 
   const senderAddress = 'Mega Bilgisayar Tic. Ltd. Şti, Ankara, Türkiye';
 
-  // 3. Build per-recipient messages
+  // 3. Build per-recipient messages. Subject precedence:
+  //    overrideSubject (A/B remainder) → assigned variant subject → issue.subject.
   const messages: Array<{
     message: EmailMessage;
     recipient: TopicRecipient;
     trackToken: string;
+    variantIndex: number | null;
   }> = await Promise.all(
-    recipients.map(async (recipient) => {
+    dispatchList.map(async ({ recipient, variantIndex }) => {
+      const subject =
+        opts.overrideSubject ??
+        (variantIndex !== null ? (variants[variantIndex]?.subject ?? issue.subject) : issue.subject);
+
       const unsubscribeUrl = buildUnsubscribeUrl(recipient.unsubscribeToken);
-      const data = buildDigestEmailData(issue, unsubscribeUrl, senderAddress);
+      const data = buildDigestEmailData(issue, unsubscribeUrl, senderAddress, subject);
       const rendered = await renderDigestEmail(data);
 
       // One opaque tracking token per Send — links + open pixel resolve to it.
@@ -269,13 +366,13 @@ export async function dispatchIssue(
           email: fromEmail,
           name: 'Curated AI Digest',
         },
-        subject: issue.subject,
+        subject,
         html: trackedHtml,
         text: rendered.text,
         headers,
       };
 
-      return { message, recipient, trackToken };
+      return { message, recipient, trackToken, variantIndex };
     }),
   );
 
@@ -288,7 +385,7 @@ export async function dispatchIssue(
 
     await Promise.all(
       results.map(async (result, i) => {
-        const { recipient, trackToken } = messages[i]!;
+        const { recipient, trackToken, variantIndex } = messages[i]!;
         await repo.recordSend({
           issueId,
           subscriberId: recipient.subscriberId,
@@ -296,6 +393,7 @@ export async function dispatchIssue(
           trackToken,
           status: 'sent',
           providerMessageId: result.providerMessageId,
+          variantIndex,
         });
         successCount++;
       }),
@@ -303,13 +401,14 @@ export async function dispatchIssue(
   } catch (batchError) {
     // Batch failed — record individual failures with PII scrubbed from error message
     const rawError = batchError instanceof Error ? batchError.message : String(batchError);
-    for (const { recipient, trackToken } of messages) {
+    for (const { recipient, trackToken, variantIndex } of messages) {
       await repo.recordSend({
         issueId,
         subscriberId: recipient.subscriberId,
         subscriberTopicId: recipient.subscriberTopicId,
         trackToken,
         status: 'failed',
+        variantIndex,
         error: rawError,
       });
       failureCount++;
@@ -320,15 +419,20 @@ export async function dispatchIssue(
   const allFailed = failureCount > 0 && successCount === 0;
   const targetStatus: IssueStatus = allFailed ? 'failed' : 'sent';
 
-  await doTransition({
-    issueId,
-    to: targetStatus,
-    actorId: opts.actorId ?? 'system',
-    meta: { successCount, failureCount, totalRecipients: recipients.length },
-  });
+  // A/B test sends (testFractionOnly) intentionally leave the issue in its
+  // current status — the winner job sends the remainder and finalizes it.
+  // Otherwise transition to sent/failed as before.
+  if (!opts.testFractionOnly || variantCount === 0) {
+    await doTransition({
+      issueId,
+      to: targetStatus,
+      actorId: opts.actorId ?? 'system',
+      meta: { successCount, failureCount, totalRecipients: dispatchList.length },
+    });
+  }
 
   return {
-    totalRecipients: recipients.length,
+    totalRecipients: dispatchList.length,
     successCount,
     failureCount,
     issueStatus: targetStatus,
