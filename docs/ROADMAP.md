@@ -8,7 +8,9 @@
 >
 > **Progress:** Phase 0 ✅ · Phase 1a ✅ (Topic entity + isolation) · Phase 1b ✅
 > (Topic management + switcher) · Phase 1c ✅ (per-topic subscribers, schedules &
-> sending) · Phase 2 ✅ (engagement analytics) · Phase 3 → next.
+> sending) · Phase 2 ✅ (engagement analytics) · Phase 3 ✅ (self-serve growth:
+> per-topic consent mode, public signup + double opt-in, preference center,
+> rate-limit + bot protection) · Phase 4 → next.
 
 ## Where we are today (v1)
 
@@ -47,9 +49,11 @@ Stabilize the flaky `web#test` source tests; baseline visual snapshots and make 
 
 **Value:** the numbers leadership wants. Open + click tracking (opaque per‑send token → `EmailEvent`; opens labelled approximate) and provider delivery webhooks (ACS/Resend signature‑verified, Graph stubbed); per‑topic **Analitik** dashboard — open rate, CTR, top‑clicked stories, subscriber growth, send history — computed on the fly, aggregate and privacy‑forward (daily‑salted IP hash, coarse device class, no raw PII). Bounces/complaints mark the membership `bounced`. See [ADR‑0008](adr/ADR-0008-engagement-analytics.md).
 
-## Phase 3 — Self‑serve growth
+## Phase 3 ✅ — Self‑serve growth
 
-**Value:** the list grows itself. Public per‑topic signup/landing pages, double opt‑in confirmation, and a subscriber preference center (choose topics, granular unsubscribe). Hardened with rate limiting and bot protection.
+**Value:** the list grows itself. Public per‑topic signup/landing pages (`/s/<slug>`, public‑mode topics only), double opt‑in confirmation (`pending` membership → single‑use confirm token → `/confirm/<token>` flips to active), and a subscriber preference center (`/preferences/<global‑token>`: per‑topic subscribe/unsubscribe + leave‑all). Public endpoints are hardened with an in‑process IP rate limiter + honeypot/timing bot protection and emit no subscriber‑enumeration signal. See [ADR‑0009](adr/ADR-0009-consent-and-double-opt-in.md).
+
+**Consent model (decided):** each topic has a `consentMode` — **`business`** (existing‑relationship B2B: no prior opt‑in required under TR tacir/esnaf + EU soft‑opt‑in; admin/CSV import only; no public signup) or **`public`** (public signup page + **double opt‑in**). Every `SubscriberTopic` records a `consentBasis` (`business_relationship` | `double_opt_in` | `import` | `single_opt_in`) + `consentAt` + `consentSource` for an auditable lawful‑basis trail. Unsubscribe always works (per‑topic token), regardless of basis. **İYS** (Turkey's national message system): record everything İYS‑ready now (basis/timestamp/source + opt‑out events); the İYS **API sync** is a deferred, dedicated task. _Not legal advice — verify with counsel._
 
 ## Phase 4 — Send optimization & deliverability
 
@@ -58,6 +62,10 @@ Stabilize the flaky `web#test` source tests; baseline visual snapshots and make 
 ## Phase 5 — White‑label & reach
 
 **Value:** one platform, many branded products and channels. Per‑topic branding (logo/colors/from‑address/custom domain), multi‑language editions, and additional channels — Slack/Teams delivery, a public web archive per topic with outbound RSS, and a small read API.
+
+## Phase 6 — Monetization
+
+**Value:** the newsletter pays for itself. A reserved **"Sponsorlu" issue slot** (a sponsored `IssueItem` type) with a per‑sponsor **performance view** built on Phase 2 click analytics ("N engaged clicks to your sponsor"), and a **premium/paid topic tier** (rides the existing per‑topic subscription model). Direct sponsorship + premium topics over programmatic ads for a niche, high‑intent B2B audience. **Hard rule:** monetization surfaces (sponsored slots, ads, paid upsell) **never appear on `business`/B2B topics — only on `public` topics.**
 
 ---
 

@@ -31,6 +31,12 @@ describe('isPublicPath', () => {
     '/brand/mega-logo-white.svg',
     '/brand/mega-logo-blue.svg',
     '/some/nested/asset.svg',
+    // Self-serve growth (Phase 3) — signup pages, opt-in links, public APIs.
+    '/s/enterprise-ai',
+    '/confirm/tok-abc',
+    '/preferences/tok-xyz',
+    '/api/public/subscribe',
+    '/api/public/preferences/tok-xyz',
   ];
 
   it.each(publicPaths)('treats %s as public', (path) => {

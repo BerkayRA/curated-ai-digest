@@ -24,5 +24,23 @@ export type SendStatus = z.infer<typeof SendStatusSchema>;
 export const EmailProviderKindSchema = z.enum(['microsoft_graph', 'acs_email', 'resend']);
 export type EmailProviderKind = z.infer<typeof EmailProviderKindSchema>;
 
-export const SubscriberStatusSchema = z.enum(['active', 'unsubscribed', 'bounced']);
+export const SubscriberStatusSchema = z.enum([
+  'active',
+  'unsubscribed',
+  'bounced',
+  'pending',
+]);
 export type SubscriberStatus = z.infer<typeof SubscriberStatusSchema>;
+
+// Consent mode for a topic: `business` (no public signup) or `public` (double opt-in).
+export const ConsentModeSchema = z.enum(['business', 'public']);
+export type ConsentMode = z.infer<typeof ConsentModeSchema>;
+
+// Recorded lawful basis for a SubscriberTopic membership (İYS-ready).
+export const ConsentBasisSchema = z.enum([
+  'business_relationship',
+  'double_opt_in',
+  'import',
+  'single_opt_in',
+]);
+export type ConsentBasis = z.infer<typeof ConsentBasisSchema>;

@@ -52,3 +52,15 @@ export interface RenderedEmail {
   readonly html: string;
   readonly text: string;
 }
+
+/** Top-level props for the ConfirmEmail (double opt-in) template. */
+export interface ConfirmEmailData {
+  /** Display name of the topic the recipient is confirming. */
+  readonly topicName: string;
+  /** Absolute confirm URL (e.g. `${APP_BASE_URL}/confirm/<token>`). */
+  readonly confirmUrl: string;
+  /** Physical sender address line shown in the footer (compliance). */
+  readonly senderAddress: string;
+  /** Absolute base URL for email image assets; defaults to APP_BASE_URL at render time. */
+  readonly assetBaseUrl?: string;
+}

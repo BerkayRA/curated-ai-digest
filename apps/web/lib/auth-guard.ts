@@ -22,6 +22,13 @@ const PUBLIC_PREFIXES = [
   // verified per-route; they arrive unauthenticated from outside.
   '/api/webhooks',
   '/unsubscribe',
+  // Self-serve growth (Phase 3) — public, rate-limited + honeypot-protected.
+  // Signup landing pages, double opt-in confirmation, preference center, and the
+  // public growth APIs are reached unauthenticated (signup forms + email links).
+  '/s',
+  '/confirm',
+  '/preferences',
+  '/api/public',
   '/_next/static',
   '/_next/image',
   '/favicon.ico',

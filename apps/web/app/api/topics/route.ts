@@ -37,7 +37,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json(err(message), { status: 400 });
     }
 
-    const { slug, name, description, audience, voice, status } = parsed.data;
+    const { slug, name, description, audience, voice, status, consentMode } = parsed.data;
 
     const repo = createTopicRepository(prisma);
     const topic = await repo.create({
@@ -47,6 +47,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       audience: audience ?? null,
       voice: voice ?? null,
       status,
+      consentMode,
     });
 
     return NextResponse.json(ok(topic), { status: 201 });

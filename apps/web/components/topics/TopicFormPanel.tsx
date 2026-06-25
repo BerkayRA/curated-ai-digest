@@ -10,6 +10,10 @@ import styles from './topics.module.css';
 // ---------------------------------------------------------------------------
 
 type TopicStatus = 'active' | 'paused';
+type ConsentMode = 'business' | 'public';
+
+// Reset the "copied" confirmation after this delay.
+const COPY_RESET_MS = 2000;
 
 // Allow the slide-in transition to begin before shifting focus to the panel.
 const PANEL_FOCUS_DELAY_MS = 50;
@@ -43,9 +47,11 @@ export function TopicFormPanel({ open, topic, onClose, onSaved }: TopicFormPanel
   const [audience, setAudience] = useState('');
   const [voice, setVoice] = useState('');
   const [status, setStatus] = useState<TopicStatus>('active');
+  const [consentMode, setConsentMode] = useState<ConsentMode>('business');
 
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [signupCopied, setSignupCopied] = useState(false);
 
   // ── Populate when editing ─────────────────────────────────
 
@@ -58,6 +64,7 @@ export function TopicFormPanel({ open, topic, onClose, onSaved }: TopicFormPanel
       setAudience(topic.audience ?? '');
       setVoice(topic.voice ?? '');
       setStatus(topic.status as TopicStatus);
+      setConsentMode(topic.consentMode as ConsentMode);
     } else {
       setSlug('');
       setName('');
@@ -65,8 +72,10 @@ export function TopicFormPanel({ open, topic, onClose, onSaved }: TopicFormPanel
       setAudience('');
       setVoice('');
       setStatus('active');
+      setConsentMode('business');
     }
     setFormError(null);
+    setSignupCopied(false);
   }, [open, topic]);
 
   // ── Focus management on open ──────────────────────────────
@@ -108,6 +117,7 @@ export function TopicFormPanel({ open, topic, onClose, onSaved }: TopicFormPanel
       audience: trimmedAudience === '' ? null : trimmedAudience,
       voice: trimmedVoice === '' ? null : trimmedVoice,
       status,
+      consentMode,
     };
 
     try {
@@ -132,6 +142,25 @@ export function TopicFormPanel({ open, topic, onClose, onSaved }: TopicFormPanel
       setFormError('Sunucuya bağlanırken bir hata oluştu');
     } finally {
       setSaving(false);
+    }
+  };
+
+  // ── Public signup link (edit-mode + public consent only) ──
+
+  const showSignupLink = isEdit && consentMode === 'public';
+  const signupUrl =
+    showSignupLink && typeof window !== 'undefined'
+      ? `${window.location.origin}/s/${topic.slug}`
+      : '';
+
+  const handleCopySignupUrl = async () => {
+    if (signupUrl === '') return;
+    try {
+      await navigator.clipboard.writeText(signupUrl);
+      setSignupCopied(true);
+      setTimeout(() => setSignupCopied(false), COPY_RESET_MS);
+    } catch {
+      setSignupCopied(false);
     }
   };
 
@@ -282,6 +311,51 @@ export function TopicFormPanel({ open, topic, onClose, onSaved }: TopicFormPanel
                 <option value="paused">Duraklatıldı</option>
               </select>
             </div>
+
+            {/* Consent mode */}
+            <div className={styles.formField}>
+              <label className={styles.formLabel} htmlFor="topic-consent-mode">
+                Kayıt Modu
+              </label>
+              <select
+                id="topic-consent-mode"
+                className={styles.formSelect}
+                value={consentMode}
+                onChange={(e) => setConsentMode(e.target.value as ConsentMode)}
+              >
+                <option value="business">İş İlişkisi (kapalı liste)</option>
+                <option value="public">Herkese Açık (çift onaylı kayıt)</option>
+              </select>
+              <span className={styles.formHint}>
+                İş ilişkisi modunda herkese açık kayıt sayfası oluşturulmaz.
+              </span>
+            </div>
+
+            {/* Public signup link (read-only) */}
+            {showSignupLink && (
+              <div className={styles.formField}>
+                <label className={styles.formLabel} htmlFor="topic-signup-url">
+                  Kayıt Bağlantısı
+                </label>
+                <div className={styles.copyRow}>
+                  <input
+                    id="topic-signup-url"
+                    type="text"
+                    className={`${styles.formInput} ${styles.mono}`}
+                    value={signupUrl}
+                    readOnly
+                  />
+                  <button
+                    type="button"
+                    className={styles.cardBtn}
+                    onClick={handleCopySignupUrl}
+                    aria-label="Kayıt bağlantısını kopyala"
+                  >
+                    {signupCopied ? 'Kopyalandı' : 'Kopyala'}
+                  </button>
+                </div>
+              </div>
+            )}
           </form>
         </div>
 

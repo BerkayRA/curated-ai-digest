@@ -51,11 +51,31 @@ enum SubscriberStatus {
   active
   unsubscribed
   bounced
+  // Double opt-in: membership awaiting email confirmation. NOT a dispatch
+  // recipient (findActiveRecipients gates on status='active').
+  pending
 }
 
 enum TopicStatus {
   active
   paused
+}
+
+// Lawful basis for a topic's recipients.
+//   business — existing-relationship B2B: no prior opt-in required; admin/CSV
+//              import only, NO public signup page.
+//   public   — public signup page + double opt-in confirmation.
+enum ConsentMode {
+  business
+  public
+}
+
+// Recorded lawful-basis trail for each SubscriberTopic membership (İYS-ready).
+enum ConsentBasis {
+  business_relationship
+  double_opt_in
+  import
+  single_opt_in
 }
 
 // ---------------------------------------------------------------------------
@@ -70,6 +90,10 @@ model Topic {
   audience    String? // injected into rank/curate/QA prompts; null → default copy
   voice       String? // injected into copywrite/QA prompts; null → default copy
   status      TopicStatus @default(active)
+
+  // Consent mode — `business` (no public signup; import only) is the safe
+  // default; `public` opens a /s/<slug> signup page with double opt-in.
+  consentMode ConsentMode @default(business) @map("consent_mode")
 
   // Per-topic schedule (nullable; null → fall back to global Settings)
   sendDayOfWeek    String?  @map("send_day_of_week")
@@ -214,6 +238,13 @@ model SubscriberTopic {
   topicId          String           @map("topic_id")
   status           SubscriberStatus @default(active)
   unsubscribeToken String           @unique @map("unsubscribe_token")
+  // Double opt-in confirmation token; set while status='pending', cleared
+  // (NULL) on confirm. Partial-unique so many confirmed rows can share NULL.
+  confirmToken     String?          @unique @map("confirm_token")
+  // Recorded lawful basis for this membership (İYS-ready audit trail).
+  consentBasis     ConsentBasis?    @map("consent_basis")
+  consentAt        DateTime?        @map("consent_at")
+  consentSource    String?          @map("consent_source") // e.g. public_signup, import, preferences_center
   createdAt        DateTime         @default(now()) @map("created_at")
   updatedAt        DateTime         @updatedAt @map("updated_at")
 
