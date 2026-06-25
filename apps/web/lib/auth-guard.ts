@@ -15,6 +15,12 @@ const PUBLIC_PREFIXES = [
   '/login',
   '/api/auth',
   '/api/health',
+  // Engagement tracking pixel + click redirects — recipients hit these
+  // unauthenticated from their email clients.
+  '/api/track',
+  // Provider delivery webhooks (Resend/ACS/Graph) — signed by the provider and
+  // verified per-route; they arrive unauthenticated from outside.
+  '/api/webhooks',
   '/unsubscribe',
   '/_next/static',
   '/_next/image',

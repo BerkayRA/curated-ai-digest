@@ -8,6 +8,9 @@
 export { dispatchIssue, defaultDispatchRepo } from './dispatch.js';
 export type { DispatchRepo, DispatchOptions, DispatchResult } from './dispatch.js';
 
+// Engagement tracking hooks
+export { injectTrackingHooks } from './track.js';
+
 // Auto-send guardrails
 export { evaluateAutoSend, AutoSendInputSchema } from './guardrails.js';
 export type { AutoSendInput, AutoSendResult } from './guardrails.js';
