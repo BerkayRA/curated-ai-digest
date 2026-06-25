@@ -87,4 +87,16 @@ describe('TopicRepository', () => {
       data: { name: 'Renamed' },
     });
   });
+
+  it('setStatus updates only the status field', async () => {
+    const update = vi.fn().mockResolvedValue({ ...baseTopic, status: 'paused' });
+    const repo = createTopicRepository(makeFakePrisma({ update }));
+
+    const result = await repo.setStatus('topic_enterprise_ai', 'paused');
+    expect(update).toHaveBeenCalledWith({
+      where: { id: 'topic_enterprise_ai' },
+      data: { status: 'paused' },
+    });
+    expect(result.status).toBe('paused');
+  });
 });

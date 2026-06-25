@@ -31,6 +31,13 @@ interface DraftItem {
 interface NewIssueFormProps {
   /** Pre-filled ISO week — defaults to next week, computed server-side. */
   defaultIsoWeek: string;
+  /** Active topic slug — scopes candidate fetches and the created draft. */
+  topicSlug?: string;
+}
+
+/** Build a `?topic=<slug>` query suffix, or empty string when no slug. */
+function topicQuery(slug: string | undefined): string {
+  return slug ? `?topic=${encodeURIComponent(slug)}` : '';
 }
 
 const emptyItem = (): DraftItem => ({
@@ -40,7 +47,7 @@ const emptyItem = (): DraftItem => ({
   sourceName: '',
 });
 
-export function NewIssueForm({ defaultIsoWeek }: NewIssueFormProps) {
+export function NewIssueForm({ defaultIsoWeek, topicSlug }: NewIssueFormProps) {
   const router = useRouter();
 
   const [isoWeek, setIsoWeek] = useState(defaultIsoWeek);
@@ -69,7 +76,7 @@ export function NewIssueForm({ defaultIsoWeek }: NewIssueFormProps) {
   useEffect(() => {
     let cancelled = false;
     setCandLoading(true);
-    fetch('/api/candidates/recent')
+    fetch(`/api/candidates/recent${topicQuery(topicSlug)}`)
       .then((r) => r.json() as Promise<ApiResponse<CandData>>)
       .then((json) => {
         if (cancelled) return;
@@ -88,7 +95,7 @@ export function NewIssueForm({ defaultIsoWeek }: NewIssueFormProps) {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [topicSlug]);
 
   const updateItem = useCallback(
     (index: number, field: 'titleTr' | 'summaryTr' | 'sourceUrl' | 'sourceName', value: string) => {
@@ -136,7 +143,7 @@ export function NewIssueForm({ defaultIsoWeek }: NewIssueFormProps) {
     setFormError(null);
     setCurateStatus(null);
     try {
-      const res = await fetch('/api/candidates/auto');
+      const res = await fetch(`/api/candidates/auto${topicQuery(topicSlug)}`);
       const json = (await res.json()) as ApiResponse<{ items: DraftItem[]; total: number }>;
       if (!json.success || !json.data) {
         setFormError(json.error ?? 'Otomatik kürasyon başarısız.');
@@ -153,7 +160,7 @@ export function NewIssueForm({ defaultIsoWeek }: NewIssueFormProps) {
     } finally {
       setAutoLoading(false);
     }
-  }, []);
+  }, [topicSlug]);
 
   /** Fill one slot from a chosen source: its top article not already used in any
    *  slot (so re-picking the same source yields the next one). */
@@ -193,6 +200,7 @@ export function NewIssueForm({ defaultIsoWeek }: NewIssueFormProps) {
           subject,
           preheader: preheader.trim() ? preheader : undefined,
           items,
+          ...(topicSlug ? { topicSlug } : {}),
         }),
       });
 

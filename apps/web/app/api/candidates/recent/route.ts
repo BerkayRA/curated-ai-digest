@@ -8,18 +8,20 @@
  * Auth is enforced by middleware.
  */
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { ok, err } from '@/lib/api-response';
 import { getErrorMessage } from '@/lib/error';
 import { loadRecentCandidates } from '@/lib/candidates';
+import { resolveTopicIdFromRequest } from '@/lib/resolve-topic';
 
 export const dynamic = 'force-dynamic';
 
 const TOP_PER_SOURCE = 3;
 
-export async function GET(): Promise<NextResponse> {
+export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
-    const { candidates, scannedAt, source } = await loadRecentCandidates();
+    const topicId = await resolveTopicIdFromRequest(request);
+    const { candidates, scannedAt, source } = await loadRecentCandidates(topicId);
     const { groupBySourceTopN } = await import('@digest/curation');
 
     const sources = groupBySourceTopN(candidates, TOP_PER_SOURCE).map((group) => ({
