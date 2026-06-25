@@ -9,7 +9,12 @@ import { z } from 'zod';
 import type { CandidateArticle } from '@digest/db';
 import { MODEL_MAP, calcCostUsd } from './config.js';
 import { callWithValidatedTool } from './llm-utils.js';
-import type { ScoredCandidate, StageOptions, PipelineRunRecord } from './types.js';
+import type {
+  ScoredCandidate,
+  StageOptions,
+  PipelineRunRecord,
+  TopicContext,
+} from './types.js';
 
 // ---------------------------------------------------------------------------
 // Zod schema for LLM tool output
@@ -37,7 +42,22 @@ export interface RankStageResult {
   readonly pipelineRun: PipelineRunRecord;
 }
 
-const SYSTEM_PROMPT = `You are an editorial AI assistant for Mega Bilgisayar, a Turkish B2B IT company.
+/**
+ * Build the Stage 1 RANK system prompt for a topic.
+ *
+ * When `ctx.audience` is null, the relevance description falls back verbatim to
+ * the original hardcoded copy, so the default `enterprise-ai` topic produces a
+ * byte-identical prompt.
+ */
+export function buildSystemPrompt(ctx: TopicContext): string {
+  const audienceBlock =
+    ctx.audience ??
+    `Mega Bilgisayar's Turkish customer/prospect audience.
+   - These are Turkish IT professionals, CIOs, and business decision-makers at mid-to-large companies.
+   - High relevance: enterprise AI tools, productivity AI, security AI, cloud AI services, AI regulation affecting EU/TR businesses.
+   - Low relevance: consumer apps, highly academic papers, US-specific policy with no TR impact.`;
+
+  return `You are an editorial AI assistant for Mega Bilgisayar, a Turkish B2B IT company.
 Your task is to score AI-news articles for two dimensions:
 
 1. importanceScore (0.0–1.0): Global significance of the development.
@@ -45,12 +65,10 @@ Your task is to score AI-news articles for two dimensions:
    - 0.5 = solid industry news with moderate impact
    - 0.0 = minor update, opinion piece, low-signal rumour
 
-2. relevanceScore (0.0–1.0): Relevance to Mega Bilgisayar's Turkish customer/prospect audience.
-   - These are Turkish IT professionals, CIOs, and business decision-makers at mid-to-large companies.
-   - High relevance: enterprise AI tools, productivity AI, security AI, cloud AI services, AI regulation affecting EU/TR businesses.
-   - Low relevance: consumer apps, highly academic papers, US-specific policy with no TR impact.
+2. relevanceScore (0.0–1.0): Relevance to ${audienceBlock}
 
 Score precisely and consistently. Brief rationale required for each item.`;
+}
 
 /**
  * Stage 1 — RANK
@@ -62,7 +80,7 @@ export async function runRankStage(
   candidates: readonly CandidateArticle[],
   opts: StageOptions,
 ): Promise<RankStageResult> {
-  const { client, repository, logger, issueId } = opts;
+  const { client, repository, logger, issueId, topicContext } = opts;
   const model = MODEL_MAP['rank'];
   const startedAt = new Date();
 
@@ -81,7 +99,7 @@ export async function runRankStage(
       startedAt,
       finishedAt,
     };
-    await repository.logPipelineRun({ ...run, issueId });
+    await repository.logPipelineRun({ ...run, topicId: topicContext.topicId, issueId });
     return { scored: [], pipelineRun: run };
   }
 
@@ -102,7 +120,7 @@ export async function runRankStage(
     const result = await callWithValidatedTool({
       client,
       model,
-      system: SYSTEM_PROMPT,
+      system: buildSystemPrompt(topicContext),
       userMessage,
       tool: {
         name: 'score_articles',
@@ -146,7 +164,7 @@ export async function runRankStage(
       startedAt,
       finishedAt,
     };
-    await repository.logPipelineRun({ ...run, issueId });
+    await repository.logPipelineRun({ ...run, topicId: topicContext.topicId, issueId });
     throw err;
   }
 
@@ -198,7 +216,7 @@ export async function runRankStage(
     finishedAt,
   };
 
-  await repository.logPipelineRun({ ...run, issueId });
+  await repository.logPipelineRun({ ...run, topicId: topicContext.topicId, issueId });
 
   logger.info('pipeline.rank.done', { scored: scored.length, costUsd });
 

@@ -9,6 +9,9 @@ import type { IngestResult, SourceProvider, Logger } from '../ingest/types.js';
 // Scan runner — keyless, no DB, writes to local NDJSON pool
 // ---------------------------------------------------------------------------
 
+/** Default topic slug used to namespace the scan's candidate-pool directory. */
+export const DEFAULT_TOPIC_SLUG = 'enterprise-ai';
+
 export interface RunScanOptions {
   /** Directory where the candidate pool artifact is written. */
   readonly dir: string;
@@ -19,6 +22,12 @@ export interface RunScanOptions {
   readonly providers?: readonly SourceProvider[];
   /** Topic threaded into SourceContext for every provider. */
   readonly topic?: string;
+  /**
+   * Topic slug for this scan. Defaults to {@link DEFAULT_TOPIC_SLUG}. Used by
+   * the CLI to namespace the pool directory; the scan itself is topic-unaware
+   * (the file pool is keyless), so this is informational here.
+   */
+  readonly topicSlug?: string;
   /** Maximum candidates to retain in the pool. Defaults to 200. */
   readonly maxItems?: number;
   /** Logger; defaults to a silent no-op. */

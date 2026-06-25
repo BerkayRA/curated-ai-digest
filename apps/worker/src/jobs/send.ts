@@ -40,7 +40,9 @@ export interface SendJobRepo {
 
 export const defaultSendJobRepo: SendJobRepo = {
   async findIssueByWeek(isoWeek) {
-    const issue = await prisma.issue.findUnique({
+    // Single-topic today (Phase 1c scopes the send job by topic); one topic →
+    // isoWeek is effectively unique, so findFirst is correct and safe here.
+    const issue = await prisma.issue.findFirst({
       where: { isoWeek },
       select: {
         id: true,

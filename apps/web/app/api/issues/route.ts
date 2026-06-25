@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@digest/db';
+import { prisma, getDefaultTopicId } from '@digest/db';
 import { ok, err } from '@/lib/api-response';
 import { getErrorMessage } from '@/lib/error';
 // CreateIssueDraftSchema is defined in ./schema (not inline) because Next.js
@@ -44,7 +44,12 @@ export async function POST(request: NextRequest) {
 
     const { isoWeek, subject, preheader, items } = parsed.data;
 
-    const existing = await prisma.issue.findUnique({ where: { isoWeek } });
+    // No topic selector in the UI yet (Phase 1b) — scope to the default topic.
+    const topicId = await getDefaultTopicId(prisma);
+
+    const existing = await prisma.issue.findUnique({
+      where: { topicId_isoWeek: { topicId, isoWeek } },
+    });
     if (existing) {
       return NextResponse.json(err('Bu hafta için zaten bir sayı var.'), { status: 409 });
     }
@@ -52,6 +57,7 @@ export async function POST(request: NextRequest) {
     const issue = await prisma.$transaction(async (tx) => {
       return tx.issue.create({
         data: {
+          topicId,
           isoWeek,
           subject,
           ...(preheader ? { preheader } : {}),

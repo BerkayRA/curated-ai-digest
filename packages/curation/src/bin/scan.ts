@@ -3,9 +3,13 @@
  * scan.ts — CLI entrypoint for the daily deterministic scan.
  *
  * Reads configuration from environment variables:
- *   CANDIDATES_DIR   — output directory (default: data/candidates, resolved
- *                      against INIT_CWD — the dir `pnpm` was invoked from)
+ *   CANDIDATES_DIR   — output directory. When unset, defaults to
+ *                      data/candidates/<topicSlug> (resolved against INIT_CWD —
+ *                      the dir `pnpm` was invoked from). An explicit
+ *                      CANDIDATES_DIR is honored as-is (used by the GitHub Action).
  *   SCAN_TOPIC       — topic string passed to providers (default: DEFAULT_TOPIC)
+ *   SCAN_TOPIC_SLUG  — topic slug used to namespace the default dir
+ *                      (default: DEFAULT_TOPIC_SLUG = 'enterprise-ai')
  *   SCAN_MAX_ITEMS   — pool size cap (default: 200)
  *
  * Logs progress to STDERR; prints the IngestResult as JSON to STDOUT on success.
@@ -14,7 +18,7 @@
  */
 
 import * as path from 'node:path';
-import { runScan } from '../scan/run-scan.js';
+import { runScan, DEFAULT_TOPIC_SLUG } from '../scan/run-scan.js';
 import { DEFAULT_TOPIC } from '../ingest/sources.js';
 import type { Logger } from '../ingest/types.js';
 
@@ -47,8 +51,11 @@ async function main(): Promise<void> {
   // scan`, cwd is the package dir, but INIT_CWD is the repo root where `pnpm scan`
   // was launched — which is where the daily Action commits `data/candidates/` from.
   const baseDir = process.env['INIT_CWD'] ?? process.cwd();
+  const topicSlug = process.env['SCAN_TOPIC_SLUG'] ?? DEFAULT_TOPIC_SLUG;
   const rawDir = process.env['CANDIDATES_DIR'];
-  const dir = path.resolve(baseDir, rawDir ?? 'data/candidates');
+  // Explicit CANDIDATES_DIR wins as-is (the GitHub Action sets it). Otherwise
+  // namespace the pool by topic slug so multiple topics never share a pool.
+  const dir = path.resolve(baseDir, rawDir ?? path.join('data', 'candidates', topicSlug));
   const topic = process.env['SCAN_TOPIC'] ?? DEFAULT_TOPIC;
   const rawMax = process.env['SCAN_MAX_ITEMS'];
   const maxItems = rawMax !== undefined ? parseInt(rawMax, 10) : 200;
@@ -60,9 +67,9 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  logger.info('scan.start', { dir, topic, maxItems });
+  logger.info('scan.start', { dir, topic, topicSlug, maxItems });
 
-  const result = await runScan({ dir, topic, maxItems, logger });
+  const result = await runScan({ dir, topic, topicSlug, maxItems, logger });
 
   process.stdout.write(JSON.stringify(result, null, 2) + '\n');
 

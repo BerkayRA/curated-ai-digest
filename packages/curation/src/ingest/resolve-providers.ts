@@ -19,6 +19,12 @@ export interface ResolveProvidersOptions {
   /** Injected SourceRepository — when provided, @digest/db is NOT imported. */
   repository?: import('@digest/db').SourceRepository;
   logger?: Logger;
+  /**
+   * When set, only sources for this topic are resolved (`findEnabledByTopic`).
+   * When absent, all enabled sources are resolved (`findEnabled`) — the
+   * single-topic Phase 1a behavior.
+   */
+  topicId?: string;
 }
 
 /**
@@ -44,7 +50,10 @@ export async function resolveProviders(
     repo = db.createSourceRepository(db.prisma);
   }
 
-  const sources = await repo.findEnabled();
+  const sources =
+    opts.topicId !== undefined
+      ? await repo.findEnabledByTopic(opts.topicId)
+      : await repo.findEnabled();
 
   if (sources.length === 0) {
     logger.info('resolve-providers.empty', { fallback: 'defaultProviders' });

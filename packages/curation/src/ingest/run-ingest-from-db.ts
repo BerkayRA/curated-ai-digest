@@ -10,6 +10,12 @@ import type { IngestResult, Logger } from './types.js';
 export interface RunIngestFromDbOptions {
   logger?: Logger;
   topic?: string;
+  /**
+   * Topic id used to scope source resolution + candidate persistence. When
+   * omitted, all enabled sources are used and runIngest resolves the default
+   * active topic for persistence (Phase 1a single-topic behavior).
+   */
+  topicId?: string;
   /** Injected SourceRepository (for health recording). */
   sourceRepository?: import('@digest/db').SourceRepository;
   /** Injected IngestRepository (for candidate persistence). */
@@ -27,14 +33,15 @@ export interface RunIngestFromDbOptions {
 export async function runIngestFromDb(
   opts: RunIngestFromDbOptions = {},
 ): Promise<IngestResult> {
-  const { logger, topic, sourceRepository, ingestRepository } = opts;
+  const { logger, topic, topicId, sourceRepository, ingestRepository } = opts;
 
-  const providers = await resolveProviders({ repository: sourceRepository, logger });
+  const providers = await resolveProviders({ repository: sourceRepository, logger, topicId });
 
   const result = await runIngest({
     providers,
     logger,
     topic,
+    topicId,
     repository: ingestRepository,
   });
 

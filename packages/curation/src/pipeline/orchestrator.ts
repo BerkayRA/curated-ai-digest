@@ -19,6 +19,7 @@ import type {
   PipelineResult,
   PipelineRunRecord,
   StageOptions,
+  TopicContext,
 } from './types.js';
 import type { Logger } from '../ingest/types.js';
 import type { IngestOptions } from '../ingest/orchestrator.js';
@@ -33,6 +34,19 @@ export interface RunWeeklyPipelineOptions {
    * Defaults to the current week if not provided.
    */
   isoWeek?: string;
+
+  /**
+   * Topic id to curate. When omitted, the default active topic is resolved
+   * lazily from the DB (Phase 1a single-topic behavior). Threaded into ingest,
+   * every repository call, and the stage system prompts.
+   */
+  topicId?: string;
+
+  /**
+   * Override the resolved topic context (for testing). When provided, no DB
+   * lookup for the topic is performed.
+   */
+  topicContext?: TopicContext;
 
   /**
    * Whether to run ingest before the pipeline stages.
@@ -160,12 +174,43 @@ export async function runWeeklyPipeline(
     opts.anthropicClient ??
     new Anthropic({ apiKey });
 
+  // Resolve the topic context. When provided explicitly, use it. When a
+  // repository is injected (tests) we avoid DB access and synthesise a context
+  // from the provided/empty topicId with null audience/voice (default copy).
+  // On the production path we load the Topic row lazily from the DB.
+  let topicContext: TopicContext;
+  if (opts.topicContext) {
+    topicContext = opts.topicContext;
+  } else if (opts.repository) {
+    topicContext = {
+      topicId: opts.topicId ?? '',
+      name: '',
+      audience: null,
+      voice: null,
+    };
+  } else {
+    const db = await import('@digest/db');
+    const topic = opts.topicId
+      ? await db.createTopicRepository(db.prisma).findById(opts.topicId)
+      : await db.getDefaultTopic(db.prisma);
+    if (!topic) {
+      throw new Error(`Topic '${opts.topicId}' not found.`);
+    }
+    topicContext = {
+      topicId: topic.id,
+      name: topic.name,
+      audience: topic.audience,
+      voice: topic.voice,
+    };
+  }
+  const topicId = topicContext.topicId;
+
   const allRuns: PipelineRunRecord[] = [];
 
-  logger.info('pipeline.start', { isoWeek, runIngestFirst });
+  logger.info('pipeline.start', { isoWeek, runIngestFirst, topicId });
 
   // Check for existing issue — guard against re-running on already-terminal states
-  const existingIssue = await repository.findIssueByWeek(isoWeek);
+  const existingIssue = await repository.findIssueByWeek(topicId, isoWeek);
   if (existingIssue && ['sent', 'approved', 'scheduled'].includes(existingIssue.status)) {
     logger.info('pipeline.skip', { isoWeek, status: existingIssue.status });
     throw new Error(
@@ -176,7 +221,7 @@ export async function runWeeklyPipeline(
   // 0. Optional ingest
   if (runIngestFirst) {
     logger.info('pipeline.ingest.start');
-    await runIngest({ ...ingestOptions, logger });
+    await runIngest({ ...ingestOptions, topicId, logger });
     logger.info('pipeline.ingest.done');
   }
 
@@ -184,11 +229,12 @@ export async function runWeeklyPipeline(
     client: anthropicClient,
     repository,
     logger,
+    topicContext,
     issueId: existingIssue?.id,
   };
 
   // 1. Load candidates
-  const candidates = await repository.findCandidates({ isoWeek, limit: candidateLimit });
+  const candidates = await repository.findCandidates({ topicId, isoWeek, limit: candidateLimit });
   logger.info('pipeline.candidates.loaded', { count: candidates.length });
 
   if (candidates.length === 0) {

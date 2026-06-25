@@ -27,6 +27,10 @@ vi.mock('@digest/db', async (importOriginal) => {
   return {
     ...actual,
     createSourceRepository: vi.fn(),
+    // Mock the default-topic resolver so the create route never touches a live
+    // DB in unit tests (CI has no DATABASE_URL).
+    getDefaultTopicId: vi.fn().mockResolvedValue('topic-1'),
+    getDefaultTopic: vi.fn().mockResolvedValue({ id: 'topic-1', slug: 'enterprise-ai' }),
     prisma: actual.prisma,
   };
 });
@@ -55,6 +59,7 @@ vi.mock('@/auth', () => ({
 
 const makeSource = (overrides: Partial<Source> = {}): Source => ({
   id: 'src-1',
+  topicId: 'topic-1',
   type: 'rss',
   label: 'Test RSS',
   url: 'https://example.com/feed.xml',
@@ -72,6 +77,7 @@ const makeSource = (overrides: Partial<Source> = {}): Source => ({
 const makeRepo = (overrides: Partial<SourceRepository> = {}): SourceRepository => ({
   findAll: vi.fn().mockResolvedValue([makeSource()]),
   findEnabled: vi.fn().mockResolvedValue([makeSource()]),
+  findEnabledByTopic: vi.fn().mockResolvedValue([makeSource()]),
   findById: vi.fn().mockResolvedValue(makeSource()),
   create: vi.fn().mockResolvedValue(makeSource()),
   update: vi.fn().mockResolvedValue(makeSource()),

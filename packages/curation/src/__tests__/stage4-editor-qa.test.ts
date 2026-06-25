@@ -1,11 +1,12 @@
 import { describe, it, expect, vi } from 'vitest';
-import { runEditorQaStage } from '../pipeline/stage4-editor-qa.js';
+import { runEditorQaStage, buildSystemPrompt } from '../pipeline/stage4-editor-qa.js';
 import type {
   StageOptions,
   PipelineRepository,
   ScoredCandidate,
   CopywriteOutput,
   PipelineRunRecord,
+  TopicContext,
 } from '../pipeline/types.js';
 import type { Logger } from '../ingest/types.js';
 import type { AnthropicClient } from '../pipeline/types.js';
@@ -18,6 +19,13 @@ const noopLogger: Logger = {
   info: () => undefined,
   warn: () => undefined,
   error: () => undefined,
+};
+
+const topicContext: TopicContext = {
+  topicId: 'topic_enterprise_ai',
+  name: 'on-prem & enterprise AI workflows',
+  audience: null,
+  voice: null,
 };
 
 function makeRepo(): PipelineRepository {
@@ -118,7 +126,7 @@ describe('runEditorQaStage', () => {
       },
     } as unknown as AnthropicClient;
     const repo = makeRepo();
-    const opts: StageOptions = { client, repository: repo, logger: noopLogger };
+    const opts: StageOptions = { client, repository: repo, logger: noopLogger, topicContext };
     const copywriteFn = vi.fn();
 
     const result = await runEditorQaStage(
@@ -148,7 +156,7 @@ describe('runEditorQaStage', () => {
     } as unknown as AnthropicClient;
 
     const repo = makeRepo();
-    const opts: StageOptions = { client, repository: repo, logger: noopLogger };
+    const opts: StageOptions = { client, repository: repo, logger: noopLogger, topicContext };
 
     const revisedCopywrite: CopywriteOutput = { ...baseCopywrite };
     const copywriteRun: PipelineRunRecord = {
@@ -195,7 +203,7 @@ describe('runEditorQaStage', () => {
       },
     } as unknown as AnthropicClient;
     const repo = makeRepo();
-    const opts: StageOptions = { client, repository: repo, logger: noopLogger };
+    const opts: StageOptions = { client, repository: repo, logger: noopLogger, topicContext };
 
     const copywriteRun: PipelineRunRecord = {
       stage: 'copywrite',
@@ -227,5 +235,21 @@ describe('runEditorQaStage', () => {
     expect(result.qaOutput.passed).toBe(false);
     // All flags from both QA passes accumulated
     expect(result.allFlags).toHaveLength(2);
+  });
+});
+
+describe('buildSystemPrompt (editor/qa)', () => {
+  it('preserves the original brand-voice descriptor when voice is null', () => {
+    const prompt = buildSystemPrompt(topicContext);
+    expect(prompt).toContain('matches the brand voice (confident, clear, no hype).');
+    expect(prompt).toContain(
+      'FACT-CHECK: Verify every specific claim, number, date, or statistic',
+    );
+  });
+
+  it('injects a custom voice descriptor when provided', () => {
+    const prompt = buildSystemPrompt({ ...topicContext, voice: 'playful, bold' });
+    expect(prompt).toContain('matches the brand voice (playful, bold).');
+    expect(prompt).not.toContain('matches the brand voice (confident, clear, no hype).');
   });
 });

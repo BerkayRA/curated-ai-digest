@@ -13,11 +13,12 @@ import type { CandidateArticle } from '@digest/db';
 export function createPipelinePrismaRepository(): PipelineRepository {
   return {
     async findCandidates(opts: {
+      topicId: string;
       isoWeek: string;
       limit?: number;
     }): Promise<readonly CandidateArticle[]> {
       return prisma.candidateArticle.findMany({
-        where: { status: 'candidate' },
+        where: { status: 'candidate', topicId: opts.topicId },
         orderBy: { fetchedAt: 'desc' },
         take: opts.limit ?? 30,
       });
@@ -47,14 +48,18 @@ export function createPipelinePrismaRepository(): PipelineRepository {
     },
 
     async upsertIssue(opts: {
+      topicId: string;
       isoWeek: string;
       subject: string;
       preheader: string;
       status: 'draft';
     }): Promise<string> {
       const issue = await prisma.issue.upsert({
-        where: { isoWeek: opts.isoWeek },
+        where: {
+          topicId_isoWeek: { topicId: opts.topicId, isoWeek: opts.isoWeek },
+        },
         create: {
+          topicId: opts.topicId,
           isoWeek: opts.isoWeek,
           subject: opts.subject,
           preheader: opts.preheader,
@@ -123,6 +128,7 @@ export function createPipelinePrismaRepository(): PipelineRepository {
 
     async logPipelineRun(
       opts: Omit<PipelineRunRecord, 'startedAt' | 'finishedAt'> & {
+        topicId: string;
         issueId?: string;
         startedAt: Date;
         finishedAt: Date;
@@ -130,6 +136,7 @@ export function createPipelinePrismaRepository(): PipelineRepository {
     ): Promise<string> {
       const row = await prisma.pipelineRun.create({
         data: {
+          topicId: opts.topicId,
           issueId: opts.issueId,
           stage: opts.stage,
           model: opts.model,
@@ -146,9 +153,12 @@ export function createPipelinePrismaRepository(): PipelineRepository {
       return row.id;
     },
 
-    async findIssueByWeek(isoWeek: string): Promise<{ id: string; status: string } | null> {
-      const issue = await prisma.issue.findUnique({
-        where: { isoWeek },
+    async findIssueByWeek(
+      topicId: string,
+      isoWeek: string,
+    ): Promise<{ id: string; status: string } | null> {
+      const issue = await prisma.issue.findFirst({
+        where: { topicId, isoWeek },
         select: { id: true, status: true },
       });
       return issue ? { id: issue.id, status: issue.status } : null;
