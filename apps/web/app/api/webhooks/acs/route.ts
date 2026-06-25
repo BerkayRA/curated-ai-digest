@@ -14,6 +14,7 @@ import {
   prisma,
   createEmailEventRepository,
   createSubscriberTopicRepository,
+  createSuppressionRepository,
 } from '@digest/db';
 import type { EmailEventType } from '@digest/db';
 import { ok, err } from '@/lib/api-response.js';
@@ -70,12 +71,30 @@ async function processDeliveryEvent(event: EventGridEvent): Promise<void> {
     occurredAt,
   });
 
-  if ((type === 'bounced' || type === 'complaint') && send.subscriberTopic) {
+  if (type !== 'bounced' && type !== 'complaint') return;
+
+  if (send.subscriberTopic) {
     await createSubscriberTopicRepository(prisma).setStatus(
       send.subscriberId,
       send.subscriberTopic.topicId,
       'bounced',
     );
+  }
+
+  // Globally suppress the recipient. ACS Failed → bounced is always a hard
+  // bounce here (Event Grid does not report soft bounces). Resolve the email
+  // from the subscriber — Send has no email column.
+  const subscriber = await prisma.subscriber.findUnique({
+    where: { id: send.subscriberId },
+    select: { email: true },
+  });
+  if (!subscriber) return;
+
+  const suppression = createSuppressionRepository(prisma);
+  if (type === 'bounced') {
+    await suppression.insertHardBounce(subscriber.email, 'acs_webhook');
+  } else {
+    await suppression.insertComplaint(subscriber.email, 'acs_webhook');
   }
 }
 

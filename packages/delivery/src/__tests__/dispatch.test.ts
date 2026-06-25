@@ -97,6 +97,11 @@ function makeMockRepo(overrides: Partial<DispatchRepo> = {}): DispatchRepo {
     getTopicRecipients: vi.fn().mockResolvedValue(mockRecipients),
     getTopicBranding: vi.fn().mockResolvedValue({ fromAddress: null, replyTo: null }),
     getSettings: vi.fn().mockResolvedValue(mockSettings),
+    // Phase 4 defaults: no A/B variants, no suppressions, nothing already sent →
+    // the dispatch path is byte-identical to pre-Phase-4 behaviour.
+    getSubjectVariants: vi.fn().mockResolvedValue([]),
+    isSuppressedBatch: vi.fn().mockResolvedValue(new Set<string>()),
+    getAlreadySentRecipientIds: vi.fn().mockResolvedValue(new Set<string>()),
     recordSend: vi.fn().mockResolvedValue(undefined),
     ...overrides,
   };
@@ -341,5 +346,104 @@ describe('dispatchIssue', () => {
 
     expect(messages[0]!.from.email).toBe('topic@mega.com.tr');
     expect(messages[0]!.headers?.['Reply-To']).toBe('reply@mega.com.tr');
+  });
+
+  // -------------------------------------------------------------------------
+  // A/B subject-line testing
+  // -------------------------------------------------------------------------
+
+  const abVariants = [
+    { variantIndex: 0, subject: 'Konu Varyant A', testFraction: 0.5 },
+    { variantIndex: 1, subject: 'Konu Varyant B', testFraction: 0.5 },
+  ];
+
+  /** Provider whose sendBatch echoes a result per message (handles partial batches). */
+  function makeDynamicProvider(): EmailProvider {
+    return {
+      kind: 'resend' as const,
+      send: vi.fn(),
+      sendBatch: vi
+        .fn()
+        .mockImplementation((msgs: readonly EmailMessage[]) =>
+          Promise.resolve(
+            msgs.map((_, i) => ({ providerMessageId: `msg-${i + 1}`, status: 'sent' as const })),
+          ),
+        ),
+      verifyConfig: vi.fn().mockResolvedValue({ ok: true }),
+    };
+  }
+
+  it('testFractionOnly: sends only the test-fraction recipients, each with a variantIndex, without transitioning', async () => {
+    // 2 recipients, fraction 0.5 → testGroupSize = 1 (only position 0 is in-test).
+    const repo = makeMockRepo({
+      getSubjectVariants: vi.fn().mockResolvedValue(abVariants),
+    });
+    const provider = makeDynamicProvider();
+
+    const result = await dispatchIssue('issue-1', {
+      provider,
+      repo,
+      transitionFn: mockTransitionFn,
+      testFractionOnly: true,
+    });
+
+    // Only the in-test recipient was sent.
+    expect(result.totalRecipients).toBe(1);
+    expect(result.successCount).toBe(1);
+
+    const recordSendMock = repo.recordSend as ReturnType<typeof vi.fn>;
+    expect(recordSendMock).toHaveBeenCalledTimes(1);
+    const recorded = recordSendMock.mock.calls.map(
+      (c: unknown[]) => c[0] as Parameters<DispatchRepo['recordSend']>[0],
+    );
+    expect(recorded[0]!.variantIndex).toBe(0);
+
+    // The message subject is the assigned variant's subject, not the issue subject.
+    const messages: readonly EmailMessage[] = (
+      (provider.sendBatch as ReturnType<typeof vi.fn>).mock.calls[0] as [readonly EmailMessage[]]
+    )[0];
+    expect(messages[0]!.subject).toBe('Konu Varyant A');
+
+    // Issue is NOT transitioned during a test-fraction send.
+    expect(mockTransitionFn).not.toHaveBeenCalled();
+  });
+
+  it('overrideSubject: all messages use the override, variantIndex is null, and already-sent recipients are skipped', async () => {
+    const repo = makeMockRepo({
+      // Even if variants exist, an override send ignores them.
+      getSubjectVariants: vi.fn().mockResolvedValue(abVariants),
+      // Alice (st-1) already received the test send → skipped on the remainder.
+      getAlreadySentRecipientIds: vi.fn().mockResolvedValue(new Set(['st-1'])),
+    });
+    const provider = makeDynamicProvider();
+
+    const result = await dispatchIssue('issue-1', {
+      provider,
+      repo,
+      transitionFn: mockTransitionFn,
+      overrideSubject: 'Kazanan Konu',
+    });
+
+    // Only Bob (st-2) remains.
+    expect(result.totalRecipients).toBe(1);
+    expect(result.successCount).toBe(1);
+
+    const messages: readonly EmailMessage[] = (
+      (provider.sendBatch as ReturnType<typeof vi.fn>).mock.calls[0] as [readonly EmailMessage[]]
+    )[0];
+    expect(messages).toHaveLength(1);
+    expect(messages[0]!.to.email).toBe('bob@example.com');
+    expect(messages[0]!.subject).toBe('Kazanan Konu');
+
+    const recordSendMock = repo.recordSend as ReturnType<typeof vi.fn>;
+    const recorded = recordSendMock.mock.calls.map(
+      (c: unknown[]) => c[0] as Parameters<DispatchRepo['recordSend']>[0],
+    );
+    expect(recorded.every((c) => c.variantIndex === null || c.variantIndex === undefined)).toBe(true);
+
+    // Override (remainder) send finalizes the issue → transition to sent.
+    expect(mockTransitionFn).toHaveBeenCalledWith(
+      expect.objectContaining({ issueId: 'issue-1', to: 'sent' }),
+    );
   });
 });

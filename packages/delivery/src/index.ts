@@ -5,8 +5,25 @@
  */
 
 // Dispatch
-export { dispatchIssue, defaultDispatchRepo } from './dispatch.js';
-export type { DispatchRepo, DispatchOptions, DispatchResult } from './dispatch.js';
+export { dispatchIssue, defaultDispatchRepo, scrubPii } from './dispatch.js';
+export type {
+  DispatchRepo,
+  DispatchOptions,
+  DispatchResult,
+  SubjectVariantRow,
+} from './dispatch.js';
+
+// A/B subject-line split (pure helpers)
+export { assignVariant, selectWinner } from './ab-split.js';
+export type { VariantStats } from './ab-split.js';
+
+// A/B winner-selection job
+export { runAbWinnerJob } from './ab-winner-job.js';
+export type {
+  RunAbWinnerJobOptions,
+  AbWinnerLogger,
+  AbDispatchFn,
+} from './ab-winner-job.js';
 
 // Engagement tracking hooks
 export { injectTrackingHooks } from './track.js';

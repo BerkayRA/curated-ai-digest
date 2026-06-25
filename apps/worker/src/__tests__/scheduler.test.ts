@@ -44,15 +44,20 @@ const CronMock = vi.fn(
 
 vi.mock('croner', () => ({ Cron: CronMock }));
 
+const issueFindUnique = vi.fn().mockResolvedValue(null);
+
 vi.mock('@digest/db', () => ({
-  prisma: {},
+  prisma: { issue: { findUnique: (...args: unknown[]) => issueFindUnique(...args) } },
   createTopicRepository: vi.fn(),
 }));
+
+vi.mock('@digest/delivery', () => ({ runAbWinnerJob: vi.fn().mockResolvedValue(null) }));
 
 vi.mock('../jobs/send.js', () => ({ runSendJob: vi.fn().mockResolvedValue(undefined) }));
 vi.mock('../jobs/curate.js', () => ({ runCurationJob: vi.fn().mockResolvedValue(undefined) }));
 
 const { runSendJob } = await import('../jobs/send.js');
+const { runAbWinnerJob } = await import('@digest/delivery');
 
 const { settingsToCronExpressions, startScheduler, SCHEDULE_RELOAD_INTERVAL_MS } = await import(
   '../scheduler.js'
@@ -171,6 +176,9 @@ describe('startScheduler', () => {
     cronInstances.length = 0;
     CronMock.mockClear();
     vi.mocked(runSendJob).mockClear();
+    vi.mocked(runAbWinnerJob).mockClear();
+    issueFindUnique.mockReset();
+    issueFindUnique.mockResolvedValue(null);
     vi.useFakeTimers();
   });
 
@@ -178,7 +186,7 @@ describe('startScheduler', () => {
     vi.useRealTimers();
   });
 
-  it('registers four Cron instances (2 pairs) for two active topics', () => {
+  it('registers six Cron instances (3 per topic) for two active topics', () => {
     const topics = [topic({ id: 'topic-a' }), topic({ id: 'topic-b' })];
     const handle = startScheduler({
       topics,
@@ -187,14 +195,86 @@ describe('startScheduler', () => {
       dataSource: staticDataSource(topics),
     });
 
-    expect(cronInstances).toHaveLength(4);
+    expect(cronInstances).toHaveLength(6);
     const names = cronInstances.map((c) => c.name).sort();
     expect(names).toEqual([
+      'abcheck:topic-a',
+      'abcheck:topic-b',
       'curation:topic-a',
       'curation:topic-b',
       'send:topic-a',
       'send:topic-b',
     ]);
+
+    handle.stop();
+  });
+
+  it('registers the A/B-check cron 4 hours after the send cron on the same day', () => {
+    const topics = [topic({ id: 'topic-a' })];
+    const handle = startScheduler({
+      topics,
+      settings: globalSettings,
+      logger: makeLogger(),
+      dataSource: staticDataSource(topics),
+    });
+
+    // Global: Thursday (4) 09:00 → A/B-check at 13:00 the same day.
+    const abcheck = cronInstances.find((c) => c.name === 'abcheck:topic-a');
+    expect(abcheck?.expression).toBe('0 13 * * 4');
+
+    handle.stop();
+  });
+
+  it('rolls the A/B-check day forward when the holdout crosses midnight', () => {
+    // Thursday (4) 21:00 → +4h holdout = 01:00 next day (Friday = 5).
+    const topics = [topic({ id: 'topic-a', sendDayOfWeek: 'Thursday', sendTime: '21:00' })];
+    const handle = startScheduler({
+      topics,
+      settings: globalSettings,
+      logger: makeLogger(),
+      dataSource: staticDataSource(topics),
+    });
+
+    const abcheck = cronInstances.find((c) => c.name === 'abcheck:topic-a');
+    expect(abcheck?.expression).toBe('0 1 * * 5');
+
+    handle.stop();
+  });
+
+  it('A/B-check callback no-ops when the issue abStatus is not testing', async () => {
+    const topics = [topic({ id: 'topic-a' })];
+    const handle = startScheduler({
+      topics,
+      settings: globalSettings,
+      logger: makeLogger(),
+      dataSource: staticDataSource(topics),
+    });
+
+    issueFindUnique.mockResolvedValueOnce({ id: 'issue-1', abStatus: 'completed' });
+    const abcheck = cronInstances.find((c) => c.name === 'abcheck:topic-a');
+    await abcheck?.fn();
+
+    expect(vi.mocked(runAbWinnerJob)).not.toHaveBeenCalled();
+
+    handle.stop();
+  });
+
+  it('A/B-check callback runs the winner job when the issue is testing', async () => {
+    const topics = [topic({ id: 'topic-a' })];
+    const handle = startScheduler({
+      topics,
+      settings: globalSettings,
+      logger: makeLogger(),
+      dataSource: staticDataSource(topics),
+    });
+
+    issueFindUnique.mockResolvedValueOnce({ id: 'issue-1', abStatus: 'testing' });
+    const abcheck = cronInstances.find((c) => c.name === 'abcheck:topic-a');
+    await abcheck?.fn();
+
+    expect(vi.mocked(runAbWinnerJob)).toHaveBeenCalledWith(
+      expect.objectContaining({ issueId: 'issue-1' }),
+    );
 
     handle.stop();
   });
@@ -250,7 +330,7 @@ describe('startScheduler', () => {
     });
 
     const initialCrons = [...cronInstances];
-    expect(initialCrons).toHaveLength(2); // topic-a pair
+    expect(initialCrons).toHaveLength(3); // topic-a trio
 
     // Trigger the poll and let the async reload settle.
     await vi.advanceTimersByTimeAsync(1000);
@@ -261,7 +341,7 @@ describe('startScheduler', () => {
     }
     expect(dataSource.loadTopics).toHaveBeenCalled();
     const reloaded = cronInstances.filter((c) => c.name.endsWith('topic-b'));
-    expect(reloaded).toHaveLength(2);
+    expect(reloaded).toHaveLength(3);
 
     handle.stop();
   });

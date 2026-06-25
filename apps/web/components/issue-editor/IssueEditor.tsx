@@ -14,6 +14,7 @@ import type { IssueStatus } from '@digest/shared';
 import type { IssueEditorData, EditableItem } from './types';
 import { IssueItemCard } from './IssueItemCard';
 import { PreviewPanel } from './PreviewPanel';
+import { AbTestPanel } from './AbTestPanel';
 import { ALLOWED_TRANSITIONS } from '@/lib/issue-status';
 import styles from './editor.module.css';
 
@@ -270,6 +271,15 @@ export function IssueEditor({ issue }: IssueEditorProps) {
             ))}
           </ol>
         </section>
+
+        {/* A/B subject-line test */}
+        <AbTestPanel
+          issueId={issue.id}
+          status={currentStatus}
+          abStatus={issue.abStatus}
+          abWinnerVariantIndex={issue.abWinnerVariantIndex}
+          initialVariants={issue.variants}
+        />
 
         {/* Transition actions */}
         {allowedNext.length > 0 && (

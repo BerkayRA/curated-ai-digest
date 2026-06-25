@@ -10,7 +10,9 @@
 > (Topic management + switcher) · Phase 1c ✅ (per-topic subscribers, schedules &
 > sending) · Phase 2 ✅ (engagement analytics) · Phase 3 ✅ (self-serve growth:
 > per-topic consent mode, public signup + double opt-in, preference center,
-> rate-limit + bot protection) · Phase 4 → next.
+> rate-limit + bot protection) · Phase 4 ✅ (send optimization & deliverability:
+> A/B subjects, send-time hints, SPF/DKIM/DMARC checks, suppression list) ·
+> Phase 5 → next.
 
 ## Where we are today (v1)
 
@@ -55,9 +57,9 @@ Stabilize the flaky `web#test` source tests; baseline visual snapshots and make 
 
 **Consent model (decided):** each topic has a `consentMode` — **`business`** (existing‑relationship B2B: no prior opt‑in required under TR tacir/esnaf + EU soft‑opt‑in; admin/CSV import only; no public signup) or **`public`** (public signup page + **double opt‑in**). Every `SubscriberTopic` records a `consentBasis` (`business_relationship` | `double_opt_in` | `import` | `single_opt_in`) + `consentAt` + `consentSource` for an auditable lawful‑basis trail. Unsubscribe always works (per‑topic token), regardless of basis. **İYS** (Turkey's national message system): record everything İYS‑ready now (basis/timestamp/source + opt‑out events); the İYS **API sync** is a deferred, dedicated task. _Not legal advice — verify with counsel._
 
-## Phase 4 — Send optimization & deliverability
+## Phase 4 ✅ — Send optimization & deliverability
 
-**Value:** measurably higher open rates and inbox placement. A/B subject‑line testing (winner chosen from open data), send‑time optimization, and deliverability health — SPF/DKIM/DMARC checks plus bounce/complaint handling and a suppression list.
+**Value:** measurably higher open rates and inbox placement. A/B subject‑line testing (50/50 two‑variant MVP: test fraction → 4h holdout → winner by open rate → remainder send, idempotent via an atomic claim), send‑time optimization (advisory best‑window recommendation from historical opens), and deliverability health — on‑demand SPF/DKIM/DMARC checks in Ayarlar plus a global bounce/complaint **suppression list** consulted on every send. See [ADR‑0010](adr/ADR-0010-send-optimization-deliverability.md).
 
 ## Phase 5 — White‑label & reach
 

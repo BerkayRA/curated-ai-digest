@@ -9,35 +9,47 @@ import { createHmac } from 'node:crypto';
 import { NextRequest } from 'next/server';
 
 const findFirst = vi.fn();
+const subscriberFindUnique = vi.fn();
 const recordOnce = vi.fn();
 const setStatus = vi.fn();
+const insertHardBounce = vi.fn();
+const insertComplaint = vi.fn();
 
 vi.mock('@digest/db', () => ({
-  prisma: { send: { findFirst: (...args: unknown[]) => findFirst(...args) } },
+  prisma: {
+    send: { findFirst: (...args: unknown[]) => findFirst(...args) },
+    subscriber: { findUnique: (...args: unknown[]) => subscriberFindUnique(...args) },
+  },
   createEmailEventRepository: () => ({ recordOnce }),
   createSubscriberTopicRepository: () => ({ setStatus }),
+  createSuppressionRepository: () => ({ insertHardBounce, insertComplaint }),
 }));
 
 import { POST } from '../app/api/webhooks/resend/route';
 
 const SECRET = 'whsec_dGVzdHNlY3JldGtleWZvcnVuaXR0ZXN0aW5nMTIz';
 const SVIX_ID = 'msg_abc123';
-const SVIX_TS = '1700000000';
+/** Within the ±300s replay window so valid-signature cases are accepted. */
+const SVIX_TS = String(Math.floor(Date.now() / 1000));
 
-function sign(rawBody: string): string {
+function sign(rawBody: string, ts: string = SVIX_TS): string {
   const keyBytes = Buffer.from(SECRET.replace(/^whsec_/, ''), 'base64');
-  const payload = `${SVIX_ID}.${SVIX_TS}.${rawBody}`;
+  const payload = `${SVIX_ID}.${ts}.${rawBody}`;
   return createHmac('sha256', keyBytes).update(payload).digest('base64');
 }
 
-function makeRequest(body: unknown, opts: { signature?: string } = {}): NextRequest {
+function makeRequest(
+  body: unknown,
+  opts: { signature?: string; timestamp?: string } = {},
+): NextRequest {
   const rawBody = JSON.stringify(body);
+  const ts = opts.timestamp ?? SVIX_TS;
   const headers: Record<string, string> = {
     'content-type': 'application/json',
     'svix-id': SVIX_ID,
-    'svix-timestamp': SVIX_TS,
+    'svix-timestamp': ts,
   };
-  const signature = opts.signature ?? `v1,${sign(rawBody)}`;
+  const signature = opts.signature ?? `v1,${sign(rawBody, ts)}`;
   if (signature) headers['svix-signature'] = signature;
   return new NextRequest('http://localhost/api/webhooks/resend', {
     method: 'POST',
@@ -52,6 +64,9 @@ describe('POST /api/webhooks/resend', () => {
     vi.stubEnv('RESEND_WEBHOOK_SECRET', SECRET);
     recordOnce.mockResolvedValue({ id: 'evt-1' });
     setStatus.mockResolvedValue(undefined);
+    subscriberFindUnique.mockResolvedValue({ email: 'recipient@x.test' });
+    insertHardBounce.mockResolvedValue({ id: 'sup-1' });
+    insertComplaint.mockResolvedValue({ id: 'sup-2' });
   });
 
   it('records a delivered event on a valid signature', async () => {
@@ -74,6 +89,20 @@ describe('POST /api/webhooks/resend', () => {
     const res = await POST(
       makeRequest({ type: 'email.delivered', data: { email_id: 'pmid-1' } }, {
         signature: 'v1,not-a-valid-signature',
+      }),
+    );
+
+    expect(res.status).toBe(401);
+    expect(findFirst).not.toHaveBeenCalled();
+    expect(recordOnce).not.toHaveBeenCalled();
+  });
+
+  it('returns 401 for a stale timestamp even with a valid signature', async () => {
+    const staleTs = String(Math.floor(Date.now() / 1000) - 600); // 10 min ago
+
+    const res = await POST(
+      makeRequest({ type: 'email.delivered', data: { email_id: 'pmid-1' } }, {
+        timestamp: staleTs,
       }),
     );
 

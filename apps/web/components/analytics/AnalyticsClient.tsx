@@ -5,12 +5,14 @@ import type {
   IssueAnalyticsRow,
   ClickedUrlRow,
   GrowthPoint,
+  HourlyOpenBucket,
 } from '@digest/db';
 import { EyebrowLabel } from '@/components/ui/EyebrowLabel';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { StatusPill, type RingTone } from '@/components/ui/StatusPill';
 import { StatCard } from './StatCard';
 import { BarChart } from './BarChart';
+import { SendTimeWidget } from './SendTimeWidget';
 import styles from './analytics.module.css';
 
 interface AnalyticsClientProps {
@@ -19,6 +21,7 @@ interface AnalyticsClientProps {
   topClicks: ClickedUrlRow[];
   growth: GrowthPoint[];
   topicName: string | null;
+  sendTimeHint: HourlyOpenBucket[];
 }
 
 const ADOPT_THRESHOLD = 0.3;
@@ -67,6 +70,7 @@ export function AnalyticsClient({
   topClicks,
   growth,
   topicName,
+  sendTimeHint,
 }: AnalyticsClientProps) {
   const hasSends = summary.totalSent > 0;
 
@@ -105,6 +109,10 @@ export function AnalyticsClient({
       <p className={styles.note}>
         Açılma oranları yaklaşıktır — e-posta gizlilik korumaları açılışları şişirebilir.
       </p>
+
+      <div className={styles.sendTimeRow}>
+        <SendTimeWidget buckets={sendTimeHint} />
+      </div>
 
       <div className={styles.panel}>
         <EyebrowLabel className={styles.panelLabel}>Abone Büyümesi</EyebrowLabel>
