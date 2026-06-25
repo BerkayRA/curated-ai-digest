@@ -163,6 +163,27 @@ describe('dispatchIssue', () => {
     expect(bobMsg!.headers?.['List-Unsubscribe']).toMatch(/token-bob-def456/);
   });
 
+  it('injects tracking hooks (open pixel + click redirects) into each message HTML', async () => {
+    const repo = makeMockRepo();
+    const provider = makeMockProvider();
+
+    await dispatchIssue('issue-1', { provider, repo, transitionFn: mockTransitionFn });
+
+    const sendBatchMock = provider.sendBatch as ReturnType<typeof vi.fn>;
+    const messages: readonly EmailMessage[] = (
+      sendBatchMock.mock.calls[0] as [readonly EmailMessage[]]
+    )[0];
+
+    for (const msg of messages) {
+      // Open pixel injected with a per-Send token.
+      expect(msg.html).toMatch(/\/api\/track\/open\//);
+      // Item source links rewritten to click-redirect URLs keyed by item order.
+      expect(msg.html).toMatch(/\/api\/track\/click\/[^/]+\/0/);
+      // Original source URL no longer present as a raw href.
+      expect(msg.html).not.toContain('href="https://example.com/article-1"');
+    }
+  });
+
   it('records a Send row for each subscriber', async () => {
     const repo = makeMockRepo();
     const provider = makeMockProvider();
@@ -179,6 +200,9 @@ describe('dispatchIssue', () => {
     expect(calls.map((c) => c.subscriberId).sort()).toEqual(['sub-1', 'sub-2'].sort());
     expect(calls.map((c) => c.subscriberTopicId).sort()).toEqual(['st-1', 'st-2'].sort());
     expect(calls.every((c) => c.providerMessageId !== undefined)).toBe(true);
+    expect(calls.every((c) => typeof c.trackToken === 'string' && c.trackToken.length > 0)).toBe(
+      true,
+    );
   });
 
   it('records the per-topic subscriberTopicId on each Send', async () => {

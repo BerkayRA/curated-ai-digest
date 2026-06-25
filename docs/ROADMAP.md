@@ -8,7 +8,7 @@
 >
 > **Progress:** Phase 0 ✅ · Phase 1a ✅ (Topic entity + isolation) · Phase 1b ✅
 > (Topic management + switcher) · Phase 1c ✅ (per-topic subscribers, schedules &
-> sending) · Phase 2 → next.
+> sending) · Phase 2 ✅ (engagement analytics) · Phase 3 → next.
 
 ## Where we are today (v1)
 
@@ -43,9 +43,9 @@ Stabilize the flaky `web#test` source tests; baseline visual snapshots and make 
 - **1b ✅ — Topic management:** a Topics admin page (create/edit/pause) and a topic switcher that scopes sources, the archive, and curation via `?topic=<slug>`. Verified: a second newsletter (`edge-ai`) created end‑to‑end, with the first topic untouched and its sources isolated.
 - **1c ✅ — Per‑topic audience & delivery:** subscribers opt into topics individually (a `SubscriberTopic` join with per‑topic status + unsubscribe token); dispatch sends only to the issue topic's active members, from the topic's own address (falling back to global Settings); the worker runs one schedule per active topic, reloading every ~5 min so pause/schedule changes apply automatically. Existing subscribers were backfilled into the seed topic with zero behavior change.
 
-## Phase 2 — Engagement analytics
+## Phase 2 ✅ — Engagement analytics
 
-**Value:** the numbers leadership wants. Open and click tracking via provider webhooks; per‑issue and per‑topic dashboards (open rate, CTR, top stories, subscriber growth, send history). Privacy‑respecting and aggregate.
+**Value:** the numbers leadership wants. Open + click tracking (opaque per‑send token → `EmailEvent`; opens labelled approximate) and provider delivery webhooks (ACS/Resend signature‑verified, Graph stubbed); per‑topic **Analitik** dashboard — open rate, CTR, top‑clicked stories, subscriber growth, send history — computed on the fly, aggregate and privacy‑forward (daily‑salted IP hash, coarse device class, no raw PII). Bounces/complaints mark the membership `bounced`. See [ADR‑0008](adr/ADR-0008-engagement-analytics.md).
 
 ## Phase 3 — Self‑serve growth
 

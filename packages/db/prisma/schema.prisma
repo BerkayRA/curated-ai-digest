@@ -257,16 +257,52 @@ model Send {
   subscriberTopicId String?    @map("subscriber_topic_id")
   status            SendStatus @default(queued)
   providerMessageId String?    @map("provider_message_id")
+  /** Opaque per-send token embedded in open-pixel + click links (engagement tracking). */
+  trackToken        String     @unique @map("track_token")
   error             String?
   sentAt            DateTime?  @map("sent_at")
   createdAt         DateTime   @default(now()) @map("created_at")
 
   issue           Issue            @relation(fields: [issueId], references: [id], onDelete: Cascade)
   subscriberTopic SubscriberTopic? @relation(fields: [subscriberTopicId], references: [id], onDelete: SetNull)
+  events          EmailEvent[]
 
   @@index([issueId])
   @@index([subscriberId])
   @@map("sends")
+}
+
+// ---------------------------------------------------------------------------
+// EmailEvent — engagement signal for a Send (open/click from tracking hooks;
+// delivered/bounced/complaint from provider webhooks). Privacy-forward: no raw
+// IP or user-agent — only a daily-salted ip hash and a coarse device class.
+// ---------------------------------------------------------------------------
+
+enum EmailEventType {
+  open
+  click
+  delivered
+  bounced
+  complaint
+}
+
+model EmailEvent {
+  id              String         @id @default(cuid())
+  sendId          String         @map("send_id")
+  type            EmailEventType
+  url             String? // click destination (original story URL)
+  urlIndex        Int?           @map("url_index") // which issue item was clicked
+  ipHash          String?        @map("ip_hash") // daily-salted HMAC, never the raw IP
+  uaClass         String?        @map("ua_class") // "mobile" | "desktop" | "bot" | "unknown"
+  providerEventId String?        @unique @map("provider_event_id") // webhook dedup key
+  occurredAt      DateTime       @map("occurred_at")
+  createdAt       DateTime       @default(now()) @map("created_at")
+
+  send Send @relation(fields: [sendId], references: [id], onDelete: Cascade)
+
+  @@index([sendId])
+  @@index([type])
+  @@map("email_events")
 }
 
 // ---------------------------------------------------------------------------
