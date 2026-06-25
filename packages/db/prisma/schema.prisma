@@ -78,6 +78,23 @@ enum ConsentBasis {
   single_opt_in
 }
 
+// A/B subject-line test lifecycle on an Issue. `none` is the default — existing
+// issues stay here and the send path is byte-identical to pre-Phase-4.
+enum AbStatus {
+  none
+  testing // test fraction sent, awaiting the holdout window
+  selecting // holdout expired, winner being chosen
+  completed // remainder sent with the winning subject
+}
+
+// Why an email address was added to the global suppression list.
+enum SuppressionReason {
+  hard_bounce
+  soft_bounce_threshold // accumulated soft bounces crossed the threshold
+  complaint
+  manual
+}
+
 // ---------------------------------------------------------------------------
 // Topic — a configurable newsletter (its own sources, pool, issues, audience)
 // ---------------------------------------------------------------------------
@@ -138,12 +155,19 @@ model Issue {
   sentAt       DateTime?   @map("sent_at")
   approvedById String?     @map("approved_by_id") // FK reserved for future User model
   autoSent     Boolean     @default(false) @map("auto_sent")
-  createdAt    DateTime    @default(now()) @map("created_at")
-  updatedAt    DateTime    @updatedAt @map("updated_at")
 
-  topic Topic       @relation(fields: [topicId], references: [id])
-  items IssueItem[]
-  sends Send[]
+  // A/B subject-line testing (Phase 4). `none` → no test (default; legacy issues).
+  abStatus             AbStatus @default(none) @map("ab_status")
+  abHoldoutMinutes     Int?     @map("ab_holdout_minutes") // null → scheduler default
+  abWinnerVariantIndex Int?     @map("ab_winner_variant_index")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  topic    Topic            @relation(fields: [topicId], references: [id])
+  items    IssueItem[]
+  sends    Send[]
+  variants SubjectVariant[]
 
   @@unique([topicId, isoWeek])
   @@index([status])
@@ -272,6 +296,8 @@ model Settings {
   fromAddress      String            @map("from_address")
   replyTo          String?           @map("reply_to")
   pipelineLeadDays Int               @default(2) @map("pipeline_lead_days")
+  /** DKIM selector for deliverability checks; null → provider default. */
+  dkimSelector     String?           @map("dkim_selector")
   updatedAt        DateTime          @updatedAt @map("updated_at")
 
   @@map("settings")
@@ -290,6 +316,8 @@ model Send {
   providerMessageId String?    @map("provider_message_id")
   /** Opaque per-send token embedded in open-pixel + click links (engagement tracking). */
   trackToken        String     @unique @map("track_token")
+  /** Which A/B subject variant this send used; null when no test ran. */
+  variantIndex      Int?       @map("variant_index")
   error             String?
   sentAt            DateTime?  @map("sent_at")
   createdAt         DateTime   @default(now()) @map("created_at")
@@ -301,6 +329,47 @@ model Send {
   @@index([issueId])
   @@index([subscriberId])
   @@map("sends")
+}
+
+// ---------------------------------------------------------------------------
+// SubjectVariant — an A/B subject-line variant for an Issue. The test fraction
+// of recipients is split across variants; the winner (highest open rate) is
+// sent to the remainder. No variants → no test (the default path).
+// ---------------------------------------------------------------------------
+
+model SubjectVariant {
+  id           String @id @default(cuid())
+  issueId      String @map("issue_id")
+  variantIndex Int    @map("variant_index") // 0, 1 (N-variant ready)
+  subject      String
+  testFraction Float  @default(0.5) @map("test_fraction") // share of the list in the test group
+  sentCount    Int    @default(0) @map("sent_count")
+  openCount    Int    @default(0) @map("open_count")
+
+  issue Issue @relation(fields: [issueId], references: [id], onDelete: Cascade)
+
+  @@unique([issueId, variantIndex])
+  @@index([issueId])
+  @@map("subject_variants")
+}
+
+// ---------------------------------------------------------------------------
+// Suppression — GLOBAL do-not-send list keyed by email (distinct from per-topic
+// unsubscribe). Fed by hard bounces / complaints (provider webhooks) and manual
+// admin entries; dispatch filters these addresses across ALL topics.
+// ---------------------------------------------------------------------------
+
+model Suppression {
+  id          String            @id @default(cuid())
+  email       String            @unique
+  reason      SuppressionReason
+  source      String // "acs_webhook" | "resend_webhook" | "admin" | "backfill"
+  bounceCount Int               @default(1) @map("bounce_count") // soft-bounce accumulator
+  createdAt   DateTime          @default(now()) @map("created_at")
+  updatedAt   DateTime          @updatedAt @map("updated_at")
+
+  @@index([email])
+  @@map("suppressions")
 }
 
 // ---------------------------------------------------------------------------

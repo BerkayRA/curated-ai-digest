@@ -15,6 +15,7 @@
 
 import { Cron } from 'croner';
 import { createTopicRepository, prisma } from '@digest/db';
+import { runAbWinnerJob } from '@digest/delivery';
 import type { Logger } from './logger.js';
 import { runCurationJob } from './jobs/curate.js';
 import { runSendJob } from './jobs/send.js';
@@ -25,6 +26,9 @@ import { runSendJob } from './jobs/send.js';
 
 /** How often the scheduler re-reads active topics + settings and re-registers crons. */
 export const SCHEDULE_RELOAD_INTERVAL_MS = 5 * 60_000;
+
+/** Holdout window (hours after send) before the A/B winner is selected. */
+export const AB_HOLDOUT_HOURS = 4;
 
 const DEFAULT_TIMEZONE = 'Europe/Istanbul';
 
@@ -64,8 +68,9 @@ export interface CronExpressions {
 /**
  * Converts Settings fields to two croner cron expressions.
  *
- * Cron field order: second minute hour day-of-month month day-of-week
- * We use 6-field croner format: "0 <minute> <hour> * * <dow>"
+ * Standard 5-field cron format: "<minute> <hour> day-of-month month <dow>".
+ * Both expressions wildcard day-of-month + month, so the shape is
+ * "<minute> <hour> * * <dow>".
  *
  * pipelineLeadDays: number of days BEFORE send day that curation should run.
  * Example: sendDayOfWeek=Thursday (4), pipelineLeadDays=2 → curation runs on Tuesday (2).
@@ -143,8 +148,10 @@ function resolveTopicSchedule(
 // ---------------------------------------------------------------------------
 
 /**
- * Registers a curation+send cron pair for a single topic and returns both Cron
- * instances. Job callbacks pass the topicId through to the underlying jobs.
+ * Registers the curation, send, and A/B-check crons for a single topic and
+ * returns all three Cron instances. Job callbacks pass the topicId through to
+ * the underlying jobs. The A/B-check cron fires AB_HOLDOUT_HOURS after the send
+ * cron and only acts on issues still in 'testing'.
  */
 function registerTopicCrons(
   topic: ScheduleTopic,
@@ -201,7 +208,44 @@ function registerTopicCrons(
     },
   );
 
-  return [curationJob, sendJob];
+  // A/B-check job: fires AB_HOLDOUT_HOURS after the send cron on the same day,
+  // selecting the winner for any issue still in 'testing'. Re-parse the resolved
+  // send time so the offset matches settingsToCronExpressions exactly.
+  const [hourStr, minuteStr] = resolved.sendTime.split(':');
+  const sendHour = parseInt(hourStr ?? '9', 10);
+  const sendMinute = parseInt(minuteStr ?? '0', 10);
+  const sendDow = DAY_INDEX[resolved.sendDayOfWeek as DayName] ?? 4;
+  const abCheckHour = (sendHour + AB_HOLDOUT_HOURS) % 24;
+  // When the holdout pushes the check past midnight, roll the day forward too.
+  const abCheckDow = abCheckHour < sendHour ? (sendDow + 1) % 7 : sendDow;
+  const abCheckCron = `${sendMinute} ${abCheckHour} * * ${abCheckDow}`;
+
+  const abCheckJob = new Cron(
+    abCheckCron,
+    {
+      timezone,
+      name: `abcheck:${topicId}`,
+      catch: (err: Error | unknown) => {
+        logger.error('scheduler.abcheck.error', {
+          topicId,
+          message: err instanceof Error ? err.message : String(err),
+        });
+      },
+    },
+    async () => {
+      const isoWeek = currentIsoWeek();
+      logger.info('scheduler.abcheck.trigger', { topicId, isoWeek });
+      const issue = await prisma.issue.findUnique({
+        where: { topicId_isoWeek: { topicId, isoWeek } },
+        select: { id: true, abStatus: true },
+      });
+      if (issue?.abStatus === 'testing') {
+        await runAbWinnerJob({ issueId: issue.id, logger });
+      }
+    },
+  );
+
+  return [curationJob, sendJob, abCheckJob];
 }
 
 // ---------------------------------------------------------------------------

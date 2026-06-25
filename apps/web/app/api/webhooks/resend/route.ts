@@ -13,6 +13,7 @@ import {
   prisma,
   createEmailEventRepository,
   createSubscriberTopicRepository,
+  createSuppressionRepository,
 } from '@digest/db';
 import type { EmailEventType } from '@digest/db';
 import { ok, err } from '@/lib/api-response.js';
@@ -41,6 +42,10 @@ function verifySvixSignature(
   const svixSignature = headers.get('svix-signature');
   if (!svixId || !svixTimestamp || !svixSignature) return null;
 
+  // Replay window: reject stale or future-dated timestamps (±300s of now).
+  const ts = parseInt(svixTimestamp, 10);
+  if (Number.isNaN(ts) || Math.abs(Date.now() / 1000 - ts) > 300) return null;
+
   const keyBytes = Buffer.from(secret.replace(/^whsec_/, ''), 'base64');
   const payload = `${svixId}.${svixTimestamp}.${rawBody}`;
   const expected = createHmac('sha256', keyBytes).update(payload).digest('base64');
@@ -55,7 +60,33 @@ function verifySvixSignature(
 
 interface ResendEvent {
   readonly type?: string;
-  readonly data?: { readonly email_id?: string };
+  readonly data?: {
+    readonly email_id?: string;
+    /** 'hard' | 'soft' on bounce events; absent on other event types. */
+    readonly bounce_type?: string;
+    /** Recipient(s); present on most Resend payloads. */
+    readonly to?: readonly string[];
+    readonly email?: string;
+  };
+}
+
+/**
+ * Resolve the recipient email for a Send. Prefer the webhook payload (no extra
+ * query); fall back to the subscriber record. Returns null when unavailable.
+ */
+async function resolveRecipientEmail(
+  data: ResendEvent['data'],
+  subscriberId: string,
+): Promise<string | null> {
+  // Lowercase to match the normalized emails stored in the suppression list.
+  const fromPayload = (data?.to?.[0] ?? data?.email)?.toLowerCase();
+  if (fromPayload) return fromPayload;
+
+  const subscriber = await prisma.subscriber.findUnique({
+    where: { id: subscriberId },
+    select: { email: true },
+  });
+  return subscriber?.email ?? null;
 }
 
 export async function POST(request: Request): Promise<NextResponse> {
@@ -93,12 +124,32 @@ export async function POST(request: Request): Promise<NextResponse> {
     occurredAt: new Date(),
   });
 
-  if ((type === 'bounced' || type === 'complaint') && send.subscriberTopic) {
+  if (type !== 'bounced' && type !== 'complaint') {
+    return NextResponse.json(ok({ ok: true }));
+  }
+
+  if (send.subscriberTopic) {
     await createSubscriberTopicRepository(prisma).setStatus(
       send.subscriberId,
       send.subscriberTopic.topicId,
       'bounced',
     );
+  }
+
+  // Soft (transient) bounces only keep the per-membership status above — they
+  // do NOT globally suppress. Hard bounces (or bounces with no type) and
+  // complaints are added to the suppression firewall.
+  const isSoftBounce = type === 'bounced' && event.data?.bounce_type === 'soft';
+  if (!isSoftBounce) {
+    const email = await resolveRecipientEmail(event.data, send.subscriberId);
+    if (email) {
+      const suppression = createSuppressionRepository(prisma);
+      if (type === 'complaint') {
+        await suppression.insertComplaint(email, 'resend_webhook');
+      } else {
+        await suppression.insertHardBounce(email, 'resend_webhook');
+      }
+    }
   }
 
   return NextResponse.json(ok({ ok: true }));

@@ -48,6 +48,7 @@ export function SettingsForm({ settings }: SettingsFormProps) {
   );
   const [fromAddress, setFromAddress] = useState(settings?.fromAddress ?? '');
   const [replyTo, setReplyTo] = useState(settings?.replyTo ?? '');
+  const [dkimSelector, setDkimSelector] = useState(settings?.dkimSelector ?? '');
   const [pipelineLeadDays, setPipelineLeadDays] = useState(settings?.pipelineLeadDays ?? 2);
 
   const [saving, setSaving] = useState(false);
@@ -75,6 +76,7 @@ export function SettingsForm({ settings }: SettingsFormProps) {
       activeProvider: activeProvider as UpdateSettingsDto['activeProvider'],
       fromAddress: fromAddress || undefined,
       replyTo: replyTo || undefined,
+      dkimSelector: dkimSelector.trim() || undefined,
       pipelineLeadDays,
     };
 
@@ -264,6 +266,25 @@ export function SettingsForm({ settings }: SettingsFormProps) {
               placeholder="iletisim@mega.com.tr"
               autoComplete="email"
             />
+          </div>
+
+          <div className={styles.field}>
+            <label htmlFor="dkim-selector" className={styles.label}>
+              DKIM Seçici (selector)
+            </label>
+            <input
+              id="dkim-selector"
+              type="text"
+              className={styles.input}
+              value={dkimSelector}
+              onChange={(e) => setDkimSelector(e.target.value)}
+              placeholder="selector1"
+              autoComplete="off"
+              aria-describedby="dkim-selector-hint"
+            />
+            <span id="dkim-selector-hint" className={styles.toggleLabelHint}>
+              Boş bırakılırsa sağlayıcının varsayılan seçicisi kullanılır.
+            </span>
           </div>
         </div>
       </section>

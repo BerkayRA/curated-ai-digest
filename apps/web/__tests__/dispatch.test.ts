@@ -98,6 +98,11 @@ function makeMockRepo(overrides: Partial<DispatchRepo> = {}): DispatchRepo {
     getTopicRecipients: vi.fn().mockResolvedValue(mockRecipients),
     getTopicBranding: vi.fn().mockResolvedValue({ fromAddress: null, replyTo: null }),
     getSettings: vi.fn().mockResolvedValue(mockSettings),
+    // Phase 4 defaults: no A/B variants, no suppressions, nothing already sent →
+    // the dispatch path is byte-identical to pre-Phase-4 behaviour.
+    getSubjectVariants: vi.fn().mockResolvedValue([]),
+    isSuppressedBatch: vi.fn().mockResolvedValue(new Set<string>()),
+    getAlreadySentRecipientIds: vi.fn().mockResolvedValue(new Set<string>()),
     recordSend: vi.fn().mockResolvedValue(undefined),
     ...overrides,
   };
