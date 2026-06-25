@@ -1,7 +1,9 @@
+import { Suspense } from 'react';
 import Image from 'next/image';
+import { prisma, createTopicRepository } from '@digest/db';
 import { auth, signOut } from '@/auth';
 import { EyebrowLabel } from '@/components/ui/EyebrowLabel';
-import { HeroNav } from './HeroNav';
+import { HeroNav, type NavTopic } from './HeroNav';
 import styles from './shell.module.css';
 
 async function HeroSignOut(): Promise<React.ReactElement> {
@@ -29,6 +31,9 @@ export async function HeroHeader(): Promise<React.ReactElement> {
   const session = await auth();
   const user = session?.user;
   const displayName = user?.name ?? user?.email ?? '';
+
+  const activeTopics = await createTopicRepository(prisma).findActive();
+  const navTopics: NavTopic[] = activeTopics.map((t) => ({ slug: t.slug, name: t.name }));
 
   return (
     <header className={styles.hero} aria-labelledby="hero-heading">
@@ -66,7 +71,9 @@ export async function HeroHeader(): Promise<React.ReactElement> {
               Yapay zeka dünyasından haftalık, özenle seçilmiş haberler.
             </p>
           </div>
-          <HeroNav />
+          <Suspense fallback={null}>
+            <HeroNav topics={navTopics} />
+          </Suspense>
         </div>
       </div>
     </header>

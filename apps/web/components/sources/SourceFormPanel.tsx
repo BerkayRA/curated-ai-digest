@@ -74,6 +74,7 @@ interface SourceFormPanelProps {
   open: boolean;
   source: Source | null;
   exaConfigured: boolean;
+  topicSlug?: string;
   onClose: () => void;
   onSaved: (saved: Source) => void;
 }
@@ -86,6 +87,7 @@ export function SourceFormPanel({
   open,
   source,
   exaConfigured,
+  topicSlug,
   onClose,
   onSaved,
 }: SourceFormPanelProps) {
@@ -210,6 +212,9 @@ export function SourceFormPanel({
     };
     if (showUrl) body.url = url.trim();
     if (config !== undefined) body.config = config;
+    // On create, carry the active topic so the source lands under it. The
+    // PATCH/update path never reassigns topic, so topicSlug is omitted there.
+    if (!isEdit && topicSlug) body.topicSlug = topicSlug;
 
     try {
       const endpoint = isEdit ? `/api/sources/${source.id}` : '/api/sources';
