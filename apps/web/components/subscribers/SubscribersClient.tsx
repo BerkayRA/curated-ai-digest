@@ -10,8 +10,20 @@ import { CsvImportModal } from './CsvImportModal';
 import type { ApiResponse } from '@/lib/api-response';
 import styles from './subscribers.module.css';
 
+interface TopicOption {
+  id: string;
+  slug: string;
+  name: string;
+}
+
 interface SubscribersClientProps {
   initialSubscribers: Subscriber[];
+  topics: TopicOption[];
+  activeTopicId: string;
+  activeTopicSlug: string | null;
+  activeTopicName: string | null;
+  /** subscriberId → active topicId[] */
+  topicsBySubscriber: Record<string, string[]>;
 }
 
 const STATUS_LABELS: Record<SubscriberStatus, string> = {
@@ -30,7 +42,14 @@ function formatDate(date: Date | string): string {
   }).format(new Date(date));
 }
 
-export function SubscribersClient({ initialSubscribers }: SubscribersClientProps) {
+export function SubscribersClient({
+  initialSubscribers,
+  topics,
+  activeTopicId,
+  activeTopicSlug,
+  activeTopicName,
+  topicsBySubscriber,
+}: SubscribersClientProps) {
   const [subscribers, setSubscribers] = useState<Subscriber[]>(initialSubscribers);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [editingSubscriber, setEditingSubscriber] = useState<Subscriber | null>(null);
@@ -38,14 +57,52 @@ export function SubscribersClient({ initialSubscribers }: SubscribersClientProps
   const [isImporting, setIsImporting] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [memberships, setMemberships] = useState<Record<string, string[]>>(topicsBySubscriber);
+  const [membershipBusyId, setMembershipBusyId] = useState<string | null>(null);
+
+  const topicNameById = new Map(topics.map((t) => [t.id, t.name] as const));
+
+  const toggleActiveTopic = useCallback(
+    async (subscriberId: string, isMember: boolean) => {
+      setMembershipBusyId(subscriberId);
+      try {
+        const res = await fetch(`/api/subscribers/${subscriberId}/topics`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            topicId: activeTopicId,
+            action: isMember ? 'remove' : 'add',
+          }),
+        });
+        const json = (await res.json()) as ApiResponse<unknown>;
+        if (!json.success) return;
+
+        setMemberships((prev) => {
+          const current = prev[subscriberId] ?? [];
+          const next = isMember
+            ? current.filter((id) => id !== activeTopicId)
+            : [...current, activeTopicId];
+          return { ...prev, [subscriberId]: next };
+        });
+      } finally {
+        setMembershipBusyId(null);
+      }
+    },
+    [activeTopicId],
+  );
 
   const filtered =
     statusFilter === 'all' ? subscribers : subscribers.filter((s) => s.status === statusFilter);
 
-  const handleCreated = useCallback((created: Subscriber) => {
-    setSubscribers((prev) => [created, ...prev]);
-    setIsCreating(false);
-  }, []);
+  const handleCreated = useCallback(
+    (created: Subscriber) => {
+      setSubscribers((prev) => [created, ...prev]);
+      // Manual create scopes the new subscriber to the active topic.
+      setMemberships((prev) => ({ ...prev, [created.id]: [activeTopicId] }));
+      setIsCreating(false);
+    },
+    [activeTopicId],
+  );
 
   const handleUpdated = useCallback((updated: Subscriber) => {
     setSubscribers((prev) => prev.map((s) => (s.id === updated.id ? updated : s)));
@@ -54,7 +111,7 @@ export function SubscribersClient({ initialSubscribers }: SubscribersClientProps
 
   const handleImported = useCallback(() => {
     setIsImporting(false);
-    // Refetch the full list after import
+    // Refetch the full list + active-topic memberships after import.
     fetch('/api/subscribers')
       .then((r) => r.json() as Promise<ApiResponse<Subscriber[]>>)
       .then((res) => {
@@ -65,7 +122,25 @@ export function SubscribersClient({ initialSubscribers }: SubscribersClientProps
       .catch(() => {
         // swallow — user can reload
       });
-  }, []);
+
+    fetch(`/api/topics/${activeTopicId}/subscribers`)
+      .then((r) => r.json() as Promise<ApiResponse<{ subscriberId: string }[]>>)
+      .then((res) => {
+        if (!res.success || !res.data) return;
+        const ids = res.data.map((m) => m.subscriberId);
+        setMemberships((prev) => {
+          const next = { ...prev };
+          for (const id of ids) {
+            const current = next[id] ?? [];
+            if (!current.includes(activeTopicId)) next[id] = [...current, activeTopicId];
+          }
+          return next;
+        });
+      })
+      .catch(() => {
+        // swallow — user can reload
+      });
+  }, [activeTopicId]);
 
   const handleDelete = useCallback(async (id: string) => {
     setDeletingId(id);
@@ -142,6 +217,9 @@ export function SubscribersClient({ initialSubscribers }: SubscribersClientProps
                   Kaynak
                 </th>
                 <th scope="col" className={styles.th}>
+                  Konular
+                </th>
+                <th scope="col" className={styles.th}>
                   Eklenme
                 </th>
                 <th scope="col" className={styles.th}>
@@ -166,9 +244,36 @@ export function SubscribersClient({ initialSubscribers }: SubscribersClientProps
                   <td className={styles.td}>
                     <span className={styles.source}>{sub.source}</span>
                   </td>
+                  <td className={styles.td}>
+                    <div className={styles.topicBadges}>
+                      {(memberships[sub.id] ?? []).length === 0 ? (
+                        <span className={styles.topicEmpty}>—</span>
+                      ) : (
+                        (memberships[sub.id] ?? []).map((topicId) => (
+                          <span key={topicId} className={styles.topicBadge}>
+                            {topicNameById.get(topicId) ?? topicId}
+                          </span>
+                        ))
+                      )}
+                    </div>
+                  </td>
                   <td className={styles.td}>{formatDate(sub.createdAt)}</td>
                   <td className={styles.td}>
                     <div className={styles.rowActions}>
+                      {(() => {
+                        const isMember = (memberships[sub.id] ?? []).includes(activeTopicId);
+                        return (
+                          <Button
+                            variant={isMember ? 'secondary' : 'ghost'}
+                            size="sm"
+                            loading={membershipBusyId === sub.id}
+                            onClick={() => toggleActiveTopic(sub.id, isMember)}
+                            title={activeTopicName ?? undefined}
+                          >
+                            {isMember ? 'Konudan Çıkar' : 'Konuya Ekle'}
+                          </Button>
+                        );
+                      })()}
                       <Button variant="ghost" size="sm" onClick={() => setEditingSubscriber(sub)}>
                         Düzenle
                       </Button>
@@ -211,6 +316,7 @@ export function SubscribersClient({ initialSubscribers }: SubscribersClientProps
       {isCreating && (
         <SubscriberFormModal
           mode="create"
+          topicSlug={activeTopicSlug}
           onSaved={handleCreated}
           onClose={() => setIsCreating(false)}
         />
@@ -226,7 +332,12 @@ export function SubscribersClient({ initialSubscribers }: SubscribersClientProps
       )}
 
       {isImporting && (
-        <CsvImportModal onImported={handleImported} onClose={() => setIsImporting(false)} />
+        <CsvImportModal
+          topicSlug={activeTopicSlug}
+          topicName={activeTopicName}
+          onImported={handleImported}
+          onClose={() => setIsImporting(false)}
+        />
       )}
     </div>
   );

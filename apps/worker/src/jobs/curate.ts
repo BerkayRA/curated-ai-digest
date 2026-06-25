@@ -21,6 +21,8 @@ export interface CurationJobOptions {
    * Defaults to current week if not provided.
    */
   readonly isoWeek?: string;
+  /** Topic to curate. Passed through to the topic-aware pipeline. */
+  readonly topicId?: string;
 }
 
 /**
@@ -28,9 +30,9 @@ export interface CurationJobOptions {
  * Creates a draft Issue that then awaits human approval (or auto-send).
  */
 export async function runCurationJob(opts: CurationJobOptions): Promise<void> {
-  const { logger, isoWeek } = opts;
+  const { logger, isoWeek, topicId } = opts;
 
-  logger.info('job.curate.start', { isoWeek: isoWeek ?? 'current' });
+  logger.info('job.curate.start', { isoWeek: isoWeek ?? 'current', topicId });
 
   // Shared adapter so library code logs through the worker logger.
   const libLogger = {
@@ -61,6 +63,7 @@ export async function runCurationJob(opts: CurationJobOptions): Promise<void> {
   try {
     const result = await runWeeklyPipeline({
       isoWeek,
+      topicId,
       renderFn: renderDigestEmail,
       logger: libLogger,
     });

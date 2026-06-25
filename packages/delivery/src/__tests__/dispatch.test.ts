@@ -27,35 +27,26 @@ const mockSettings = {
   updatedAt: new Date(),
 };
 
-const mockSubscribers = [
+const mockRecipients = [
   {
-    id: 'sub-1',
+    subscriberTopicId: 'st-1',
+    subscriberId: 'sub-1',
     email: 'alice@example.com',
     displayName: 'Alice',
-    company: null,
-    status: 'active' as const,
-    locale: 'tr-TR',
     unsubscribeToken: 'token-alice-abc123',
-    source: 'manual',
-    createdAt: new Date(),
-    updatedAt: new Date(),
   },
   {
-    id: 'sub-2',
+    subscriberTopicId: 'st-2',
+    subscriberId: 'sub-2',
     email: 'bob@example.com',
     displayName: null,
-    company: null,
-    status: 'active' as const,
-    locale: 'tr-TR',
     unsubscribeToken: 'token-bob-def456',
-    source: 'import',
-    createdAt: new Date(),
-    updatedAt: new Date(),
   },
 ];
 
 const mockIssue = {
   id: 'issue-1',
+  topicId: 'topic-1',
   isoWeek: '2026-W25',
   status: 'approved' as IssueStatus,
   subject: 'Test Digest Konusu',
@@ -103,7 +94,8 @@ const mockIssue = {
 function makeMockRepo(overrides: Partial<DispatchRepo> = {}): DispatchRepo {
   return {
     getIssueWithItems: vi.fn().mockResolvedValue(mockIssue),
-    getActiveSubscribers: vi.fn().mockResolvedValue(mockSubscribers),
+    getTopicRecipients: vi.fn().mockResolvedValue(mockRecipients),
+    getTopicBranding: vi.fn().mockResolvedValue({ fromAddress: null, replyTo: null }),
     getSettings: vi.fn().mockResolvedValue(mockSettings),
     recordSend: vi.fn().mockResolvedValue(undefined),
     ...overrides,
@@ -111,7 +103,7 @@ function makeMockRepo(overrides: Partial<DispatchRepo> = {}): DispatchRepo {
 }
 
 function makeMockProvider(overrides: Partial<EmailProvider> = {}): EmailProvider {
-  const sendResults: SendResult[] = mockSubscribers.map((_, i) => ({
+  const sendResults: SendResult[] = mockRecipients.map((_, i) => ({
     providerMessageId: `msg-${i + 1}`,
     status: 'sent' as const,
   }));
@@ -185,7 +177,40 @@ describe('dispatchIssue', () => {
     );
     expect(calls.every((c) => c.status === 'sent')).toBe(true);
     expect(calls.map((c) => c.subscriberId).sort()).toEqual(['sub-1', 'sub-2'].sort());
+    expect(calls.map((c) => c.subscriberTopicId).sort()).toEqual(['st-1', 'st-2'].sort());
     expect(calls.every((c) => c.providerMessageId !== undefined)).toBe(true);
+  });
+
+  it('records the per-topic subscriberTopicId on each Send', async () => {
+    const repo = makeMockRepo();
+    const provider = makeMockProvider();
+
+    await dispatchIssue('issue-1', { provider, repo, transitionFn: mockTransitionFn });
+
+    const recordSendMock = repo.recordSend as ReturnType<typeof vi.fn>;
+    const calls: Array<Parameters<DispatchRepo['recordSend']>[0]> = recordSendMock.mock.calls.map(
+      (c: unknown[]) => c[0] as Parameters<DispatchRepo['recordSend']>[0],
+    );
+
+    const aliceCall = calls.find((c) => c.subscriberId === 'sub-1');
+    expect(aliceCall?.subscriberTopicId).toBe('st-1');
+    const bobCall = calls.find((c) => c.subscriberId === 'sub-2');
+    expect(bobCall?.subscriberTopicId).toBe('st-2');
+  });
+
+  it('loads recipients from getTopicRecipients using the issue topicId', async () => {
+    const repo = makeMockRepo();
+    const provider = makeMockProvider();
+
+    const result = await dispatchIssue('issue-1', {
+      provider,
+      repo,
+      transitionFn: mockTransitionFn,
+    });
+
+    const getTopicRecipientsMock = repo.getTopicRecipients as ReturnType<typeof vi.fn>;
+    expect(getTopicRecipientsMock).toHaveBeenCalledWith('topic-1');
+    expect(result.totalRecipients).toBe(2);
   });
 
   it('calls transitionFn with to=sent on success', async () => {
@@ -250,8 +275,8 @@ describe('dispatchIssue', () => {
     ).rejects.toThrow(/not found/i);
   });
 
-  it('throws when there are no active subscribers', async () => {
-    const repo = makeMockRepo({ getActiveSubscribers: vi.fn().mockResolvedValue([]) });
+  it('throws when there are no active recipients', async () => {
+    const repo = makeMockRepo({ getTopicRecipients: vi.fn().mockResolvedValue([]) });
     const provider = makeMockProvider();
 
     await expect(
@@ -259,8 +284,10 @@ describe('dispatchIssue', () => {
     ).rejects.toThrow(/subscriber/i);
   });
 
-  it('sets correct from address from settings', async () => {
-    const repo = makeMockRepo();
+  it('falls back to settings.fromAddress when topic fromAddress is null', async () => {
+    const repo = makeMockRepo({
+      getTopicBranding: vi.fn().mockResolvedValue({ fromAddress: null, replyTo: null }),
+    });
     const provider = makeMockProvider();
 
     await dispatchIssue('issue-1', { provider, repo, transitionFn: mockTransitionFn });
@@ -271,5 +298,24 @@ describe('dispatchIssue', () => {
     const messages: readonly EmailMessage[] = (mockCall as [readonly EmailMessage[]])[0];
 
     expect(messages[0]!.from.email).toBe('digest@mega.com.tr');
+  });
+
+  it('uses topic.fromAddress for from.email when set', async () => {
+    const repo = makeMockRepo({
+      getTopicBranding: vi
+        .fn()
+        .mockResolvedValue({ fromAddress: 'topic@mega.com.tr', replyTo: 'reply@mega.com.tr' }),
+    });
+    const provider = makeMockProvider();
+
+    await dispatchIssue('issue-1', { provider, repo, transitionFn: mockTransitionFn });
+
+    const sendBatchMock = provider.sendBatch as ReturnType<typeof vi.fn>;
+    const messages: readonly EmailMessage[] = (
+      sendBatchMock.mock.calls[0] as [readonly EmailMessage[]]
+    )[0];
+
+    expect(messages[0]!.from.email).toBe('topic@mega.com.tr');
+    expect(messages[0]!.headers?.['Reply-To']).toBe('reply@mega.com.tr');
   });
 });

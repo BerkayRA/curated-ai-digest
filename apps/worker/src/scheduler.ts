@@ -1,15 +1,32 @@
 /**
- * Scheduler — reads Settings and registers two timezone-aware croner jobs:
+ * Scheduler — registers per-topic timezone-aware croner job pairs.
+ *
+ * For each ACTIVE topic it registers two crons:
  *   1. Curation job: pipelineLeadDays before send day
  *   2. Send job:     on send day at send time
+ *
+ * Topic schedule fields are nullable; when null they fall back to the global
+ * Settings row. The active topic set + global settings are re-read on a fixed
+ * polling interval (SCHEDULE_RELOAD_INTERVAL_MS) so dashboard changes (pausing
+ * a topic, editing its schedule) take effect without a worker restart.
  *
  * Exposes pure helper settingsToCronExpressions() for unit testing.
  */
 
 import { Cron } from 'croner';
+import { createTopicRepository, prisma } from '@digest/db';
 import type { Logger } from './logger.js';
 import { runCurationJob } from './jobs/curate.js';
 import { runSendJob } from './jobs/send.js';
+
+// ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
+
+/** How often the scheduler re-reads active topics + settings and re-registers crons. */
+export const SCHEDULE_RELOAD_INTERVAL_MS = 5 * 60_000;
+
+const DEFAULT_TIMEZONE = 'Europe/Istanbul';
 
 // ---------------------------------------------------------------------------
 // Day-of-week mapping
@@ -74,11 +91,117 @@ export function settingsToCronExpressions(settings: SchedulerSettings): CronExpr
 }
 
 // ---------------------------------------------------------------------------
-// Scheduler state
+// Resolved per-topic schedule
 // ---------------------------------------------------------------------------
 
-export interface SchedulerHandle {
-  stop(): void;
+/** Minimal shape of an active Topic the scheduler needs. */
+export interface ScheduleTopic {
+  readonly id: string;
+  readonly sendDayOfWeek: string | null;
+  readonly sendTime: string | null;
+  readonly timezone: string | null;
+  readonly pipelineLeadDays: number | null;
+  readonly autoSendEnabled: boolean | null;
+}
+
+/** Global Settings fields the scheduler falls back to for null topic fields. */
+export interface GlobalSchedulerSettings {
+  readonly sendDayOfWeek: string;
+  readonly sendTime: string;
+  readonly timezone: string;
+  readonly pipelineLeadDays: number;
+  readonly autoSendEnabled: boolean;
+}
+
+interface ResolvedSchedule {
+  readonly sendDayOfWeek: string;
+  readonly sendTime: string;
+  readonly timezone: string;
+  readonly pipelineLeadDays: number;
+  readonly autoSendEnabled: boolean;
+}
+
+/**
+ * Resolves a topic's effective schedule by falling back to global Settings for
+ * each null field. Returns an immutable resolved schedule.
+ */
+function resolveTopicSchedule(
+  topic: ScheduleTopic,
+  settings: GlobalSchedulerSettings,
+): ResolvedSchedule {
+  return {
+    sendDayOfWeek: topic.sendDayOfWeek ?? settings.sendDayOfWeek,
+    sendTime: topic.sendTime ?? settings.sendTime,
+    timezone: topic.timezone ?? settings.timezone,
+    pipelineLeadDays: topic.pipelineLeadDays ?? settings.pipelineLeadDays,
+    autoSendEnabled: topic.autoSendEnabled ?? settings.autoSendEnabled,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Cron registration (per topic)
+// ---------------------------------------------------------------------------
+
+/**
+ * Registers a curation+send cron pair for a single topic and returns both Cron
+ * instances. Job callbacks pass the topicId through to the underlying jobs.
+ */
+function registerTopicCrons(
+  topic: ScheduleTopic,
+  settings: GlobalSchedulerSettings,
+  logger: Logger,
+): readonly Cron[] {
+  const resolved = resolveTopicSchedule(topic, settings);
+  const expressions = settingsToCronExpressions(resolved);
+  const { timezone, autoSendEnabled } = resolved;
+  const { id: topicId } = topic;
+
+  logger.info('scheduler.topic.register', {
+    topicId,
+    curationCron: expressions.curation,
+    sendCron: expressions.send,
+    timezone,
+  });
+
+  const curationJob = new Cron(
+    expressions.curation,
+    {
+      timezone,
+      name: `curation:${topicId}`,
+      catch: (err: Error | unknown) => {
+        logger.error('scheduler.curation.error', {
+          topicId,
+          message: err instanceof Error ? err.message : String(err),
+        });
+      },
+    },
+    async () => {
+      const isoWeek = currentIsoWeek();
+      logger.info('scheduler.curation.trigger', { topicId, isoWeek });
+      await runCurationJob({ logger, isoWeek, topicId });
+    },
+  );
+
+  const sendJob = new Cron(
+    expressions.send,
+    {
+      timezone,
+      name: `send:${topicId}`,
+      catch: (err: Error | unknown) => {
+        logger.error('scheduler.send.error', {
+          topicId,
+          message: err instanceof Error ? err.message : String(err),
+        });
+      },
+    },
+    async () => {
+      const isoWeek = currentIsoWeek();
+      logger.info('scheduler.send.trigger', { topicId, isoWeek });
+      await runSendJob({ logger, isoWeek, topicId, autoSendEnabled });
+    },
+  );
+
+  return [curationJob, sendJob];
 }
 
 // ---------------------------------------------------------------------------
@@ -96,70 +219,106 @@ export function currentIsoWeek(): string {
 }
 
 // ---------------------------------------------------------------------------
+// Scheduler handle + options
+// ---------------------------------------------------------------------------
+
+export interface SchedulerHandle {
+  /** Clears the poll timer and stops all registered crons. */
+  stop(): void;
+}
+
+/** Reloads active topics + global settings; falls back to the seed data on error. */
+export interface SchedulerDataSource {
+  loadTopics(): Promise<ScheduleTopic[]>;
+  loadSettings(): Promise<GlobalSchedulerSettings | null>;
+}
+
+const defaultDataSource: SchedulerDataSource = {
+  async loadTopics() {
+    return createTopicRepository(prisma).findActive();
+  },
+  async loadSettings() {
+    return prisma.settings.findFirst();
+  },
+};
+
+export interface StartSchedulerOptions {
+  /** Initial topics loaded at boot (avoids a redundant query on startup). */
+  readonly topics: readonly ScheduleTopic[];
+  /** Initial global settings loaded at boot. */
+  readonly settings: GlobalSchedulerSettings;
+  readonly logger: Logger;
+  /** Injectable for tests; defaults to the live Prisma-backed source. */
+  readonly dataSource?: SchedulerDataSource;
+  /** Override the reload interval (ms); defaults to SCHEDULE_RELOAD_INTERVAL_MS. */
+  readonly reloadIntervalMs?: number;
+}
+
+// ---------------------------------------------------------------------------
 // Start scheduler
 // ---------------------------------------------------------------------------
 
-export interface StartSchedulerOptions {
-  readonly settings: SchedulerSettings & { readonly timezone?: string };
-  readonly logger: Logger;
-}
-
 /**
- * Registers both cron jobs and returns a handle to stop them on shutdown.
+ * Registers a curation+send cron pair per active topic and polls for changes
+ * every reloadIntervalMs. Returns a handle to stop the poll timer and all crons.
  */
 export function startScheduler(opts: StartSchedulerOptions): SchedulerHandle {
-  const { settings, logger } = opts;
-  const timezone = settings.timezone ?? 'Europe/Istanbul';
+  const {
+    topics: initialTopics,
+    settings: initialSettings,
+    logger,
+    dataSource = defaultDataSource,
+    reloadIntervalMs = SCHEDULE_RELOAD_INTERVAL_MS,
+  } = opts;
 
-  const expressions = settingsToCronExpressions(settings);
+  // Mutable holder for the currently-registered crons. Reassigned (not mutated)
+  // on each reload so the previous set can be stopped cleanly.
+  let crons: readonly Cron[] = [];
 
-  logger.info('scheduler.start', {
-    curationCron: expressions.curation,
-    sendCron: expressions.send,
-    timezone,
-  });
+  function register(topics: readonly ScheduleTopic[], settings: GlobalSchedulerSettings): void {
+    // Always stop the previous set first to avoid leaking crons on reload.
+    for (const cron of crons) {
+      cron.stop();
+    }
+    crons = topics.flatMap((topic) => registerTopicCrons(topic, settings, logger));
+    logger.info('scheduler.registered', { topicCount: topics.length, cronCount: crons.length });
+  }
 
-  const curationJob = new Cron(
-    expressions.curation,
-    {
-      timezone,
-      name: 'curation',
-      catch: (err: Error | unknown) => {
-        logger.error('scheduler.curation.error', {
-          message: err instanceof Error ? err.message : String(err),
-        });
-      },
-    },
-    async () => {
-      const isoWeek = currentIsoWeek();
-      logger.info('scheduler.curation.trigger', { isoWeek });
-      await runCurationJob({ logger, isoWeek });
-    },
-  );
+  register(initialTopics, initialSettings);
 
-  const sendJob = new Cron(
-    expressions.send,
-    {
-      timezone,
-      name: 'send',
-      catch: (err: Error | unknown) => {
-        logger.error('scheduler.send.error', {
-          message: err instanceof Error ? err.message : String(err),
-        });
-      },
-    },
-    async () => {
-      const isoWeek = currentIsoWeek();
-      logger.info('scheduler.send.trigger', { isoWeek });
-      await runSendJob({ logger, isoWeek });
-    },
-  );
+  async function reload(): Promise<void> {
+    try {
+      const [topics, settings] = await Promise.all([
+        dataSource.loadTopics(),
+        dataSource.loadSettings(),
+      ]);
+      if (!settings) {
+        logger.warn('scheduler.reload.no_settings');
+        return;
+      }
+      register(topics, settings);
+    } catch (err: unknown) {
+      logger.error('scheduler.reload.error', {
+        message: err instanceof Error ? err.message : String(err),
+      });
+    }
+  }
+
+  const pollTimer = setInterval(() => {
+    void reload();
+  }, reloadIntervalMs);
 
   return {
     stop() {
-      curationJob.stop();
-      sendJob.stop();
+      clearInterval(pollTimer);
+      for (const cron of crons) {
+        cron.stop();
+      }
+      crons = [];
       logger.info('scheduler.stopped');
     },
   };
 }
+
+// Re-exported for callers that need the default timezone constant.
+export { DEFAULT_TIMEZONE };
