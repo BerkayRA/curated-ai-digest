@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
-import { ConsentModeSchema } from './enums.js';
+import { ConsentModeSchema, LanguageSchema } from './enums.js';
+import { HTTPS_URL_MESSAGE, isHttpsUrl } from './primitives.js';
 
 // ---------------------------------------------------------------------------
 // Topic status enum — values MUST match the Prisma TopicStatus enum exactly.
@@ -47,6 +48,22 @@ export const CreateTopicSchema = z.object({
   status: TopicStatusSchema.default('active'),
   // Default `business`: opening a public signup page is an explicit choice.
   consentMode: ConsentModeSchema.default('business'),
+  // Phase 5 — white-label + language. Defaults preserve the Mega/TR look.
+  language: LanguageSchema.default('tr'),
+  brandLogoUrl: z
+    .string()
+    .url()
+    .max(500)
+    .refine(isHttpsUrl, { message: HTTPS_URL_MESSAGE })
+    .nullable()
+    .optional(),
+  brandColorHex: z
+    .string()
+    .regex(/^#[0-9a-fA-F]{6}$/, 'Renk #RRGGBB biçiminde olmalı.')
+    .nullable()
+    .optional(),
+  brandName: z.string().max(120).nullable().optional(),
+  brandFooterText: z.string().max(500).nullable().optional(),
 });
 export type CreateTopicDto = z.infer<typeof CreateTopicSchema>;
 
@@ -62,5 +79,20 @@ export const UpdateTopicSchema = z.object({
   voice: z.string().max(2000).nullable().optional(),
   status: TopicStatusSchema.optional(),
   consentMode: ConsentModeSchema.optional(),
+  language: LanguageSchema.optional(),
+  brandLogoUrl: z
+    .string()
+    .url()
+    .max(500)
+    .refine(isHttpsUrl, { message: HTTPS_URL_MESSAGE })
+    .nullable()
+    .optional(),
+  brandColorHex: z
+    .string()
+    .regex(/^#[0-9a-fA-F]{6}$/, 'Renk #RRGGBB biçiminde olmalı.')
+    .nullable()
+    .optional(),
+  brandName: z.string().max(120).nullable().optional(),
+  brandFooterText: z.string().max(500).nullable().optional(),
 });
 export type UpdateTopicDto = z.infer<typeof UpdateTopicSchema>;

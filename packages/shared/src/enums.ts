@@ -36,6 +36,10 @@ export type SubscriberStatus = z.infer<typeof SubscriberStatusSchema>;
 export const ConsentModeSchema = z.enum(['business', 'public']);
 export type ConsentMode = z.infer<typeof ConsentModeSchema>;
 
+// Content language for a topic's curation output + email/archive copy.
+export const LanguageSchema = z.enum(['tr', 'en']);
+export type Language = z.infer<typeof LanguageSchema>;
+
 // Recorded lawful basis for a SubscriberTopic membership (İYS-ready).
 export const ConsentBasisSchema = z.enum([
   'business_relationship',

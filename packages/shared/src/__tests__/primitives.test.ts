@@ -1,5 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { emailSchema, isoWeekSchema, timeHHmmSchema } from '../primitives.js';
+import {
+  emailSchema,
+  isoWeekSchema,
+  timeHHmmSchema,
+  httpUrlSchema,
+  isHttpUrl,
+  isHttpsUrl,
+} from '../primitives.js';
 
 describe('emailSchema', () => {
   it('accepts a valid lowercase email', () => {
@@ -93,5 +100,30 @@ describe('timeHHmmSchema', () => {
 
   it('rejects an empty string', () => {
     expect(() => timeHHmmSchema.parse('')).toThrow();
+  });
+});
+
+describe('URL scheme guards', () => {
+  it('httpUrlSchema accepts http and https URLs', () => {
+    expect(httpUrlSchema.parse('http://example.com/a')).toBe('http://example.com/a');
+    expect(httpUrlSchema.parse('https://example.com/a')).toBe('https://example.com/a');
+  });
+
+  it('httpUrlSchema rejects javascript:, data:, and ftp: URLs', () => {
+    // These all pass Zod's bare .url() (new URL succeeds) — the refine blocks them.
+    expect(() => httpUrlSchema.parse('javascript:alert(1)')).toThrow();
+    expect(() => httpUrlSchema.parse('data:text/html,<script>1</script>')).toThrow();
+    expect(() => httpUrlSchema.parse('ftp://example.com/x')).toThrow();
+  });
+
+  it('isHttpUrl / isHttpsUrl predicates classify schemes correctly', () => {
+    expect(isHttpUrl('http://x.com')).toBe(true);
+    expect(isHttpUrl('https://x.com')).toBe(true);
+    expect(isHttpUrl('javascript:alert(1)')).toBe(false);
+    expect(isHttpUrl('not a url')).toBe(false);
+
+    expect(isHttpsUrl('https://x.com')).toBe(true);
+    expect(isHttpsUrl('http://x.com')).toBe(false);
+    expect(isHttpsUrl('data:image/svg+xml,<svg/>')).toBe(false);
   });
 });

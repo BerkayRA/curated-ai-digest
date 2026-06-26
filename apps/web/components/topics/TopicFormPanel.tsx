@@ -11,6 +11,11 @@ import styles from './topics.module.css';
 
 type TopicStatus = 'active' | 'paused';
 type ConsentMode = 'business' | 'public';
+type Language = 'tr' | 'en';
+
+// Fallback swatch shown by the native color input before the user picks a
+// brand color. Stored value stays null until they intentionally choose one.
+const DEFAULT_BRAND_COLOR = '#009fda';
 
 // Reset the "copied" confirmation after this delay.
 const COPY_RESET_MS = 2000;
@@ -49,6 +54,14 @@ export function TopicFormPanel({ open, topic, onClose, onSaved }: TopicFormPanel
   const [status, setStatus] = useState<TopicStatus>('active');
   const [consentMode, setConsentMode] = useState<ConsentMode>('business');
 
+  // ── Brand & language state ────────────────────────────────
+
+  const [language, setLanguage] = useState<Language>('tr');
+  const [brandName, setBrandName] = useState('');
+  const [brandLogoUrl, setBrandLogoUrl] = useState('');
+  const [brandColorHex, setBrandColorHex] = useState('');
+  const [brandFooterText, setBrandFooterText] = useState('');
+
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [signupCopied, setSignupCopied] = useState(false);
@@ -65,6 +78,11 @@ export function TopicFormPanel({ open, topic, onClose, onSaved }: TopicFormPanel
       setVoice(topic.voice ?? '');
       setStatus(topic.status as TopicStatus);
       setConsentMode(topic.consentMode as ConsentMode);
+      setLanguage((topic.language as Language) ?? 'tr');
+      setBrandName(topic.brandName ?? '');
+      setBrandLogoUrl(topic.brandLogoUrl ?? '');
+      setBrandColorHex(topic.brandColorHex ?? '');
+      setBrandFooterText(topic.brandFooterText ?? '');
     } else {
       setSlug('');
       setName('');
@@ -73,6 +91,11 @@ export function TopicFormPanel({ open, topic, onClose, onSaved }: TopicFormPanel
       setVoice('');
       setStatus('active');
       setConsentMode('business');
+      setLanguage('tr');
+      setBrandName('');
+      setBrandLogoUrl('');
+      setBrandColorHex('');
+      setBrandFooterText('');
     }
     setFormError(null);
     setSignupCopied(false);
@@ -109,6 +132,10 @@ export function TopicFormPanel({ open, topic, onClose, onSaved }: TopicFormPanel
     const trimmedDescription = description.trim();
     const trimmedAudience = audience.trim();
     const trimmedVoice = voice.trim();
+    const trimmedBrandName = brandName.trim();
+    const trimmedBrandLogoUrl = brandLogoUrl.trim();
+    const trimmedBrandColorHex = brandColorHex.trim();
+    const trimmedBrandFooterText = brandFooterText.trim();
 
     const body: Record<string, unknown> = {
       slug: slug.trim(),
@@ -118,6 +145,11 @@ export function TopicFormPanel({ open, topic, onClose, onSaved }: TopicFormPanel
       voice: trimmedVoice === '' ? null : trimmedVoice,
       status,
       consentMode,
+      language,
+      brandName: trimmedBrandName === '' ? null : trimmedBrandName,
+      brandLogoUrl: trimmedBrandLogoUrl === '' ? null : trimmedBrandLogoUrl,
+      brandColorHex: trimmedBrandColorHex === '' ? null : trimmedBrandColorHex,
+      brandFooterText: trimmedBrandFooterText === '' ? null : trimmedBrandFooterText,
     };
 
     try {
@@ -295,6 +327,123 @@ export function TopicFormPanel({ open, topic, onClose, onSaved }: TopicFormPanel
                 Metin yazımı ve QA istemlerine eklenir. Boş bırakılırsa varsayılan metin kullanılır.
               </span>
             </div>
+
+            {/* ── Brand & language ──────────────────────────── */}
+            <p className={styles.formSection}>Marka ve Dil</p>
+
+            {/* Language */}
+            <div className={styles.formField}>
+              <label className={styles.formLabel} htmlFor="topic-language">
+                Dil
+              </label>
+              <select
+                id="topic-language"
+                className={styles.formSelect}
+                value={language}
+                onChange={(e) => setLanguage(e.target.value as Language)}
+              >
+                <option value="tr">Türkçe</option>
+                <option value="en">İngilizce</option>
+              </select>
+              <span className={styles.formHint}>
+                Seçim, metin yazımı ve e-posta/arşiv kopyasının dili.
+              </span>
+            </div>
+
+            {/* Brand name */}
+            <div className={styles.formField}>
+              <label htmlFor="topic-brand-name" className={styles.formLabel}>
+                Marka Adı
+              </label>
+              <input
+                id="topic-brand-name"
+                type="text"
+                className={styles.formInput}
+                value={brandName}
+                maxLength={120}
+                placeholder="Curated AI Digest"
+                onChange={(e) => setBrandName(e.target.value)}
+              />
+              <span className={styles.formHint}>
+                Boş bırakılırsa varsayılan ad &ldquo;Curated AI Digest&rdquo; kullanılır.
+              </span>
+            </div>
+
+            {/* Brand logo URL */}
+            <div className={styles.formField}>
+              <label htmlFor="topic-brand-logo" className={styles.formLabel}>
+                Logo Adresi
+              </label>
+              <input
+                id="topic-brand-logo"
+                type="url"
+                className={`${styles.formInput} ${styles.mono}`}
+                value={brandLogoUrl}
+                maxLength={500}
+                placeholder="https://…/logo.png"
+                onChange={(e) => setBrandLogoUrl(e.target.value)}
+              />
+              <span className={styles.formHint}>Boş bırakılırsa Mega logosu kullanılır.</span>
+            </div>
+
+            {/* Brand color */}
+            <div className={styles.formField}>
+              <label htmlFor="topic-brand-color" className={styles.formLabel}>
+                Marka Rengi
+              </label>
+              <div className={styles.colorRow}>
+                <input
+                  id="topic-brand-color"
+                  type="color"
+                  className={styles.colorSwatchInput}
+                  value={brandColorHex === '' ? DEFAULT_BRAND_COLOR : brandColorHex}
+                  aria-label="Marka rengini seç"
+                  onChange={(e) => setBrandColorHex(e.target.value)}
+                />
+                <input
+                  type="text"
+                  className={`${styles.formInput} ${styles.mono}`}
+                  value={brandColorHex}
+                  maxLength={7}
+                  placeholder="#RRGGBB"
+                  aria-label="Marka rengi onaltılık değer"
+                  onChange={(e) => setBrandColorHex(e.target.value)}
+                />
+                {brandColorHex !== '' && (
+                  <button
+                    type="button"
+                    className={`${styles.cardBtn} ${styles.colorClear}`}
+                    onClick={() => setBrandColorHex('')}
+                  >
+                    Temizle
+                  </button>
+                )}
+              </div>
+              <span className={styles.formHint}>Vurgu rengi (e-posta + arşiv).</span>
+            </div>
+
+            {/* Brand footer text */}
+            <div className={styles.formField}>
+              <label htmlFor="topic-brand-footer" className={styles.formLabel}>
+                Alt Bilgi Metni
+              </label>
+              <input
+                id="topic-brand-footer"
+                type="text"
+                className={styles.formInput}
+                value={brandFooterText}
+                maxLength={500}
+                placeholder="E-posta altında görünen kısa açıklama"
+                onChange={(e) => setBrandFooterText(e.target.value)}
+              />
+              <span className={styles.formHint}>
+                E-posta ve arşivin altındaki marka açıklaması. Boş bırakılırsa varsayılan metin
+                kullanılır.
+              </span>
+            </div>
+
+            {/* ── Yayın ──────────────────────────────────────── */}
+            <p className={styles.formSection}>Yayın</p>
 
             {/* Status */}
             <div className={styles.formField}>

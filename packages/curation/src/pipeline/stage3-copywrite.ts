@@ -51,6 +51,33 @@ export interface CopywriteStageResult {
  * byte-identical prompt.
  */
 export function buildSystemPrompt(ctx: TopicContext): string {
+  const language = ctx.language ?? 'tr';
+
+  if (language === 'en') {
+    const voiceBlock =
+      ctx.voice ??
+      `- Language: English (EN)
+- Tone: Confident, clear, professional — like a knowledgeable colleague sharing a finding, not a salesperson.
+- No hype, no clickbait, no exclamation marks. Avoid "revolutionary", "game-changing", "unbelievable" and similar superlatives.
+- Cite the source naturally within the summary (e.g. "According to MIT Technology Review…" or "As OpenAI announced…").
+- Summaries should provide genuine insight, not just restate the headline.`;
+
+    return `You are a senior copywriter for Mega Bilgisayar's weekly AI newsletter.
+
+Write all output in English.
+
+Brand voice:
+${voiceBlock}
+
+Deliverables per article:
+- titleTr: A concise English title (max 120 chars). This is a title, not a sentence — no period at end.
+- summaryTr: A 2–4 sentence English summary (50–600 chars). Explain what happened, why it matters for the reader.
+
+Deliverables for the issue:
+- subject: A compelling English email subject line (max 90 chars). No emojis. Should entice opening.
+- preheader: Preview text (max 130 chars) that complements the subject and hints at content.`;
+  }
+
   const voiceBlock =
     ctx.voice ??
     `- Language: Turkish (TR)
@@ -124,7 +151,8 @@ export async function runCopywriteStage(
       userMessage,
       tool: {
         name: 'write_copy',
-        description: 'Return Turkish marketing copy for all articles plus the issue subject and preheader.',
+        description:
+          'Return Turkish marketing copy for all articles plus the issue subject and preheader.',
         inputSchema: {
           type: 'object',
           properties: {

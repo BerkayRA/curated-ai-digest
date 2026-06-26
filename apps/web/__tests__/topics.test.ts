@@ -53,6 +53,9 @@ const makeTopic = (overrides: Partial<Topic> = {}): Topic => ({
   replyTo: null,
   brandLogoUrl: null,
   brandColorHex: null,
+  brandName: null,
+  brandFooterText: null,
+  language: 'tr',
   createdAt: new Date('2026-01-01'),
   updatedAt: new Date('2026-01-01'),
   ...overrides,
@@ -198,6 +201,49 @@ describe('POST /api/topics — validation', () => {
     );
   });
 
+  it('passes language + brand fields through to repo.create', async () => {
+    const { repo } = await setupMocks();
+    const { POST } = await import('../app/api/topics/route');
+    await POST(
+      makeRequest('POST', '/api/topics', {
+        slug: 'edge-ai',
+        name: 'Edge AI',
+        language: 'en',
+        brandColorHex: '#E6007E',
+        brandName: 'Edge Weekly',
+        brandLogoUrl: 'https://cdn.example.com/logo.png',
+        brandFooterText: 'A weekly edge AI brief.',
+      }),
+    );
+    expect(vi.mocked(repo.create)).toHaveBeenCalledWith(
+      expect.objectContaining({
+        language: 'en',
+        brandColorHex: '#E6007E',
+        brandName: 'Edge Weekly',
+        brandLogoUrl: 'https://cdn.example.com/logo.png',
+        brandFooterText: 'A weekly edge AI brief.',
+      }),
+    );
+  });
+
+  it('defaults language to tr when omitted', async () => {
+    const { repo } = await setupMocks();
+    const { POST } = await import('../app/api/topics/route');
+    await POST(makeRequest('POST', '/api/topics', { slug: 'edge-ai', name: 'Edge AI' }));
+    expect(vi.mocked(repo.create)).toHaveBeenCalledWith(
+      expect.objectContaining({ language: 'tr' }),
+    );
+  });
+
+  it('rejects malformed brandColorHex → 400', async () => {
+    await setupMocks();
+    const { POST } = await import('../app/api/topics/route');
+    const res = await POST(
+      makeRequest('POST', '/api/topics', { slug: 'edge-ai', name: 'Edge AI', brandColorHex: 'red' }),
+    );
+    expect(res.status).toBe(400);
+  });
+
   it('returns 500 when repository.create throws', async () => {
     const { repo } = await setupMocks();
     vi.mocked(repo.create).mockRejectedValue(new Error('Unique constraint failed'));
@@ -289,6 +335,49 @@ describe('PATCH /api/topics/[id]', () => {
       params: { id: 'topic-1' },
     });
     expect(res.status).toBe(400);
+  });
+
+  it('passes language + brand fields through to repo.update', async () => {
+    const { repo } = await setupMocks();
+    vi.mocked(repo.findById).mockResolvedValue(makeTopic());
+    vi.mocked(repo.update).mockResolvedValue(makeTopic({ language: 'en' }));
+
+    const { PATCH } = await import('../app/api/topics/[id]/route');
+    const res = await PATCH(
+      makeRequest('PATCH', '/api/topics/topic-1', {
+        language: 'en',
+        brandColorHex: '#E6007E',
+        brandName: 'Edge Weekly',
+        brandLogoUrl: 'https://cdn.example.com/logo.png',
+        brandFooterText: 'A weekly edge AI brief.',
+      }),
+      { params: { id: 'topic-1' } },
+    );
+
+    expect(res.status).toBe(200);
+    expect(vi.mocked(repo.update)).toHaveBeenCalledWith('topic-1', {
+      language: 'en',
+      brandColorHex: '#E6007E',
+      brandName: 'Edge Weekly',
+      brandLogoUrl: 'https://cdn.example.com/logo.png',
+      brandFooterText: 'A weekly edge AI brief.',
+    });
+  });
+
+  it('clears brand fields when sent as null', async () => {
+    const { repo } = await setupMocks();
+    vi.mocked(repo.findById).mockResolvedValue(makeTopic());
+
+    const { PATCH } = await import('../app/api/topics/[id]/route');
+    await PATCH(
+      makeRequest('PATCH', '/api/topics/topic-1', { brandColorHex: null, brandName: null }),
+      { params: { id: 'topic-1' } },
+    );
+
+    expect(vi.mocked(repo.update)).toHaveBeenCalledWith('topic-1', {
+      brandColorHex: null,
+      brandName: null,
+    });
   });
 
   it('returns 404 when topic not found', async () => {

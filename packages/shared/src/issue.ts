@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { IssueStatusSchema } from './enums.js';
-import { isoWeekSchema } from './primitives.js';
+import { httpUrlSchema, isoWeekSchema } from './primitives.js';
 
 // ---------------------------------------------------------------------------
 // Issue DTOs
@@ -33,7 +33,8 @@ export const CreateIssueItemSchema = z.object({
   order: z.number().int().min(0).max(2),
   titleTr: z.string().min(1),
   summaryTr: z.string().min(1),
-  sourceUrl: z.string().url(),
+  // http(s) only — this URL is rendered as an <a href> in the public archive.
+  sourceUrl: httpUrlSchema,
   sourceName: z.string().min(1),
   factCheckNotes: z.string().optional(),
   qaFlags: z.unknown().optional(),
