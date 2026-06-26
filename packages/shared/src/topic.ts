@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { ConsentModeSchema, LanguageSchema } from './enums.js';
+import { ConsentModeSchema, LanguageSchema, TopicTierSchema } from './enums.js';
 import { HTTPS_URL_MESSAGE, isHttpsUrl } from './primitives.js';
 
 // ---------------------------------------------------------------------------
@@ -48,6 +48,8 @@ export const CreateTopicSchema = z.object({
   status: TopicStatusSchema.default('active'),
   // Default `business`: opening a public signup page is an explicit choice.
   consentMode: ConsentModeSchema.default('business'),
+  // Phase 6 — monetization tier. `free` default; `premium` is a stored marker.
+  tier: TopicTierSchema.default('free'),
   // Phase 5 — white-label + language. Defaults preserve the Mega/TR look.
   language: LanguageSchema.default('tr'),
   brandLogoUrl: z
@@ -79,6 +81,7 @@ export const UpdateTopicSchema = z.object({
   voice: z.string().max(2000).nullable().optional(),
   status: TopicStatusSchema.optional(),
   consentMode: ConsentModeSchema.optional(),
+  tier: TopicTierSchema.optional(),
   language: LanguageSchema.optional(),
   brandLogoUrl: z
     .string()

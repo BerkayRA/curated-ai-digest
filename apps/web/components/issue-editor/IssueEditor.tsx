@@ -5,13 +5,14 @@
  * Handles: field editing, item reordering, save, status transitions.
  */
 
-import { useState, useCallback, useTransition } from 'react';
+import { useState, useCallback, useEffect, useTransition } from 'react';
 import { Button } from '@/components/ui/Button';
 import { issueStatusLabel } from '@/components/ui/Badge';
 import { EyebrowLabel } from '@/components/ui/EyebrowLabel';
 import { StatusPill, issueStatusTone } from '@/components/ui/StatusPill';
 import type { IssueStatus } from '@digest/shared';
-import type { IssueEditorData, EditableItem } from './types';
+import type { ApiResponse } from '@/lib/api-response';
+import type { IssueEditorData, EditableItem, SponsorOption } from './types';
 import { IssueItemCard } from './IssueItemCard';
 import { PreviewPanel } from './PreviewPanel';
 import { AbTestPanel } from './AbTestPanel';
@@ -34,15 +35,39 @@ const EDITABLE_STATUSES: IssueStatus[] = ['draft', 'in_review'];
 
 export function IssueEditor({ issue }: IssueEditorProps) {
   const isEditable = EDITABLE_STATUSES.includes(issue.status);
+  // Sponsored slots are offered ONLY on public topics. Business/B2B topics
+  // never expose the sponsored control (and the API rejects them server-side).
+  const sponsorsAllowed = issue.topicConsentMode === 'public';
 
   const [subject, setSubject] = useState(issue.subject);
   const [preheader, setPreheader] = useState(issue.preheader ?? '');
   const [items, setItems] = useState<EditableItem[]>(issue.items.map((item) => ({ ...item })));
+  const [sponsors, setSponsors] = useState<readonly SponsorOption[]>([]);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [saveError, setSaveError] = useState<string | null>(null);
   const [transitionError, setTransitionError] = useState<string | null>(null);
   const [currentStatus, setCurrentStatus] = useState<IssueStatus>(issue.status);
   const [isPending, startTransition] = useTransition();
+
+  // Load active sponsors for the sponsored-slot picker — public topics only.
+  useEffect(() => {
+    if (!sponsorsAllowed || !isEditable) return;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const res = await fetch('/api/sponsors', { credentials: 'same-origin' });
+        const json = (await res.json()) as ApiResponse<SponsorOption[]>;
+        if (!cancelled && json.success && json.data) {
+          setSponsors(json.data.map((s) => ({ id: s.id, name: s.name })));
+        }
+      } catch {
+        // Non-fatal: the picker simply has no options to offer.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [sponsorsAllowed, isEditable]);
 
   const handleSave = useCallback(async () => {
     setSaveStatus('saving');
@@ -162,7 +187,9 @@ export function IssueEditor({ issue }: IssueEditorProps) {
         item.titleTr !== issue.items[i]?.titleTr ||
         item.summaryTr !== issue.items[i]?.summaryTr ||
         item.sourceUrl !== issue.items[i]?.sourceUrl ||
-        item.sourceName !== issue.items[i]?.sourceName,
+        item.sourceName !== issue.items[i]?.sourceName ||
+        item.kind !== issue.items[i]?.kind ||
+        item.sponsorId !== issue.items[i]?.sponsorId,
     );
 
   return (
@@ -263,6 +290,8 @@ export function IssueEditor({ issue }: IssueEditorProps) {
                   index={index}
                   totalItems={items.length}
                   isEditable={isEditable}
+                  sponsorsAllowed={sponsorsAllowed}
+                  sponsors={sponsors}
                   onChange={(updated) => handleItemChange(index, updated)}
                   onMoveUp={() => handleMoveUp(index)}
                   onMoveDown={() => handleMoveDown(index)}

@@ -14,6 +14,7 @@ export type EmailLang = 'tr' | 'en';
 export interface EmailStrings {
   readonly eyebrow: string;
   readonly sourceLabel: string;
+  readonly sponsoredLabel: string;
   readonly readMore: string;
   readonly footerTagline: string;
   readonly unsubscribePrompt: string;
@@ -28,6 +29,7 @@ export const strings: Record<EmailLang, EmailStrings> = {
   tr: {
     eyebrow: 'Haftalık YZ Digest',
     sourceLabel: 'Kaynak ·',
+    sponsoredLabel: 'Sponsorlu',
     readMore: 'Devamını oku →',
     footerTagline: 'Yapay zeka dünyasından haftalık seçkiler.',
     unsubscribePrompt: 'Bu e-postayı almak istemiyorsanız',
@@ -40,6 +42,7 @@ export const strings: Record<EmailLang, EmailStrings> = {
   en: {
     eyebrow: 'Weekly AI Digest',
     sourceLabel: 'Source ·',
+    sponsoredLabel: 'Sponsored',
     readMore: 'Read more →',
     footerTagline: 'Weekly curated picks from the world of AI.',
     unsubscribePrompt: 'If you no longer wish to receive this email',

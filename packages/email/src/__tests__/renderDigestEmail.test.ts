@@ -240,4 +240,44 @@ describe('renderDigestEmail', () => {
       expect(html).toContain('FinTech Weekly — markets, money, machines.');
     });
   });
+
+  // -------------------------------------------------------------------------
+  // Phase 6 — sponsored slots. A `DigestItem.isSponsored` flag renders a small
+  // localized disclosure pill near the source eyebrow. Absent/false → unchanged.
+  // -------------------------------------------------------------------------
+
+  describe('Phase 6 — sponsored slot disclosure', () => {
+    /** sampleIssue with its first item marked as a sponsored slot. */
+    const sponsoredIssue: DigestEmailData = {
+      ...sampleIssue,
+      items: [
+        { ...sampleIssue.items[0], isSponsored: true },
+        sampleIssue.items[1],
+        sampleIssue.items[2],
+      ] as DigestEmailData['items'],
+    };
+
+    it('renders the TR "Sponsorlu" label for a sponsored item (default tr)', async () => {
+      const { html } = await renderDigestEmail(sponsoredIssue);
+      expect(html).toContain('Sponsorlu');
+    });
+
+    it('renders the EN "Sponsored" label for a sponsored item when language is en', async () => {
+      const enSponsored: DigestEmailData = { ...sponsoredIssue, language: 'en' };
+      const { html } = await renderDigestEmail(enSponsored);
+      expect(html).toContain('Sponsored');
+      expect(html).not.toContain('Sponsorlu');
+    });
+
+    it('default fixtures (no isSponsored) render no sponsored label (regression guard)', async () => {
+      const { html: htmlTr } = await renderDigestEmail(sampleIssue);
+      expect(htmlTr).not.toContain('Sponsorlu');
+      expect(htmlTr).not.toContain('Sponsored');
+
+      const enIssue: DigestEmailData = { ...sampleIssue, language: 'en' };
+      const { html: htmlEn } = await renderDigestEmail(enIssue);
+      expect(htmlEn).not.toContain('Sponsorlu');
+      expect(htmlEn).not.toContain('Sponsored');
+    });
+  });
 });
