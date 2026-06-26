@@ -41,7 +41,7 @@ export default async function ArchiveIssuePage({ params }: ArchiveIssueProps) {
 
   const issue = await prisma.issue.findFirst({
     where: { topicId: topic.id, isoWeek: week.data, status: 'sent' },
-    include: { items: { orderBy: { order: 'asc' } } },
+    include: { items: { orderBy: { order: 'asc' }, include: { sponsor: true } } },
   });
   if (!issue) {
     notFound();
@@ -51,6 +51,9 @@ export default async function ArchiveIssuePage({ params }: ArchiveIssueProps) {
   const t = getArchiveStrings(branding.language);
   const accentStyle = { '--accent': branding.accentHex } as CSSProperties;
   const issueDate = issue.sentAt ?? issue.createdAt;
+  // Sponsored slots disclose only on public topics (defense-in-depth; the API
+  // already forbids attaching them to business topics).
+  const sponsoredAllowed = topic.consentMode === 'public';
 
   return (
     <main className={styles.page} style={accentStyle} lang={branding.language}>
@@ -79,10 +82,19 @@ export default async function ArchiveIssuePage({ params }: ArchiveIssueProps) {
         <p className={styles.date}>{formatIssueDate(issueDate, branding.locale)}</p>
 
         {issue.items.map((item, index) => {
-          const href = safeHttpHref(item.sourceUrl);
+          const isSponsored = sponsoredAllowed && item.kind === 'sponsored';
+          // A sponsored slot links to the sponsor's site (falling back to the
+          // item source URL); both pass the http(s) render-boundary guard.
+          const href = safeHttpHref(
+            isSponsored ? (item.sponsor?.websiteUrl ?? item.sourceUrl) : item.sourceUrl,
+          );
+          const linkLabel = isSponsored ? (item.sponsor?.name ?? item.sourceName) : item.sourceName;
           return (
             <section key={item.id} className={styles.story}>
-              <p className={styles.storyIndex}>{String(index + 1).padStart(2, '0')}</p>
+              <div className={styles.storyMeta}>
+                <p className={styles.storyIndex}>{String(index + 1).padStart(2, '0')}</p>
+                {isSponsored && <span className={styles.sponsoredPill}>{t.sponsoredLabel}</span>}
+              </div>
               <h2 className={styles.storyTitle}>{item.titleTr}</h2>
               <p className={styles.storySummary}>{item.summaryTr}</p>
               {href ? (
@@ -92,10 +104,10 @@ export default async function ArchiveIssuePage({ params }: ArchiveIssueProps) {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  {item.sourceName} ↗
+                  {linkLabel} ↗
                 </a>
               ) : (
-                <span className={styles.source}>{item.sourceName}</span>
+                <span className={styles.source}>{linkLabel}</span>
               )}
             </section>
           );

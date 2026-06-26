@@ -61,6 +61,23 @@ enum TopicStatus {
   paused
 }
 
+// Monetization tier of a topic (Phase 6). `free` is the default — every existing
+// topic stays here. `premium` is a stored access marker only; live billing is
+// deferred (see ADR-0012), so it does not gate anything yet.
+enum TopicTier {
+  free
+  premium
+}
+
+// Kind of an IssueItem (Phase 6). `editorial` is the default — every existing
+// item stays here. `sponsored` is a paid slot, allowed ONLY on `public` topics
+// (enforced in the API/render layers, not the DB) and rendered with a
+// "Sponsorlu" label.
+enum IssueItemKind {
+  editorial
+  sponsored
+}
+
 // Lawful basis for a topic's recipients.
 //   business — existing-relationship B2B: no prior opt-in required; admin/CSV
 //              import only, NO public signup page.
@@ -111,6 +128,9 @@ model Topic {
   // Consent mode — `business` (no public signup; import only) is the safe
   // default; `public` opens a /s/<slug> signup page with double opt-in.
   consentMode ConsentMode @default(business) @map("consent_mode")
+
+  // Monetization tier (Phase 6). Stored access marker; billing deferred.
+  tier TopicTier @default(free)
 
   // Per-topic schedule (nullable; null → fall back to global Settings)
   sendDayOfWeek    String?  @map("send_day_of_week")
@@ -229,11 +249,39 @@ model IssueItem {
   factCheckNotes     String? @map("fact_check_notes")
   qaFlags            Json?   @map("qa_flags")
 
-  issue Issue @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  // Phase 6 — sponsored slots. `kind` defaults to `editorial` (existing rows
+  // unchanged). A `sponsored` item references a Sponsor and is allowed only on
+  // public topics (enforced in the API/render layers).
+  kind      IssueItemKind @default(editorial)
+  sponsorId String?       @map("sponsor_id")
+
+  issue   Issue    @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  sponsor Sponsor? @relation(fields: [sponsorId], references: [id], onDelete: SetNull)
 
   @@unique([issueId, order])
   @@index([issueId])
+  @@index([sponsorId])
   @@map("issue_items")
+}
+
+// A paid sponsor (Phase 6). Referenced by sponsored IssueItems. Non-secret
+// config; no billing/payment data is stored here (billing deferred — ADR-0012).
+model Sponsor {
+  id           String  @id @default(cuid())
+  name         String
+  websiteUrl   String  @map("website_url")
+  logoUrl      String? @map("logo_url")
+  contactEmail String? @map("contact_email")
+  notes        String?
+  active       Boolean @default(true)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  issueItems IssueItem[]
+
+  @@index([active])
+  @@map("sponsors")
 }
 
 // ---------------------------------------------------------------------------

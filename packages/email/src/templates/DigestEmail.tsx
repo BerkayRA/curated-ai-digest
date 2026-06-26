@@ -65,6 +65,9 @@ const FOOTER_LINK = '#5FC8EF';
 const INK = color.ink; // #1A1A1A
 const MUTED = color.inkMuted; // #6B7280
 const RULE_SOFT = color.surface30; // #E8E8E9
+/** Muted amber pill for the "Sponsorlu"/"Sponsored" disclosure tag. */
+const SPONSORED_PILL_BG = '#FBE7C7';
+const SPONSORED_PILL_INK = '#8A5A00';
 
 /**
  * Brand font stack — Centrale Sans (commercial, local-only) → Hanken Grotesk
@@ -331,14 +334,27 @@ interface StoryBlockProps {
   readonly isLast: boolean;
   readonly accent: AccentScale;
   readonly sourceLabel: string;
+  readonly sponsoredLabel: string;
   readonly readMore: string;
 }
 
 /**
  * A numbered story block: big mono number + UPPERCASE source eyebrow +
  * 3px Process-Blue accent rule + headline + summary + "devamını oku →".
+ *
+ * When `item.isSponsored` is true, a small uppercase amber pill ("Sponsorlu"/
+ * "Sponsored") is rendered inline after the source eyebrow. Non-sponsored items
+ * render byte-identically to before (the pill node is omitted entirely).
  */
-function StoryBlock({ item, index, isLast, accent, sourceLabel, readMore }: StoryBlockProps) {
+function StoryBlock({
+  item,
+  index,
+  isLast,
+  accent,
+  sourceLabel,
+  sponsoredLabel,
+  readMore,
+}: StoryBlockProps) {
   const number = String(index + 1).padStart(2, '0');
 
   return (
@@ -366,7 +382,7 @@ function StoryBlock({ item, index, isLast, accent, sourceLabel, readMore }: Stor
 
         {/* Story content column */}
         <Column valign="top" style={{ verticalAlign: 'top' }}>
-          {/* Source eyebrow */}
+          {/* Source eyebrow (+ optional sponsored pill) */}
           <Text
             style={{
               fontFamily: FONT_STACK,
@@ -380,6 +396,28 @@ function StoryBlock({ item, index, isLast, accent, sourceLabel, readMore }: Stor
             }}
           >
             {sourceLabel} {item.sourceName}
+            {item.isSponsored && (
+              <>
+                {' '}
+                <span
+                  style={{
+                    display: 'inline-block',
+                    backgroundColor: SPONSORED_PILL_BG,
+                    color: SPONSORED_PILL_INK,
+                    fontFamily: FONT_STACK,
+                    fontSize: '10px',
+                    fontWeight: '700',
+                    letterSpacing: '0.8px',
+                    textTransform: 'uppercase',
+                    borderRadius: '3px',
+                    padding: '2px 6px',
+                    lineHeight: '1',
+                  }}
+                >
+                  {sponsoredLabel}
+                </span>
+              </>
+            )}
           </Text>
 
           {/* 3px Process-Blue accent rule */}
@@ -628,6 +666,7 @@ export function DigestEmail(props: DigestEmailData) {
                       isLast={i === lastIndex}
                       accent={accent}
                       sourceLabel={t.sourceLabel}
+                      sponsoredLabel={t.sponsoredLabel}
                       readMore={t.readMore}
                     />
                   ))}

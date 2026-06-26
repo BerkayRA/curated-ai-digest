@@ -11,7 +11,7 @@ import { issueStatusLabel } from '@/components/ui/Badge';
 import { StatusPill, issueStatusTone } from '@/components/ui/StatusPill';
 import { IssueEditor } from '@/components/issue-editor/IssueEditor';
 import { AuditPanel } from '@/components/issue-editor/AuditPanel';
-import type { IssueStatus, AbStatusValue } from '@digest/shared';
+import type { IssueStatus, AbStatusValue, IssueItemKind, ConsentMode } from '@digest/shared';
 import styles from './issue-detail.module.css';
 
 export const dynamic = 'force-dynamic';
@@ -39,6 +39,7 @@ export default async function IssueDetailPage({ params }: IssueDetailPageProps) 
     include: {
       items: { orderBy: { order: 'asc' } },
       variants: { orderBy: { variantIndex: 'asc' } },
+      topic: { select: { consentMode: true, tier: true } },
     },
   });
 
@@ -67,9 +68,13 @@ export default async function IssueDetailPage({ params }: IssueDetailPageProps) 
       summaryTr: item.summaryTr,
       sourceUrl: item.sourceUrl,
       sourceName: item.sourceName,
+      kind: item.kind as IssueItemKind,
+      sponsorId: item.sponsorId,
       factCheckNotes: item.factCheckNotes,
       qaFlags: item.qaFlags,
     })),
+    topicConsentMode: issue.topic.consentMode as ConsentMode,
+    topicTier: issue.topic.tier as 'free' | 'premium',
   };
 
   return (

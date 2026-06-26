@@ -13,3 +13,4 @@ export * from './topic.js';
 export * from './ab-test.js';
 export * from './suppression.js';
 export * from './rss.js';
+export * from './sponsor.js';

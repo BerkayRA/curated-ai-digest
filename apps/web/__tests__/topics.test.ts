@@ -44,6 +44,7 @@ const makeTopic = (overrides: Partial<Topic> = {}): Topic => ({
   voice: null,
   status: 'active',
   consentMode: 'business',
+  tier: 'free',
   sendDayOfWeek: null,
   sendTime: null,
   timezone: null,

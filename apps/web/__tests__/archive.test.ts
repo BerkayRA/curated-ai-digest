@@ -133,6 +133,11 @@ describe('getArchiveStrings', () => {
     expect(t.eyebrow).toBe('ARCHIVE');
     expect(t.empty).toBe('No issues sent yet.');
   });
+
+  it('exposes the sponsored label in both languages (Phase 6)', () => {
+    expect(getArchiveStrings('tr').sponsoredLabel).toBe('Sponsorlu');
+    expect(getArchiveStrings('en').sponsoredLabel).toBe('Sponsored');
+  });
 });
 
 // ---------------------------------------------------------------------------

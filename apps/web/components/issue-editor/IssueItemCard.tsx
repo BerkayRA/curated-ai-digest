@@ -5,14 +5,22 @@
  * Surfaces QA flags and fact-check notes prominently for human review.
  */
 
-import type { EditableItem } from './types';
+import type { EditableItem, SponsorOption } from './types';
 import styles from './editor.module.css';
+
+// The admin editor UI is intentionally Turkish (subscriber-facing surfaces use
+// the i18n string table instead); this badge label is a dashboard string.
+const SPONSORED_BADGE_LABEL = 'Sponsorlu';
 
 interface IssueItemCardProps {
   item: EditableItem;
   index: number;
   totalItems: number;
   isEditable: boolean;
+  /** Whether sponsored slots may be offered (true only for public topics). */
+  sponsorsAllowed: boolean;
+  /** Active sponsors selectable when marking the slot sponsored. */
+  sponsors: readonly SponsorOption[];
   onChange: (updated: EditableItem) => void;
   onMoveUp: () => void;
   onMoveDown: () => void;
@@ -49,12 +57,30 @@ export function IssueItemCard({
   index,
   totalItems,
   isEditable,
+  sponsorsAllowed,
+  sponsors,
   onChange,
   onMoveUp,
   onMoveDown,
 }: IssueItemCardProps) {
   const handleField = (field: keyof EditableItem, value: string) => {
     onChange({ ...item, [field]: value });
+  };
+
+  const isSponsored = item.kind === 'sponsored';
+
+  // Toggle the slot between editorial and sponsored. Clearing sponsorship also
+  // clears the sponsorId; enabling it preselects the first active sponsor.
+  const handleSponsoredToggle = (checked: boolean) => {
+    if (checked) {
+      onChange({
+        ...item,
+        kind: 'sponsored',
+        sponsorId: item.sponsorId ?? sponsors[0]?.id ?? null,
+      });
+    } else {
+      onChange({ ...item, kind: 'editorial', sponsorId: null });
+    }
   };
 
   const cardId = `item-${item.id}`;
@@ -65,6 +91,7 @@ export function IssueItemCard({
         <span className={styles.itemOrder} aria-label={`Öğe ${index + 1}`}>
           {index + 1}
         </span>
+        {isSponsored && <span className={styles.sponsoredBadge}>{SPONSORED_BADGE_LABEL}</span>}
         {isEditable && (
           <div className={styles.reorderButtons}>
             <button
@@ -158,6 +185,51 @@ export function IssueItemCard({
             />
           </div>
         </div>
+
+        {/* Sponsored slot — offered only for public topics (the API also
+            enforces this). A sponsored slot occupies this item position. */}
+        {sponsorsAllowed && (
+          <div className={styles.sponsorPanel}>
+            <label className={styles.sponsorToggle}>
+              <input
+                type="checkbox"
+                checked={isSponsored}
+                onChange={(e) => handleSponsoredToggle(e.target.checked)}
+                disabled={!isEditable}
+              />
+              <span>Bu slotu sponsorlu olarak işaretle</span>
+            </label>
+
+            {isSponsored && (
+              <div className={styles.fieldGroup}>
+                <label htmlFor={`${cardId}-sponsor`} className={styles.label}>
+                  Sponsor
+                </label>
+                <select
+                  id={`${cardId}-sponsor`}
+                  className={styles.input}
+                  value={item.sponsorId ?? ''}
+                  onChange={(e) => onChange({ ...item, sponsorId: e.target.value || null })}
+                  disabled={!isEditable}
+                >
+                  <option value="" disabled>
+                    Sponsor seçin
+                  </option>
+                  {sponsors.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.name}
+                    </option>
+                  ))}
+                </select>
+                {sponsors.length === 0 && (
+                  <p className={styles.sponsorHint}>
+                    Aktif sponsor yok — önce Sponsorlar sayfasından ekleyin.
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </article>
   );

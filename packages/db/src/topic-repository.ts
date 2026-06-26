@@ -4,6 +4,7 @@ import {
   type PrismaClient,
   type Topic,
   type TopicStatus,
+  type TopicTier,
 } from '@prisma/client';
 
 import { prisma as defaultClient } from './index.js';
@@ -23,6 +24,7 @@ export interface CreateTopicData {
   status?: TopicStatus;
   /** Consent mode; defaults to `business` at the DB level when omitted. */
   consentMode?: ConsentMode;
+  tier?: TopicTier;
   sendDayOfWeek?: string | null;
   sendTime?: string | null;
   timezone?: string | null;
@@ -45,6 +47,7 @@ export interface UpdateTopicData {
   voice?: string | null;
   status?: TopicStatus;
   consentMode?: ConsentMode;
+  tier?: TopicTier;
   sendDayOfWeek?: string | null;
   sendTime?: string | null;
   timezone?: string | null;
