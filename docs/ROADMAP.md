@@ -12,7 +12,8 @@
 > per-topic consent mode, public signup + double opt-in, preference center,
 > rate-limit + bot protection) · Phase 4 ✅ (send optimization & deliverability:
 > A/B subjects, send-time hints, SPF/DKIM/DMARC checks, suppression list) ·
-> Phase 5 → next.
+> Phase 5 ✅ (white-label & reach: per-topic branding + TR/EN language, public
+> web archive + outbound RSS) · Phase 6 → next.
 
 ## Where we are today (v1)
 
@@ -61,9 +62,9 @@ Stabilize the flaky `web#test` source tests; baseline visual snapshots and make 
 
 **Value:** measurably higher open rates and inbox placement. A/B subject‑line testing (50/50 two‑variant MVP: test fraction → 4h holdout → winner by open rate → remainder send, idempotent via an atomic claim), send‑time optimization (advisory best‑window recommendation from historical opens), and deliverability health — on‑demand SPF/DKIM/DMARC checks in Ayarlar plus a global bounce/complaint **suppression list** consulted on every send. See [ADR‑0010](adr/ADR-0010-send-optimization-deliverability.md).
 
-## Phase 5 — White‑label & reach
+## Phase 5 ✅ — White‑label & reach
 
-**Value:** one platform, many branded products and channels. Per‑topic branding (logo/colors/from‑address/custom domain), multi‑language editions, and additional channels — Slack/Teams delivery, a public web archive per topic with outbound RSS, and a small read API.
+**Value:** one platform, many branded products and channels. Per‑topic **branding** (logo, accent color, display name, footer descriptor — within the existing verified sending domain; custom domains out of scope) and **TR/EN language editions** threaded through curation prompts, the email's structural copy, and the archive — all optional, falling back byte‑identically to the Mega/Turkish default. New **reach** channels: a public per‑topic **web archive** (sent issues only, re‑rendered from `IssueItems`, ISR‑cached) and an **outbound RSS** feed. The dashboard UI stays Turkish; only subscriber‑facing content is localized. Read API and Slack/Teams delivery were deliberately deferred. Security is enforced at the public render boundary (URL‑scheme guards for branding/source links, hex re‑validation, `isoWeek` validation). See [ADR‑0011](adr/ADR-0011-white-label-and-reach.md).
 
 ## Phase 6 — Monetization
 
@@ -80,6 +81,7 @@ Phase 2  (needs real sends from 1c)        ─┐ demo the numbers
 Phase 3  (needs per-topic subscriptions)    │
 Phase 4  (needs analytics from Phase 2)     │
 Phase 5  (needs topic config from 1a)      ─┘
+Phase 6  (monetization; rides Phase 2 clicks + per-topic subscriptions)
 ```
 
 Natural demo milestones for leadership: **after 1b** (multiple newsletters visible) and **after Phase 2** (engagement numbers).

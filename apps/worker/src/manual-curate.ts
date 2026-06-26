@@ -162,9 +162,7 @@ async function runList(args: readonly string[]): Promise<void> {
         ? item.rawExcerpt.slice(0, 140).replace(/\n/g, ' ')
         : '(no excerpt)';
       process.stdout.write(
-        `  [${globalIndex}] ${item.title}\n` +
-          `       ${item.sourceUrl}\n` +
-          `       ${excerpt}\n`,
+        `  [${globalIndex}] ${item.title}\n` + `       ${item.sourceUrl}\n` + `       ${excerpt}\n`,
       );
       globalIndex++;
     }
@@ -261,6 +259,7 @@ async function runDraft(args: readonly string[]): Promise<void> {
         name: topic.name,
         audience: topic.audience,
         voice: topic.voice,
+        language: topic.language === 'en' ? 'en' : 'tr',
       },
     },
   );
@@ -278,8 +277,7 @@ async function runDraft(args: readonly string[]): Promise<void> {
 
 const isMain =
   process.argv[1] !== undefined &&
-  (process.argv[1].endsWith('manual-curate.ts') ||
-    process.argv[1].endsWith('manual-curate.js'));
+  (process.argv[1].endsWith('manual-curate.ts') || process.argv[1].endsWith('manual-curate.js'));
 
 if (isMain) {
   const [, , subcommand, ...rest] = process.argv;

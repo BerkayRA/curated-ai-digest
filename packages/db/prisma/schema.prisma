@@ -124,6 +124,14 @@ model Topic {
   replyTo       String? @map("reply_to")
   brandLogoUrl  String? @map("brand_logo_url")
   brandColorHex String? @map("brand_color_hex")
+  // Display wordmark + footer descriptor for white-label email/archive; null →
+  // fall back to the Mega/"Curated AI Digest" defaults.
+  brandName       String? @map("brand_name")
+  brandFooterText String? @map("brand_footer_text")
+
+  // Content language for this topic's curation output + email/archive copy
+  // ('tr' | 'en'). Default 'tr' → existing topics render identically to today.
+  language String @default("tr")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")

@@ -32,6 +32,9 @@ export interface CreateTopicData {
   replyTo?: string | null;
   brandLogoUrl?: string | null;
   brandColorHex?: string | null;
+  brandName?: string | null;
+  brandFooterText?: string | null;
+  language?: 'tr' | 'en';
 }
 
 export interface UpdateTopicData {
@@ -51,6 +54,9 @@ export interface UpdateTopicData {
   replyTo?: string | null;
   brandLogoUrl?: string | null;
   brandColorHex?: string | null;
+  brandName?: string | null;
+  brandFooterText?: string | null;
+  language?: 'tr' | 'en';
 }
 
 export interface TopicRepository {
@@ -73,9 +79,7 @@ export interface TopicRepository {
  * shared singleton client; accepts any compatible client so tests can inject a
  * fake without a live database.
  */
-export function createTopicRepository(
-  client: PrismaClient = defaultClient,
-): TopicRepository {
+export function createTopicRepository(client: PrismaClient = defaultClient): TopicRepository {
   return {
     findAll(): Promise<Topic[]> {
       return client.topic.findMany({});

@@ -108,9 +108,7 @@ function currentIsoWeek(): string {
   const day = date.getUTCDay() || 7; // treat Sunday as 7
   date.setUTCDate(date.getUTCDate() + 4 - day);
   const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
-  const weekNo = Math.ceil(
-    ((date.getTime() - yearStart.getTime()) / 86_400_000 + 1) / 7,
-  );
+  const weekNo = Math.ceil(((date.getTime() - yearStart.getTime()) / 86_400_000 + 1) / 7);
   return `${date.getUTCFullYear()}-W${String(weekNo).padStart(2, '0')}`;
 }
 
@@ -170,9 +168,7 @@ export async function runWeeklyPipeline(
     );
   }
 
-  const anthropicClient =
-    opts.anthropicClient ??
-    new Anthropic({ apiKey });
+  const anthropicClient = opts.anthropicClient ?? new Anthropic({ apiKey });
 
   // Resolve the topic context. When provided explicitly, use it. When a
   // repository is injected (tests) we avoid DB access and synthesise a context
@@ -201,6 +197,7 @@ export async function runWeeklyPipeline(
       name: topic.name,
       audience: topic.audience,
       voice: topic.voice,
+      language: topic.language === 'en' ? 'en' : 'tr',
     };
   }
   const topicId = topicContext.topicId;

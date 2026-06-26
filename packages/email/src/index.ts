@@ -12,6 +12,10 @@ export { DigestEmail } from './templates/DigestEmail.js';
 export { renderDigestEmail } from './render.js';
 export type { DigestEmailData, DigestItem, RenderedEmail } from './types.js';
 
+// i18n — structural string table for the email + archive (TR default).
+export { getStrings, strings } from './i18n.js';
+export type { EmailLang, EmailStrings } from './i18n.js';
+
 // Transactional (double opt-in confirmation) — single-message send path.
 export { ConfirmEmail } from './templates/ConfirmEmail.js';
 export { renderConfirmEmail, sendTransactionalEmail } from './transactional.js';

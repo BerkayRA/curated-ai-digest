@@ -1,12 +1,14 @@
 import { z } from 'zod';
 import { ArticleStatusSchema } from './enums.js';
+import { httpUrlSchema } from './primitives.js';
 
 // ---------------------------------------------------------------------------
 // CandidateArticle DTOs
 // ---------------------------------------------------------------------------
 
 export const CreateCandidateArticleSchema = z.object({
-  sourceUrl: z.string().url(),
+  // http(s) only — propagates to IssueItem.sourceUrl, rendered as an <a href>.
+  sourceUrl: httpUrlSchema,
   sourceName: z.string().min(1),
   title: z.string().min(1),
   rawExcerpt: z.string().optional(),

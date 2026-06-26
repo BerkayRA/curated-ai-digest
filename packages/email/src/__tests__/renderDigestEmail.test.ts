@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { renderDigestEmail } from '../render.js';
 import { sampleIssue, sampleIssueTwoItems } from '../fixtures/sampleIssue.js';
+import type { DigestEmailData } from '../types.js';
 
 /**
  * React Email HTML-encodes apostrophes (') as &#x27;.
@@ -157,6 +158,86 @@ describe('renderDigestEmail', () => {
     it('text is shorter than html', async () => {
       const result = await renderDigestEmail(sampleIssue);
       expect(result.text.length).toBeLessThan(result.html.length);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Phase 5 — language + white-label. Default fields stay TR/Mega; explicit
+  // language/brand props recolor and relocalize structural copy only.
+  // -------------------------------------------------------------------------
+
+  describe('Phase 5 — TR default regression guard', () => {
+    it('default fixture (no new fields) keeps TR structural copy and lang="tr"', async () => {
+      const { html } = await renderDigestEmail(sampleIssue);
+      // Header eyebrow + CTA + footer tagline (TR i18n defaults)
+      expect(html).toContain('Haftalık YZ Digest');
+      expect(html).toContain('Devamını oku');
+      expect(html).toContain('Yapay zeka dünyasından haftalık seçkiler.');
+      expect(html).toContain('aboneliğinizi iptal edebilirsiniz');
+      // Default wordmark + Mega white logo
+      expect(html).toContain('Curated AI Digest');
+      expect(html).toContain('/brand/mega-logo-white.png');
+      expect(html).toContain('lang="tr"');
+    });
+  });
+
+  describe('Phase 5 — English edition', () => {
+    const enIssue: DigestEmailData = { ...sampleIssue, language: 'en' };
+
+    it('renders English structural copy and lang="en"', async () => {
+      const { html } = await renderDigestEmail(enIssue);
+      expect(html).toContain('Weekly AI Digest');
+      expect(html).toContain('Read more');
+      expect(html).toContain('Weekly curated picks from the world of AI.');
+      expect(html).toContain('you can unsubscribe');
+      expect(html).toContain('lang="en"');
+    });
+
+    it('does not leak TR structural copy when language is en', async () => {
+      const { html } = await renderDigestEmail(enIssue);
+      expect(html).not.toContain('Haftalık YZ Digest');
+      expect(html).not.toContain('Devamını oku');
+    });
+  });
+
+  describe('Phase 5 — per-topic branding', () => {
+    it('applies a custom accent hex to the header gradient', async () => {
+      const branded: DigestEmailData = { ...sampleIssue, brandColorHex: '#E6007E' };
+      const { html } = await renderDigestEmail(branded);
+      expect(html.toLowerCase()).toContain('#e6007e');
+    });
+
+    it('uses a custom logo URL and omits the default Mega logo', async () => {
+      const branded: DigestEmailData = {
+        ...sampleIssue,
+        brandLogoUrl: 'https://cdn.example.com/logo.png',
+      };
+      const { html } = await renderDigestEmail(branded);
+      expect(html).toContain('https://cdn.example.com/logo.png');
+      expect(html).not.toContain('/brand/mega-logo-white.png');
+    });
+
+    it('uses a custom brand name as the footer wordmark and logo alt', async () => {
+      // Override the footer descriptor too so the default ("Curated AI Digest — …")
+      // does not reintroduce the default wordmark string elsewhere in the markup.
+      const branded: DigestEmailData = {
+        ...sampleIssue,
+        brandName: 'FinTech Weekly',
+        brandFooterText: 'FinTech Weekly — markets, money, machines.',
+      };
+      const { html } = await renderDigestEmail(branded);
+      expect(html).toContain('FinTech Weekly');
+      // The default wordmark must not appear once both brand fields are overridden.
+      expect(html).not.toContain('Curated AI Digest');
+    });
+
+    it('uses a custom footer descriptor when provided', async () => {
+      const branded: DigestEmailData = {
+        ...sampleIssue,
+        brandFooterText: 'FinTech Weekly — markets, money, machines.',
+      };
+      const { html } = await renderDigestEmail(branded);
+      expect(html).toContain('FinTech Weekly — markets, money, machines.');
     });
   });
 });

@@ -55,7 +55,20 @@ export async function PATCH(request: Request, { params }: RouteParams): Promise<
       return NextResponse.json(err('Topic not found'), { status: 404 });
     }
 
-    const { slug, name, description, audience, voice, status, consentMode } = parsed.data;
+    const {
+      slug,
+      name,
+      description,
+      audience,
+      voice,
+      status,
+      consentMode,
+      language,
+      brandName,
+      brandLogoUrl,
+      brandColorHex,
+      brandFooterText,
+    } = parsed.data;
 
     const updated = await repo.update(params.id, {
       ...(slug !== undefined ? { slug } : {}),
@@ -65,6 +78,11 @@ export async function PATCH(request: Request, { params }: RouteParams): Promise<
       ...(voice !== undefined ? { voice } : {}),
       ...(status !== undefined ? { status } : {}),
       ...(consentMode !== undefined ? { consentMode } : {}),
+      ...(language !== undefined ? { language } : {}),
+      ...(brandName !== undefined ? { brandName } : {}),
+      ...(brandLogoUrl !== undefined ? { brandLogoUrl } : {}),
+      ...(brandColorHex !== undefined ? { brandColorHex } : {}),
+      ...(brandFooterText !== undefined ? { brandFooterText } : {}),
     });
 
     return NextResponse.json(ok(updated));

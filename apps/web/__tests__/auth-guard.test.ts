@@ -37,6 +37,10 @@ describe('isPublicPath', () => {
     '/preferences/tok-xyz',
     '/api/public/subscribe',
     '/api/public/preferences/tok-xyz',
+    // White-label & reach (Phase 5) — public archive pages + RSS feed.
+    '/archive/enterprise-ai',
+    '/archive/enterprise-ai/2026-W24',
+    '/archive/enterprise-ai/rss.xml',
   ];
 
   it.each(publicPaths)('treats %s as public', (path) => {

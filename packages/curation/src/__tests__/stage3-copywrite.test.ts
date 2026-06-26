@@ -56,20 +56,23 @@ const validCopyOutput = {
     {
       candidateId: 'a1',
       titleTr: 'Türkçe Başlık Bir',
-      summaryTr: 'Bu haber, yapay zeka alanında önemli bir gelişmeyi ele almaktadır. Mega Bilgisayar okuyucuları için kritik bilgiler içermektedir.',
+      summaryTr:
+        'Bu haber, yapay zeka alanında önemli bir gelişmeyi ele almaktadır. Mega Bilgisayar okuyucuları için kritik bilgiler içermektedir.',
       sourceUrl: 'https://example.com/a1',
       sourceName: 'Test Source',
     },
     {
       candidateId: 'a2',
       titleTr: 'Türkçe Başlık İki',
-      summaryTr: 'İkinci haber de yapay zeka sektöründe önemli gelişmeleri aktarmaktadır. Kurumsal kullanıcılar için değerli bilgiler sunmaktadır.',
+      summaryTr:
+        'İkinci haber de yapay zeka sektöründe önemli gelişmeleri aktarmaktadır. Kurumsal kullanıcılar için değerli bilgiler sunmaktadır.',
       sourceUrl: 'https://example.com/a2',
       sourceName: 'Test Source',
     },
   ],
   subject: 'Bu Hafta YZ Dünyasında: Önemli Gelişmeler',
-  preheader: 'OpenAI ve Anthropic\'ten büyük haberler, kurumsal yapay zeka araçları ve daha fazlası.',
+  preheader:
+    "OpenAI ve Anthropic'ten büyük haberler, kurumsal yapay zeka araçları ve daha fazlası.",
 };
 
 function makeClient(output: unknown): AnthropicClient {
@@ -148,9 +151,7 @@ describe('runCopywriteStage', () => {
     const opts: StageOptions = { client, repository: repo, logger: noopLogger, topicContext };
 
     await expect(runCopywriteStage(candidates, opts)).rejects.toThrow('API error');
-    expect(repo.logPipelineRun).toHaveBeenCalledWith(
-      expect.objectContaining({ status: 'error' }),
-    );
+    expect(repo.logPipelineRun).toHaveBeenCalledWith(expect.objectContaining({ status: 'error' }));
   });
 });
 
@@ -171,5 +172,30 @@ describe('buildSystemPrompt (copywrite)', () => {
     const prompt = buildSystemPrompt({ ...topicContext, voice: '- Playful and bold.' });
     expect(prompt).toContain('- Playful and bold.');
     expect(prompt).not.toContain('- Language: Turkish (TR)');
+  });
+
+  it('keeps the Turkish brand-voice block when language is undefined (regression)', () => {
+    const prompt = buildSystemPrompt({ ...topicContext });
+    expect(prompt).toContain('- Language: Turkish (TR)');
+    expect(prompt).toContain('senior Turkish copywriter');
+    expect(prompt).not.toContain('Write all output in English.');
+  });
+
+  it('emits an English-output instruction for EN topics with no Turkish voice block', () => {
+    const prompt = buildSystemPrompt({ ...topicContext, language: 'en', voice: null });
+    expect(prompt).toContain('Write all output in English.');
+    expect(prompt).toContain('- Language: English (EN)');
+    expect(prompt).not.toContain('Turkish (TR)');
+  });
+
+  it('still honours a custom voice block on EN topics', () => {
+    const prompt = buildSystemPrompt({
+      ...topicContext,
+      language: 'en',
+      voice: '- Playful and bold.',
+    });
+    expect(prompt).toContain('Write all output in English.');
+    expect(prompt).toContain('- Playful and bold.');
+    expect(prompt).not.toContain('Turkish (TR)');
   });
 });

@@ -6,11 +6,18 @@
  * but kept independent so email rendering has no runtime dep on Zod or Prisma.
  */
 
-/** A single curated news item rendered inside the digest. */
+/**
+ * A single curated news item rendered inside the digest.
+ *
+ * NOTE: `titleTr`/`summaryTr` are legacy field names — they hold the marketing
+ * copy in the topic's content language, which is English for `language: 'en'`
+ * topics. The `Tr` suffix is historical, not an assertion about the language;
+ * the parent topic's `language` determines the actual content language.
+ */
 export interface DigestItem {
-  /** Turkish marketing title (from Stage 3 copywriting). */
+  /** Marketing title in the topic's content language (from Stage 3 copywriting). */
   readonly titleTr: string;
-  /** Turkish marketing summary (from Stage 3 copywriting). */
+  /** Marketing summary in the topic's content language (from Stage 3 copywriting). */
   readonly summaryTr: string;
   /** Canonical URL of the source article. */
   readonly sourceUrl: string;
@@ -45,6 +52,18 @@ export interface DigestEmailData {
    * so the web app must be reachable here when the recipient opens the email.
    */
   readonly assetBaseUrl?: string;
+
+  // --- Phase 5: per-topic white-label + language (all optional → Mega/TR defaults) ---
+  /** Content language for structural copy + date locale ('tr' | 'en'); default 'tr'. */
+  readonly language?: 'tr' | 'en';
+  /** Per-topic logo URL; null/undefined → the Mega white wordmark. */
+  readonly brandLogoUrl?: string | null;
+  /** Per-topic accent color (hex); null/undefined → the Process-Blue brand color. */
+  readonly brandColorHex?: string | null;
+  /** Per-topic display wordmark; null/undefined → "Curated AI Digest". */
+  readonly brandName?: string | null;
+  /** Per-topic footer descriptor; null/undefined → the default Turkish descriptor. */
+  readonly brandFooterText?: string | null;
 }
 
 /** Output of renderDigestEmail(). */

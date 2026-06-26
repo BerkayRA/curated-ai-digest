@@ -65,7 +65,8 @@ const baseCopywrite: CopywriteOutput = {
     {
       candidateId: 'a2',
       titleTr: 'Başlık İki',
-      summaryTr: 'İkinci önemli gelişme hakkında bilgiler sunulmaktadır. Kurumsal kullanıcılar için değerlidir.',
+      summaryTr:
+        'İkinci önemli gelişme hakkında bilgiler sunulmaktadır. Kurumsal kullanıcılar için değerlidir.',
       sourceUrl: 'https://example.com/a2',
       sourceName: 'Test Source',
     },
@@ -242,14 +243,28 @@ describe('buildSystemPrompt (editor/qa)', () => {
   it('preserves the original brand-voice descriptor when voice is null', () => {
     const prompt = buildSystemPrompt(topicContext);
     expect(prompt).toContain('matches the brand voice (confident, clear, no hype).');
-    expect(prompt).toContain(
-      'FACT-CHECK: Verify every specific claim, number, date, or statistic',
-    );
+    expect(prompt).toContain('FACT-CHECK: Verify every specific claim, number, date, or statistic');
   });
 
   it('injects a custom voice descriptor when provided', () => {
     const prompt = buildSystemPrompt({ ...topicContext, voice: 'playful, bold' });
     expect(prompt).toContain('matches the brand voice (playful, bold).');
     expect(prompt).not.toContain('matches the brand voice (confident, clear, no hype).');
+  });
+
+  it('uses the Turkish hype-word list when language is undefined (regression)', () => {
+    const prompt = buildSystemPrompt(topicContext);
+    expect(prompt).toContain('"devrimci", "çığır açan", "inanılmaz", "benzersiz"');
+    expect(prompt).toContain("Mega Bilgisayar's Turkish AI newsletter");
+  });
+
+  it('uses an English hype-word list for EN topics', () => {
+    const prompt = buildSystemPrompt({ ...topicContext, language: 'en' });
+    expect(prompt).toContain(
+      '"revolutionary", "game-changing", "unbelievable", "unparalleled", "groundbreaking"',
+    );
+    expect(prompt).toContain("Mega Bilgisayar's English AI newsletter");
+    expect(prompt).not.toContain('devrimci');
+    expect(prompt).not.toContain('çığır açan');
   });
 });
