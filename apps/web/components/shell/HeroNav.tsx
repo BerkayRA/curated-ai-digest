@@ -20,6 +20,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: '/analytics', label: 'Analitik' },
   { href: '/subscribers', label: 'Aboneler' },
   { href: '/topics', label: 'Konular' },
+  { href: '/sponsors', label: 'Sponsorlar' },
   { href: '/sources', label: 'Kaynaklar' },
   { href: '/settings', label: 'Ayarlar' },
 ];

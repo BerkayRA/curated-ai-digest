@@ -71,6 +71,8 @@ export interface TopicBranding {
   readonly brandName: string | null;
   readonly brandFooterText: string | null;
   readonly language: string | null;
+  /** Topic consent mode — sponsored slots disclose only when `public`. */
+  readonly consentMode: string | null;
 }
 
 /** Minimal A/B variant shape the dispatcher needs (subject + split fraction). */
@@ -107,6 +109,7 @@ export const defaultDispatchRepo: DispatchRepo = {
       brandName: topic.brandName ?? null,
       brandFooterText: topic.brandFooterText ?? null,
       language: topic.language ?? null,
+      consentMode: topic.consentMode ?? null,
     };
   },
   async getSettings() {
@@ -233,11 +236,16 @@ function buildDigestEmailData(
   subject: string,
   branding: TopicBranding | null,
 ): DigestEmailData {
+  // Send-boundary enforcement of the hard rule: a sponsored slot discloses only
+  // on public topics. Even if a sponsored item were somehow stored against a
+  // business topic, the "Sponsorlu" label is suppressed at send time.
+  const sponsoredAllowed = branding?.consentMode === 'public';
   const items = issue.items.map((item) => ({
     titleTr: item.titleTr,
     summaryTr: item.summaryTr,
     sourceUrl: item.sourceUrl,
     sourceName: item.sourceName,
+    isSponsored: sponsoredAllowed && item.kind === 'sponsored',
   })) as DigestItem[];
 
   if (items.length < 2) {

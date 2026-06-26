@@ -31,6 +31,7 @@ export function TopicCard({ topic, onEdit, onToggled }: TopicCardProps) {
 
   const isPaused = topic.status === 'paused';
   const isPublic = topic.consentMode === 'public';
+  const isPremium = topic.tier === 'premium';
   const languageLabel = (topic.language ?? 'tr').toUpperCase();
   const brandColor = topic.brandColorHex;
 
@@ -91,6 +92,11 @@ export function TopicCard({ topic, onEdit, onToggled }: TopicCardProps) {
         >
           {isPublic ? 'Herkese Açık' : 'İş İlişkisi'}
         </span>
+        {isPremium && (
+          <span className={styles.premiumBadge} title="Premium katman konusu">
+            Premium
+          </span>
+        )}
         <span className={styles.languageBadge} title={`İçerik dili: ${languageLabel}`}>
           {brandColor && (
             <span

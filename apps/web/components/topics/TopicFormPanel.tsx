@@ -11,6 +11,7 @@ import styles from './topics.module.css';
 
 type TopicStatus = 'active' | 'paused';
 type ConsentMode = 'business' | 'public';
+type TopicTier = 'free' | 'premium';
 type Language = 'tr' | 'en';
 
 // Fallback swatch shown by the native color input before the user picks a
@@ -53,6 +54,7 @@ export function TopicFormPanel({ open, topic, onClose, onSaved }: TopicFormPanel
   const [voice, setVoice] = useState('');
   const [status, setStatus] = useState<TopicStatus>('active');
   const [consentMode, setConsentMode] = useState<ConsentMode>('business');
+  const [tier, setTier] = useState<TopicTier>('free');
 
   // ── Brand & language state ────────────────────────────────
 
@@ -78,6 +80,7 @@ export function TopicFormPanel({ open, topic, onClose, onSaved }: TopicFormPanel
       setVoice(topic.voice ?? '');
       setStatus(topic.status as TopicStatus);
       setConsentMode(topic.consentMode as ConsentMode);
+      setTier((topic.tier as TopicTier) ?? 'free');
       setLanguage((topic.language as Language) ?? 'tr');
       setBrandName(topic.brandName ?? '');
       setBrandLogoUrl(topic.brandLogoUrl ?? '');
@@ -91,6 +94,7 @@ export function TopicFormPanel({ open, topic, onClose, onSaved }: TopicFormPanel
       setVoice('');
       setStatus('active');
       setConsentMode('business');
+      setTier('free');
       setLanguage('tr');
       setBrandName('');
       setBrandLogoUrl('');
@@ -145,6 +149,7 @@ export function TopicFormPanel({ open, topic, onClose, onSaved }: TopicFormPanel
       voice: trimmedVoice === '' ? null : trimmedVoice,
       status,
       consentMode,
+      tier,
       language,
       brandName: trimmedBrandName === '' ? null : trimmedBrandName,
       brandLogoUrl: trimmedBrandLogoUrl === '' ? null : trimmedBrandLogoUrl,
@@ -478,6 +483,23 @@ export function TopicFormPanel({ open, topic, onClose, onSaved }: TopicFormPanel
               <span className={styles.formHint}>
                 İş ilişkisi modunda herkese açık kayıt sayfası oluşturulmaz.
               </span>
+            </div>
+
+            {/* Tier */}
+            <div className={styles.formField}>
+              <label className={styles.formLabel} htmlFor="topic-tier">
+                Abonelik Katmanı
+              </label>
+              <select
+                id="topic-tier"
+                className={styles.formSelect}
+                value={tier}
+                onChange={(e) => setTier(e.target.value as TopicTier)}
+              >
+                <option value="free">Ücretsiz</option>
+                <option value="premium">Premium</option>
+              </select>
+              <span className={styles.formHint}>Ödeme entegrasyonu yakında.</span>
             </div>
 
             {/* Public signup link (read-only) */}

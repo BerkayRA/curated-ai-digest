@@ -13,7 +13,9 @@
 > rate-limit + bot protection) · Phase 4 ✅ (send optimization & deliverability:
 > A/B subjects, send-time hints, SPF/DKIM/DMARC checks, suppression list) ·
 > Phase 5 ✅ (white-label & reach: per-topic branding + TR/EN language, public
-> web archive + outbound RSS) · Phase 6 → next.
+> web archive + outbound RSS) · Phase 6 ✅ (monetization: sponsored issue slots +
+> per-sponsor click analytics + premium topic tier — public topics only; billing
+> deferred). **All roadmap phases shipped.**
 
 ## Where we are today (v1)
 
@@ -66,9 +68,9 @@ Stabilize the flaky `web#test` source tests; baseline visual snapshots and make 
 
 **Value:** one platform, many branded products and channels. Per‑topic **branding** (logo, accent color, display name, footer descriptor — within the existing verified sending domain; custom domains out of scope) and **TR/EN language editions** threaded through curation prompts, the email's structural copy, and the archive — all optional, falling back byte‑identically to the Mega/Turkish default. New **reach** channels: a public per‑topic **web archive** (sent issues only, re‑rendered from `IssueItems`, ISR‑cached) and an **outbound RSS** feed. The dashboard UI stays Turkish; only subscriber‑facing content is localized. Read API and Slack/Teams delivery were deliberately deferred. Security is enforced at the public render boundary (URL‑scheme guards for branding/source links, hex re‑validation, `isoWeek` validation). See [ADR‑0011](adr/ADR-0011-white-label-and-reach.md).
 
-## Phase 6 — Monetization
+## Phase 6 ✅ — Monetization
 
-**Value:** the newsletter pays for itself. A reserved **"Sponsorlu" issue slot** (a sponsored `IssueItem` type) with a per‑sponsor **performance view** built on Phase 2 click analytics ("N engaged clicks to your sponsor"), and a **premium/paid topic tier** (rides the existing per‑topic subscription model). Direct sponsorship + premium topics over programmatic ads for a niche, high‑intent B2B audience. **Hard rule:** monetization surfaces (sponsored slots, ads, paid upsell) **never appear on `business`/B2B topics — only on `public` topics.**
+**Value:** the newsletter pays for itself. A **"Sponsorlu" issue slot** (an `IssueItem.kind = sponsored` referencing a `Sponsor`, occupying one of the 2–3 slots — labelled in both the email and the public archive), a per‑sponsor **performance view** built on Phase 2 click analytics ("N engaged clicks"), and a **premium topic tier** (`Topic.tier`) with an admin toggle. Direct sponsorship + premium topics over programmatic ads for a niche, high‑intent audience. **Hard rule (enforced in code at four layers — API gate, editor UI, archive render, send boundary):** monetization surfaces **never appear on `business`/B2B topics — only on `public` topics.** **Live billing is deferred** — `tier` is a stored marker only; no payment processor, no secrets. See [ADR‑0012](adr/ADR-0012-monetization.md).
 
 ---
 

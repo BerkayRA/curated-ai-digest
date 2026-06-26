@@ -135,8 +135,8 @@ function AbEditor({
       {enabled && (
         <div className={styles.body}>
           <p className={styles.hint}>
-            Test grubuna iki farklı konu satırı gönderilir; holdout süresi sonunda en yüksek
-            açılma oranına sahip varyant kalan alıcılara iletilir.
+            Test grubuna iki farklı konu satırı gönderilir; holdout süresi sonunda en yüksek açılma
+            oranına sahip varyant kalan alıcılara iletilir.
           </p>
 
           <div className={styles.fieldGroup}>

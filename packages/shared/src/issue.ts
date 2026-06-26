@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { IssueStatusSchema } from './enums.js';
+import { IssueItemKindSchema, IssueStatusSchema } from './enums.js';
 import { httpUrlSchema, isoWeekSchema } from './primitives.js';
 
 // ---------------------------------------------------------------------------
@@ -38,6 +38,10 @@ export const CreateIssueItemSchema = z.object({
   sourceName: z.string().min(1),
   factCheckNotes: z.string().optional(),
   qaFlags: z.unknown().optional(),
+  // Phase 6 — sponsored slots. Default editorial; a sponsored item carries a
+  // sponsorId. The public-topic gate is enforced in the API layer, not here.
+  kind: IssueItemKindSchema.default('editorial'),
+  sponsorId: z.string().cuid().nullable().optional(),
 });
 export type CreateIssueItemDto = z.infer<typeof CreateIssueItemSchema>;
 

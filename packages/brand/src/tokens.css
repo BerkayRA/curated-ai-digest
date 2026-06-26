@@ -63,14 +63,18 @@
   --color-accent-orange: #f39200;
   --color-accent-magenta: #e6007e;
 
+  /* Sponsored-slot disclosure pill (Phase 6) — amber, distinct from accents. */
+  --color-sponsored-bg: #fbe7c7;
+  --color-sponsored-ink: #8a5a00;
+
   /* Buka dot-pattern (hero = white dots, footer = gray dots), 20px tile */
   --dot-hero: radial-gradient(circle, rgba(255, 255, 255, 0.18) 1.5px, transparent 1.5px);
   --dot-footer: radial-gradient(circle, rgba(188, 190, 192, 0.45) 1.5px, transparent 1.5px);
   --dot-size: 20px 20px;
 
   /* typography — Centrale Sans (local) → Hanken Grotesk (bundled) → system */
-  --font-sans: 'Centrale Sans', 'Hanken Grotesk', system-ui, -apple-system, 'Segoe UI', Roboto,
-    sans-serif;
+  --font-sans:
+    'Centrale Sans', 'Hanken Grotesk', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --font-mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, monospace;
 
   --text-xs: 12px;

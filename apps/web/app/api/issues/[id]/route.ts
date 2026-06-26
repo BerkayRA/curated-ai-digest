@@ -6,9 +6,12 @@
 
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { prisma } from '@digest/db';
+import { prisma, createSponsorRepository } from '@digest/db';
+import { IssueItemKindSchema } from '@digest/shared';
 import { ok, err } from '@/lib/api-response';
 import { getErrorMessage } from '@/lib/error';
+import { checkSponsoredItems } from '@/lib/monetization';
+import { assertSameOrigin } from '@/lib/assert-same-origin';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,6 +22,10 @@ const PatchIssueItemSchema = z.object({
   summaryTr: z.string().min(1).optional(),
   sourceUrl: z.string().url().optional(),
   sourceName: z.string().min(1).optional(),
+  // Phase 6 — sponsored slot. The public-topic + active-sponsor gate is enforced
+  // below (checkSponsoredItems), not by this shape alone.
+  kind: IssueItemKindSchema.optional(),
+  sponsorId: z.string().cuid().nullable().optional(),
 });
 
 const PatchIssueSchema = z.object({
@@ -32,6 +39,9 @@ interface RouteParams {
 }
 
 export async function PATCH(request: Request, { params }: RouteParams) {
+  const csrfCheck = assertSameOrigin(request);
+  if (csrfCheck !== null) return csrfCheck;
+
   try {
     const body: unknown = await request.json();
     const parsed = PatchIssueSchema.safeParse(body);
@@ -42,7 +52,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
     const issue = await prisma.issue.findUnique({
       where: { id: params.id },
-      select: { id: true, status: true },
+      select: { id: true, status: true, topic: { select: { consentMode: true } } },
     });
 
     if (!issue) {
@@ -51,13 +61,26 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
     const editableStatuses = ['draft', 'in_review'] as const;
     if (!editableStatuses.includes(issue.status as (typeof editableStatuses)[number])) {
-      return NextResponse.json(
-        err(`Issue is ${issue.status} and cannot be edited`),
-        { status: 409 },
-      );
+      return NextResponse.json(err(`Issue is ${issue.status} and cannot be edited`), {
+        status: 409,
+      });
     }
 
     const { subject, preheader, items } = parsed.data;
+
+    // Phase 6 — enforce the sponsored-slot gate: sponsored items are allowed only
+    // on public topics and must reference an active sponsor. Reject before any write.
+    if (items && items.some((it) => it.kind === 'sponsored')) {
+      const active = await createSponsorRepository(prisma).findActive();
+      const gate = checkSponsoredItems(
+        issue.topic.consentMode,
+        items,
+        new Set(active.map((s) => s.id)),
+      );
+      if (!gate.ok) {
+        return NextResponse.json(err(gate.message), { status: 400 });
+      }
+    }
 
     await prisma.$transaction(async (tx) => {
       if (subject !== undefined || preheader !== undefined) {
@@ -100,7 +123,9 @@ export async function GET(_request: Request, { params }: RouteParams) {
       where: { id: params.id },
       include: {
         items: { orderBy: { order: 'asc' } },
-        sends: { select: { id: true, status: true, subscriberId: true, sentAt: true, error: true } },
+        sends: {
+          select: { id: true, status: true, subscriberId: true, sentAt: true, error: true },
+        },
       },
     });
 

@@ -118,6 +118,7 @@ export interface ArchiveStrings {
   readonly empty: string;
   readonly backToList: string;
   readonly subscribeCta: string;
+  readonly sponsoredLabel: string;
 }
 
 const STRINGS: Record<ArchiveLang, ArchiveStrings> = {
@@ -127,6 +128,7 @@ const STRINGS: Record<ArchiveLang, ArchiveStrings> = {
     empty: 'Henüz gönderilmiş sayı yok.',
     backToList: '← Tüm sayılar',
     subscribeCta: 'Abone ol',
+    sponsoredLabel: 'Sponsorlu',
   },
   en: {
     eyebrow: 'ARCHIVE',
@@ -134,6 +136,7 @@ const STRINGS: Record<ArchiveLang, ArchiveStrings> = {
     empty: 'No issues sent yet.',
     backToList: '← All issues',
     subscribeCta: 'Subscribe',
+    sponsoredLabel: 'Sponsored',
   },
 };
 

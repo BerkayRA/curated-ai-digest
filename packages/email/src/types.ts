@@ -23,6 +23,12 @@ export interface DigestItem {
   readonly sourceUrl: string;
   /** Display name of the publication / source. */
   readonly sourceName: string;
+  /**
+   * Marks this item as a sponsored slot (vs. editorial). When true, the story
+   * block renders a small localized "Sponsorlu"/"Sponsored" label near the
+   * source eyebrow. Absent/false → unchanged editorial render.
+   */
+  readonly isSponsored?: boolean;
 }
 
 /** Top-level props for the DigestEmail template. */
