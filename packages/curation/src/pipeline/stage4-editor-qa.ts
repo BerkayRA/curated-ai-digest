@@ -58,13 +58,35 @@ export interface EditorQaStageResult {
  */
 export function buildSystemPrompt(ctx: TopicContext): string {
   const voice = ctx.voice ?? 'confident, clear, no hype';
+  const language = ctx.language ?? 'tr';
+
+  if (language === 'en') {
+    return `You are a senior editor and fact-checker for Mega Bilgisayar's English AI newsletter.
+
+Your tasks:
+1. FACT-CHECK: Verify every specific claim, number, date, or statistic in the English copy against the provided source excerpts.
+   Flag anything that is not supported by the source or that appears exaggerated or inaccurate.
+
+2. GRAMMAR & TONE: Check English grammar, spelling, and punctuation. Flag errors.
+   Ensure the tone is professional and matches the brand voice (${voice}).
+
+3. BRAND VOICE: Flag any hype words ("revolutionary", "game-changing", "unbelievable", "unparalleled", "groundbreaking", etc.),
+   clickbait headlines, or off-brand language.
+
+Severity levels:
+- "block": The issue MUST be fixed before publication (factual error, serious grammar error, major brand violation).
+- "warn": Should be improved but acceptable for publication (minor tone issue, mild wording suggestion).
+
+If ALL flags are "warn" or there are no flags → set passed: true.
+If ANY flag is "block" → set passed: false and include feedbackForCopywrite with specific correction instructions.`;
+  }
 
   return `You are a senior editor and fact-checker for Mega Bilgisayar's Turkish AI newsletter.
 
 Your tasks:
 1. FACT-CHECK: Verify every specific claim, number, date, or statistic in the Turkish copy against the provided source excerpts.
    Flag anything that is not supported by the source or that appears exaggerated or inaccurate.
-   
+
 2. GRAMMAR & TONE: Check Turkish grammar, spelling, and punctuation. Flag errors.
    Ensure the tone is professional and matches the brand voice (${voice}).
 
@@ -122,14 +144,18 @@ async function runSingleQaPass(
           properties: {
             passed: {
               type: 'boolean',
-              description: 'True if all issues are warn-only or there are no issues. False if any block-severity issue found.',
+              description:
+                'True if all issues are warn-only or there are no issues. False if any block-severity issue found.',
             },
             flags: {
               type: 'array',
               items: {
                 type: 'object',
                 properties: {
-                  itemIndex: { type: 'number', description: '0-based index of the item (0, 1, or 2).' },
+                  itemIndex: {
+                    type: 'number',
+                    description: '0-based index of the item (0, 1, or 2).',
+                  },
                   field: { type: 'string', enum: ['titleTr', 'summaryTr', 'factual'] },
                   issue: { type: 'string', description: 'Description of the issue.' },
                   severity: { type: 'string', enum: ['warn', 'block'] },
@@ -144,7 +170,8 @@ async function runSingleQaPass(
             },
             feedbackForCopywrite: {
               type: 'string',
-              description: 'Specific correction instructions for the copywriter. Required if passed=false.',
+              description:
+                'Specific correction instructions for the copywriter. Required if passed=false.',
             },
           },
           required: ['passed', 'flags', 'factCheckNotes'],

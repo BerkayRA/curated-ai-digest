@@ -37,7 +37,20 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json(err(message), { status: 400 });
     }
 
-    const { slug, name, description, audience, voice, status, consentMode } = parsed.data;
+    const {
+      slug,
+      name,
+      description,
+      audience,
+      voice,
+      status,
+      consentMode,
+      language,
+      brandName,
+      brandLogoUrl,
+      brandColorHex,
+      brandFooterText,
+    } = parsed.data;
 
     const repo = createTopicRepository(prisma);
     const topic = await repo.create({
@@ -48,6 +61,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       voice: voice ?? null,
       status,
       consentMode,
+      language,
+      brandName: brandName ?? null,
+      brandLogoUrl: brandLogoUrl ?? null,
+      brandColorHex: brandColorHex ?? null,
+      brandFooterText: brandFooterText ?? null,
     });
 
     return NextResponse.json(ok(topic), { status: 201 });

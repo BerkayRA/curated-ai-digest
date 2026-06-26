@@ -42,6 +42,7 @@ import {
 } from '@react-email/components';
 import { color } from '@digest/brand';
 import type { DigestEmailData, DigestItem } from '../types.js';
+import { getStrings } from '../i18n.js';
 
 // ---------------------------------------------------------------------------
 // Constants — inline token literals (CSS custom properties unsupported in Outlook)
@@ -89,6 +90,56 @@ const FOOTER_LOGO_HEIGHT = Math.round(FOOTER_LOGO_WIDTH * LOGO_NATURAL_RATIO); /
 const CONTAINER_WIDTH = 600;
 const PX = '36px'; // horizontal padding inside the container
 
+/** The three Process-Blue accent stops used across the band, numbers, and rules. */
+interface AccentScale {
+  readonly brand: string;
+  readonly brandDark: string;
+  readonly brandDarker: string;
+}
+
+/**
+ * Resolves the accent scale for the header gradient, story numbers, and rules.
+ *
+ * Default (no hex): returns the Process-Blue token trio verbatim, so the default
+ * TR output stays byte-identical to the pre-Phase-5 template.
+ *
+ * Custom hex (MVP choice): we use the provided `hex` for the primary `brand` stop
+ * only, and keep `brandDark`/`brandDarker` anchored to the brand tokens. We do NOT
+ * derive darker shades from the hex — a single client-supplied color cannot be
+ * darkened reliably without a color library (banned: no new deps), and reusing the
+ * raw hex for all three stops would flatten the header gradient. Anchoring the dark
+ * stops keeps the gradient readable while still recoloring the dominant accent
+ * surfaces (band top, story numbers, accent rules) to the per-topic color.
+ */
+/** Strict #RRGGBB matcher — the only shape allowed into inline gradient CSS. */
+const SAFE_HEX = /^#[0-9a-fA-F]{6}$/;
+
+function deriveAccentScale(hex?: string | null): AccentScale {
+  // Re-validate at the render boundary (defense-in-depth): brandColorHex is
+  // Zod-validated on write, but renderDigestEmail is a public export and this
+  // value is interpolated verbatim into inline `background` CSS.
+  if (!hex || !SAFE_HEX.test(hex)) {
+    return { brand: BRAND, brandDark: BRAND_DARK, brandDarker: BRAND_DARKER };
+  }
+  return { brand: hex, brandDark: BRAND_DARK, brandDarker: BRAND_DARKER };
+}
+
+/**
+ * Resolves the logo URL. A custom brandLogoUrl is honored only when it is an
+ * absolute http(s) URL (validated https on write; re-checked here as defense-in-
+ * depth since this becomes an <img src>). Anything else falls back to the bundled
+ * default path, which is prefixed with the asset base for absolute email assets.
+ */
+function resolveLogoUrl(
+  assetBaseUrl: string | undefined,
+  brandLogoUrl: string | null | undefined,
+): string {
+  if (brandLogoUrl && /^https?:\/\//i.test(brandLogoUrl)) {
+    return brandLogoUrl;
+  }
+  return `${assetBaseUrl ?? ''}${LOGO_PATH}`;
+}
+
 // ---------------------------------------------------------------------------
 // Sub-components
 // ---------------------------------------------------------------------------
@@ -102,19 +153,25 @@ const PX = '36px'; // horizontal padding inside the container
  */
 function HeaderBand({
   logoUrl,
+  logoAlt,
+  eyebrow,
   issueLabel,
   formattedDate,
+  accent,
 }: {
   readonly logoUrl: string;
+  readonly logoAlt: string;
+  readonly eyebrow: string;
   readonly issueLabel: string;
   readonly formattedDate: string;
+  readonly accent: AccentScale;
 }) {
   return (
     <Section
       style={{
-        backgroundColor: BRAND_DARK,
+        backgroundColor: accent.brandDark,
         // Tiled Buka dot grid over a Process-Blue gradient (baked into the band).
-        backgroundImage: `radial-gradient(circle at center, rgba(255,255,255,0.18) 1.5px, transparent 1.6px), linear-gradient(118deg, ${BRAND} 0%, ${BRAND_DARK} 60%, ${BRAND_DARKER} 100%)`,
+        backgroundImage: `radial-gradient(circle at center, rgba(255,255,255,0.18) 1.5px, transparent 1.6px), linear-gradient(118deg, ${accent.brand} 0%, ${accent.brandDark} 60%, ${accent.brandDarker} 100%)`,
         backgroundSize: '20px 20px, 100% 100%',
         backgroundRepeat: 'repeat, no-repeat',
         padding: `30px ${PX} 26px`,
@@ -127,7 +184,7 @@ function HeaderBand({
             src={logoUrl}
             width={HEADER_LOGO_WIDTH}
             height={HEADER_LOGO_HEIGHT}
-            alt="Mega Bilgisayar"
+            alt={logoAlt}
             style={{ display: 'block', border: '0' }}
           />
         </Column>
@@ -144,7 +201,7 @@ function HeaderBand({
               lineHeight: '1',
             }}
           >
-            Haftalık YZ Digest
+            {eyebrow}
           </Text>
         </Column>
       </Row>
@@ -232,7 +289,13 @@ function DotStrip() {
 }
 
 /** Compact overview band: "01 Source · 02 Source · 03 Source". */
-function OverviewBand({ items }: { readonly items: readonly DigestItem[] }) {
+function OverviewBand({
+  items,
+  accent,
+}: {
+  readonly items: readonly DigestItem[];
+  readonly accent: AccentScale;
+}) {
   return (
     <Section style={{ backgroundColor: CARD_BG, padding: `4px ${PX} 24px` }}>
       <Row>
@@ -249,7 +312,7 @@ function OverviewBand({ items }: { readonly items: readonly DigestItem[] }) {
             {items.map((item, i) => (
               <React.Fragment key={i}>
                 {i > 0 && <span>&nbsp;&nbsp;·&nbsp;&nbsp;</span>}
-                <span style={{ color: BRAND, fontWeight: '700' }}>
+                <span style={{ color: accent.brand, fontWeight: '700' }}>
                   {String(i + 1).padStart(2, '0')}
                 </span>
                 &nbsp;{item.sourceName}
@@ -266,13 +329,16 @@ interface StoryBlockProps {
   readonly item: DigestItem;
   readonly index: number;
   readonly isLast: boolean;
+  readonly accent: AccentScale;
+  readonly sourceLabel: string;
+  readonly readMore: string;
 }
 
 /**
  * A numbered story block: big mono number + UPPERCASE source eyebrow +
  * 3px Process-Blue accent rule + headline + summary + "devamını oku →".
  */
-function StoryBlock({ item, index, isLast }: StoryBlockProps) {
+function StoryBlock({ item, index, isLast, accent, sourceLabel, readMore }: StoryBlockProps) {
   const number = String(index + 1).padStart(2, '0');
 
   return (
@@ -290,7 +356,7 @@ function StoryBlock({ item, index, isLast }: StoryBlockProps) {
               fontSize: '40px',
               lineHeight: '1',
               fontWeight: '700',
-              color: BRAND,
+              color: accent.brand,
               margin: '0',
             }}
           >
@@ -313,7 +379,7 @@ function StoryBlock({ item, index, isLast }: StoryBlockProps) {
               lineHeight: '1.2',
             }}
           >
-            Kaynak · {item.sourceName}
+            {sourceLabel} {item.sourceName}
           </Text>
 
           {/* 3px Process-Blue accent rule */}
@@ -321,7 +387,7 @@ function StoryBlock({ item, index, isLast }: StoryBlockProps) {
             style={{
               width: '34px',
               height: '3px',
-              backgroundColor: BRAND,
+              backgroundColor: accent.brand,
               borderRadius: '2px',
               margin: '0 0 12px 0',
               fontSize: '0',
@@ -366,11 +432,11 @@ function StoryBlock({ item, index, isLast }: StoryBlockProps) {
               fontFamily: FONT_STACK,
               fontSize: '14px',
               fontWeight: '700',
-              color: BRAND_DARK,
+              color: accent.brandDark,
               textDecoration: 'none',
             }}
           >
-            Devamını oku&nbsp;→
+            {readMore}
           </Link>
         </Column>
       </Row>
@@ -399,6 +465,11 @@ function StoryBlock({ item, index, isLast }: StoryBlockProps) {
 // Main template
 // ---------------------------------------------------------------------------
 
+const DEFAULT_BRAND_NAME = 'Curated AI Digest';
+const DEFAULT_LOGO_ALT = 'Mega Bilgisayar';
+const DEFAULT_FOOTER_TEXT =
+  'Curated AI Digest — Mega Bilgisayar Tic. Ltd. Şti’nin haftalık yapay zeka digesti.';
+
 export function DigestEmail(props: DigestEmailData) {
   const {
     subject,
@@ -409,20 +480,33 @@ export function DigestEmail(props: DigestEmailData) {
     unsubscribeUrl,
     senderAddress,
     assetBaseUrl,
+    language,
+    brandLogoUrl,
+    brandColorHex,
+    brandName,
+    brandFooterText,
   } = props;
 
-  const logoUrl = `${assetBaseUrl ?? ''}${LOGO_PATH}`;
+  const t = getStrings(language);
+  const accent = deriveAccentScale(brandColorHex);
+  const logoUrl = resolveLogoUrl(assetBaseUrl, brandLogoUrl);
+  const logoAlt = brandName ?? DEFAULT_LOGO_ALT;
+  const wordmark = brandName ?? DEFAULT_BRAND_NAME;
+  const footerText = brandFooterText ?? DEFAULT_FOOTER_TEXT;
 
-  const formattedDate = new Date(issueDate).toLocaleDateString('tr-TR', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  });
+  const formattedDate = new Date(issueDate).toLocaleDateString(
+    language === 'en' ? 'en-US' : 'tr-TR',
+    {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    },
+  );
 
   const lastIndex = items.length - 1;
 
   return (
-    <Html lang="tr" dir="ltr">
+    <Html lang={language ?? 'tr'} dir="ltr">
       <Head>
         {/* No webfont declarations: bulletproof clients fall back to Arial. The
             brand stack hint is applied inline on every text node. */}
@@ -474,8 +558,11 @@ export function DigestEmail(props: DigestEmailData) {
                    * ---------------------------------------------------------- */}
                   <HeaderBand
                     logoUrl={logoUrl}
+                    logoAlt={logoAlt}
+                    eyebrow={t.eyebrow}
                     issueLabel={issueLabel}
                     formattedDate={formattedDate}
+                    accent={accent}
                   />
 
                   {/* ----------------------------------------------------------
@@ -501,7 +588,7 @@ export function DigestEmail(props: DigestEmailData) {
                           style={{
                             width: '48px',
                             height: '4px',
-                            backgroundColor: BRAND,
+                            backgroundColor: accent.brand,
                             borderRadius: '2px',
                             margin: '0 0 14px 0',
                             fontSize: '0',
@@ -528,13 +615,21 @@ export function DigestEmail(props: DigestEmailData) {
                   {/* ----------------------------------------------------------
                    * OVERVIEW BAND — "01 … · 02 … · 03 …"
                    * ---------------------------------------------------------- */}
-                  <OverviewBand items={items} />
+                  <OverviewBand items={items} accent={accent} />
 
                   {/* ----------------------------------------------------------
                    * STORY BLOCKS — numbered, accent rule, CTA
                    * ---------------------------------------------------------- */}
                   {items.map((item, i) => (
-                    <StoryBlock key={i} item={item} index={i} isLast={i === lastIndex} />
+                    <StoryBlock
+                      key={i}
+                      item={item}
+                      index={i}
+                      isLast={i === lastIndex}
+                      accent={accent}
+                      sourceLabel={t.sourceLabel}
+                      readMore={t.readMore}
+                    />
                   ))}
 
                   {/* Spacer before footer */}
@@ -554,7 +649,7 @@ export function DigestEmail(props: DigestEmailData) {
                           src={logoUrl}
                           width={FOOTER_LOGO_WIDTH}
                           height={FOOTER_LOGO_HEIGHT}
-                          alt="Mega Bilgisayar"
+                          alt={logoAlt}
                           style={{ display: 'block', border: '0', marginBottom: '14px' }}
                         />
                         <Text
@@ -569,7 +664,7 @@ export function DigestEmail(props: DigestEmailData) {
                             lineHeight: '1',
                           }}
                         >
-                          Curated AI Digest
+                          {wordmark}
                         </Text>
                         <Text
                           style={{
@@ -580,7 +675,7 @@ export function DigestEmail(props: DigestEmailData) {
                             margin: '0 0 4px 0',
                           }}
                         >
-                          Yapay zeka dünyasından haftalık seçkiler.
+                          {t.footerTagline}
                         </Text>
                         <Text
                           style={{
@@ -591,8 +686,7 @@ export function DigestEmail(props: DigestEmailData) {
                             margin: '0 0 18px 0',
                           }}
                         >
-                          Curated AI Digest — Mega Bilgisayar Tic. Ltd. Şti&rsquo;nin haftalık yapay zeka
-                          digesti.
+                          {footerText}
                         </Text>
                       </Column>
                     </Row>
@@ -614,7 +708,7 @@ export function DigestEmail(props: DigestEmailData) {
                             margin: '0 0 8px 0',
                           }}
                         >
-                          Bu e-postayı almak istemiyorsanız{' '}
+                          {t.unsubscribePrompt}{' '}
                           <Link
                             href={unsubscribeUrl}
                             style={{
@@ -623,7 +717,7 @@ export function DigestEmail(props: DigestEmailData) {
                               fontWeight: '600',
                             }}
                           >
-                            aboneliğinizi iptal edebilirsiniz
+                            {t.unsubscribeLink}
                           </Link>
                           .
                         </Text>

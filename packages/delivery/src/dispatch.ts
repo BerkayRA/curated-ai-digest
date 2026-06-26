@@ -6,11 +6,7 @@
  * mock all I/O without hitting real DB or email infrastructure.
  */
 
-import {
-  prisma,
-  createSubscriberTopicRepository,
-  createTopicRepository,
-} from '@digest/db';
+import { prisma, createSubscriberTopicRepository, createTopicRepository } from '@digest/db';
 import type { EmailProvider, EmailMessage } from '@digest/email';
 import { createEmailProvider, renderDigestEmail } from '@digest/email';
 import type { DigestEmailData, DigestItem } from '@digest/email';
@@ -45,10 +41,8 @@ export interface DispatchRepo {
   getIssueWithItems(issueId: string): Promise<(Issue & { items: IssueItem[] }) | null>;
   /** Active, per-topic dispatch recipients (global unsubscribed/bounced excluded). */
   getTopicRecipients(topicId: string): Promise<TopicRecipient[]>;
-  /** Per-topic From/Reply-To overrides; null fields fall back to global Settings. */
-  getTopicBranding(
-    topicId: string,
-  ): Promise<{ fromAddress: string | null; replyTo: string | null } | null>;
+  /** Per-topic From/Reply-To + white-label/language overrides; null fields fall back to defaults. */
+  getTopicBranding(topicId: string): Promise<TopicBranding | null>;
   getSettings(): Promise<Settings | null>;
   /** A/B subject variants for an issue (empty → no test; the default path). */
   getSubjectVariants(issueId: string): Promise<SubjectVariantRow[]>;
@@ -66,6 +60,17 @@ export interface DispatchRepo {
     variantIndex?: number | null;
     error?: string;
   }): Promise<void>;
+}
+
+/** Per-topic From/Reply-To + white-label/language overrides; null → fall back to defaults. */
+export interface TopicBranding {
+  readonly fromAddress: string | null;
+  readonly replyTo: string | null;
+  readonly brandLogoUrl: string | null;
+  readonly brandColorHex: string | null;
+  readonly brandName: string | null;
+  readonly brandFooterText: string | null;
+  readonly language: string | null;
 }
 
 /** Minimal A/B variant shape the dispatcher needs (subject + split fraction). */
@@ -94,7 +99,15 @@ export const defaultDispatchRepo: DispatchRepo = {
     if (!topic) {
       return null;
     }
-    return { fromAddress: topic.fromAddress, replyTo: topic.replyTo };
+    return {
+      fromAddress: topic.fromAddress,
+      replyTo: topic.replyTo,
+      brandLogoUrl: topic.brandLogoUrl ?? null,
+      brandColorHex: topic.brandColorHex ?? null,
+      brandName: topic.brandName ?? null,
+      brandFooterText: topic.brandFooterText ?? null,
+      language: topic.language ?? null,
+    };
   },
   async getSettings() {
     return prisma.settings.findFirst();
@@ -197,11 +210,28 @@ function buildUnsubscribeUrl(token: string): string {
   return `${APP_BASE_URL}/unsubscribe?token=${encodeURIComponent(token)}`;
 }
 
+/** Maps resolved branding (or null) to the optional DigestEmailData brand props. */
+function resolveBrandProps(
+  branding: TopicBranding | null,
+): Pick<
+  DigestEmailData,
+  'language' | 'brandLogoUrl' | 'brandColorHex' | 'brandName' | 'brandFooterText'
+> {
+  return {
+    language: branding?.language === 'en' ? 'en' : 'tr',
+    brandLogoUrl: branding?.brandLogoUrl ?? undefined,
+    brandColorHex: branding?.brandColorHex ?? undefined,
+    brandName: branding?.brandName ?? undefined,
+    brandFooterText: branding?.brandFooterText ?? undefined,
+  };
+}
+
 function buildDigestEmailData(
   issue: Issue & { items: IssueItem[] },
   unsubscribeUrl: string,
   senderAddress: string,
   subject: string,
+  branding: TopicBranding | null,
 ): DigestEmailData {
   const items = issue.items.map((item) => ({
     titleTr: item.titleTr,
@@ -226,6 +256,7 @@ function buildDigestEmailData(
       : [items[0]!, items[1]!]) as DigestEmailData['items'],
     unsubscribeUrl,
     senderAddress,
+    ...resolveBrandProps(branding),
   };
 }
 
@@ -321,7 +352,8 @@ export async function dispatchIssue(
   const fromEmail = branding?.fromAddress ?? settings.fromAddress;
   const replyTo = branding?.replyTo ?? settings.replyTo;
 
-  const senderAddress = 'Mega Bilgisayar Tic. Ltd. Şti, Ankara, Türkiye';
+  const senderAddress =
+    branding?.brandFooterText ?? 'Mega Bilgisayar Tic. Ltd. Şti, Ankara, Türkiye';
 
   // 3. Build per-recipient messages. Subject precedence:
   //    overrideSubject (A/B remainder) → assigned variant subject → issue.subject.
@@ -334,20 +366,17 @@ export async function dispatchIssue(
     dispatchList.map(async ({ recipient, variantIndex }) => {
       const subject =
         opts.overrideSubject ??
-        (variantIndex !== null ? (variants[variantIndex]?.subject ?? issue.subject) : issue.subject);
+        (variantIndex !== null
+          ? (variants[variantIndex]?.subject ?? issue.subject)
+          : issue.subject);
 
       const unsubscribeUrl = buildUnsubscribeUrl(recipient.unsubscribeToken);
-      const data = buildDigestEmailData(issue, unsubscribeUrl, senderAddress, subject);
+      const data = buildDigestEmailData(issue, unsubscribeUrl, senderAddress, subject, branding);
       const rendered = await renderDigestEmail(data);
 
       // One opaque tracking token per Send — links + open pixel resolve to it.
       const trackToken = randomUUID();
-      const trackedHtml = injectTrackingHooks(
-        rendered.html,
-        trackToken,
-        issue.items,
-        APP_BASE_URL,
-      );
+      const trackedHtml = injectTrackingHooks(rendered.html, trackToken, issue.items, APP_BASE_URL);
 
       const headers: Record<string, string> = {
         'List-Unsubscribe': `<${unsubscribeUrl}>`,
@@ -364,7 +393,7 @@ export async function dispatchIssue(
         },
         from: {
           email: fromEmail,
-          name: 'Curated AI Digest',
+          name: branding?.brandName ?? 'Curated AI Digest',
         },
         subject,
         html: trackedHtml,

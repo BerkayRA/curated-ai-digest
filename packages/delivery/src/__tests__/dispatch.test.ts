@@ -95,7 +95,15 @@ function makeMockRepo(overrides: Partial<DispatchRepo> = {}): DispatchRepo {
   return {
     getIssueWithItems: vi.fn().mockResolvedValue(mockIssue),
     getTopicRecipients: vi.fn().mockResolvedValue(mockRecipients),
-    getTopicBranding: vi.fn().mockResolvedValue({ fromAddress: null, replyTo: null }),
+    getTopicBranding: vi.fn().mockResolvedValue({
+      fromAddress: null,
+      replyTo: null,
+      brandLogoUrl: null,
+      brandColorHex: null,
+      brandName: null,
+      brandFooterText: null,
+      language: null,
+    }),
     getSettings: vi.fn().mockResolvedValue(mockSettings),
     // Phase 4 defaults: no A/B variants, no suppressions, nothing already sent →
     // the dispatch path is byte-identical to pre-Phase-4 behaviour.
@@ -138,7 +146,11 @@ describe('dispatchIssue', () => {
     const repo = makeMockRepo();
     const provider = makeMockProvider();
 
-    const result = await dispatchIssue('issue-1', { provider, repo, transitionFn: mockTransitionFn });
+    const result = await dispatchIssue('issue-1', {
+      provider,
+      repo,
+      transitionFn: mockTransitionFn,
+    });
 
     expect(result.totalRecipients).toBe(2);
     expect(result.successCount).toBe(2);
@@ -261,7 +273,11 @@ describe('dispatchIssue', () => {
 
     mockTransitionFn.mockResolvedValueOnce({ id: 'issue-1', status: 'failed' });
 
-    const result = await dispatchIssue('issue-1', { provider, repo, transitionFn: mockTransitionFn });
+    const result = await dispatchIssue('issue-1', {
+      provider,
+      repo,
+      transitionFn: mockTransitionFn,
+    });
 
     expect(result.issueStatus).toBe('failed');
     expect(result.failureCount).toBe(2);
@@ -315,7 +331,15 @@ describe('dispatchIssue', () => {
 
   it('falls back to settings.fromAddress when topic fromAddress is null', async () => {
     const repo = makeMockRepo({
-      getTopicBranding: vi.fn().mockResolvedValue({ fromAddress: null, replyTo: null }),
+      getTopicBranding: vi.fn().mockResolvedValue({
+        fromAddress: null,
+        replyTo: null,
+        brandLogoUrl: null,
+        brandColorHex: null,
+        brandName: null,
+        brandFooterText: null,
+        language: null,
+      }),
     });
     const provider = makeMockProvider();
 
@@ -439,11 +463,63 @@ describe('dispatchIssue', () => {
     const recorded = recordSendMock.mock.calls.map(
       (c: unknown[]) => c[0] as Parameters<DispatchRepo['recordSend']>[0],
     );
-    expect(recorded.every((c) => c.variantIndex === null || c.variantIndex === undefined)).toBe(true);
+    expect(recorded.every((c) => c.variantIndex === null || c.variantIndex === undefined)).toBe(
+      true,
+    );
 
     // Override (remainder) send finalizes the issue → transition to sent.
     expect(mockTransitionFn).toHaveBeenCalledWith(
       expect.objectContaining({ issueId: 'issue-1', to: 'sent' }),
     );
+  });
+
+  // -------------------------------------------------------------------------
+  // Phase 5: per-topic white-label branding + language threaded into dispatch
+  // -------------------------------------------------------------------------
+
+  it('threads per-topic branding into the message: from.name uses brandName, footer uses brandFooterText', async () => {
+    const repo = makeMockRepo({
+      getTopicBranding: vi.fn().mockResolvedValue({
+        brandColorHex: '#E6007E',
+        brandName: 'FinTech',
+        brandFooterText: 'FinTech Weekly, Istanbul',
+        language: 'en',
+        fromAddress: 'fin@x.com',
+        replyTo: null,
+        brandLogoUrl: 'https://x/l.png',
+      }),
+    });
+    const provider = makeMockProvider();
+
+    await dispatchIssue('issue-1', { provider, repo, transitionFn: mockTransitionFn });
+
+    const sendBatchMock = provider.sendBatch as ReturnType<typeof vi.fn>;
+    const messages: readonly EmailMessage[] = (
+      sendBatchMock.mock.calls[0] as [readonly EmailMessage[]]
+    )[0];
+
+    // Branded display name + From override flow into every message.
+    expect(messages.every((m) => m.from.name === 'FinTech')).toBe(true);
+    expect(messages.every((m) => m.from.email === 'fin@x.com')).toBe(true);
+    // Issue subject still flows through unchanged for the default (no-A/B) path.
+    expect(messages.every((m) => m.subject === 'Test Digest Konusu')).toBe(true);
+    // brandFooterText is rendered as the compliance sender address in the HTML body.
+    expect(messages.every((m) => m.html.includes('FinTech Weekly, Istanbul'))).toBe(true);
+  });
+
+  it('uses default Curated AI Digest branding and Turkish copy when all branding is null', async () => {
+    const repo = makeMockRepo(); // factory default → all branding fields null
+    const provider = makeMockProvider();
+
+    await dispatchIssue('issue-1', { provider, repo, transitionFn: mockTransitionFn });
+
+    const sendBatchMock = provider.sendBatch as ReturnType<typeof vi.fn>;
+    const messages: readonly EmailMessage[] = (
+      sendBatchMock.mock.calls[0] as [readonly EmailMessage[]]
+    )[0];
+
+    expect(messages.every((m) => m.from.name === 'Curated AI Digest')).toBe(true);
+    // Default Turkish template copy is preserved (default path unchanged).
+    expect(messages.every((m) => m.html.includes('Haftalık YZ Digest'))).toBe(true);
   });
 });

@@ -28,6 +28,9 @@ const PUBLIC_PREFIXES = [
   '/s',
   '/confirm',
   '/preferences',
+  // White-label & reach (Phase 5) — the public web archive + RSS per topic are
+  // read-only and reachable unauthenticated (shared links, feed readers).
+  '/archive',
   '/api/public',
   '/_next/static',
   '/_next/image',

@@ -200,6 +200,8 @@ export interface TopicContext {
   readonly name: string;
   readonly audience: string | null;
   readonly voice: string | null;
+  /** Output language for curation stages; read sites default to 'tr' when omitted. */
+  readonly language?: 'tr' | 'en';
 }
 
 // ---------------------------------------------------------------------------

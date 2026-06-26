@@ -31,6 +31,8 @@ export function TopicCard({ topic, onEdit, onToggled }: TopicCardProps) {
 
   const isPaused = topic.status === 'paused';
   const isPublic = topic.consentMode === 'public';
+  const languageLabel = (topic.language ?? 'tr').toUpperCase();
+  const brandColor = topic.brandColorHex;
 
   // ── Copy the public signup link ───────────────────────────
 
@@ -88,6 +90,16 @@ export function TopicCard({ topic, onEdit, onToggled }: TopicCardProps) {
           title={isPublic ? 'Herkese açık çift onaylı kayıt' : 'Kapalı iş ilişkisi listesi'}
         >
           {isPublic ? 'Herkese Açık' : 'İş İlişkisi'}
+        </span>
+        <span className={styles.languageBadge} title={`İçerik dili: ${languageLabel}`}>
+          {brandColor && (
+            <span
+              className={styles.brandSwatch}
+              style={{ backgroundColor: brandColor, marginRight: 6 }}
+              aria-hidden="true"
+            />
+          )}
+          {languageLabel}
         </span>
       </div>
 
