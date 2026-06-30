@@ -72,6 +72,10 @@ function pruneStale(now: number, windowMs: number): void {
 export function getClientIp(headers: Headers): string {
   // NOTE: trusts `x-forwarded-for`; only safe behind a reverse proxy that
   // sets/strips that header (single-instance self-hosted assumption).
+  // TODO: if this ever runs behind a cloud load balancer (Cloudflare, GCP/AWS
+  // LB), read that provider's canonical client-IP header (e.g. CF-Connecting-IP)
+  // instead of the user-supplied x-forwarded-for — pair with the Redis shared
+  // store needed for horizontal scaling.
   const forwarded = headers.get('x-forwarded-for');
   if (forwarded) {
     const first = forwarded.split(',')[0]?.trim();

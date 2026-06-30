@@ -19,12 +19,24 @@ import { NextResponse } from 'next/server';
 import type { NextMiddleware } from 'next/server';
 import { authConfig } from '@/auth.config';
 import { isPublicPath, shouldReturnJson } from '@/lib/auth-guard';
+import { checkArchiveRateLimit } from '@/lib/public-rate-limit';
 
 // Build an Edge-safe auth() from the config that does NOT import argon2.
 const { auth } = NextAuth(authConfig);
 
 const middleware: NextMiddleware = auth((request) => {
   const { pathname } = request.nextUrl;
+
+  // Per-IP rate limit for the public archive (+ RSS) — bounds abuse of the
+  // unauthenticated, DB-backed routes before any lookup happens. Returns 429
+  // when exceeded; allowed requests fall through to the public-path check below.
+  const archiveBlock = checkArchiveRateLimit(pathname, request.headers);
+  if (archiveBlock) {
+    return new NextResponse('Too Many Requests', {
+      status: 429,
+      headers: { 'Retry-After': String(archiveBlock.retryAfterSec) },
+    });
+  }
 
   // Public paths — always pass through
   if (isPublicPath(pathname)) {
