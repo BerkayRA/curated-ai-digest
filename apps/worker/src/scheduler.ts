@@ -16,9 +16,9 @@
 import { Cron } from 'croner';
 import { createTopicRepository, prisma } from '@digest/db';
 import { runAbWinnerJob } from '@digest/delivery';
-import type { Logger } from './logger.js';
-import { runCurationJob } from './jobs/curate.js';
-import { runSendJob } from './jobs/send.js';
+import type { Logger } from './logger';
+import { runCurationJob } from './jobs/curate';
+import { runSendJob } from './jobs/send';
 
 // ---------------------------------------------------------------------------
 // Constants

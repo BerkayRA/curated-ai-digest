@@ -7,9 +7,9 @@
 
 import * as React from 'react';
 import { render, toPlainText } from '@react-email/render';
-import { ConfirmEmail } from './templates/ConfirmEmail.js';
-import type { ConfirmEmailData, RenderedEmail } from './types.js';
-import type { EmailMessage, EmailProvider, SendResult } from './providers/provider.js';
+import { ConfirmEmail } from './templates/ConfirmEmail';
+import type { ConfirmEmailData, RenderedEmail } from './types';
+import type { EmailMessage, EmailProvider, SendResult } from './providers/provider';
 
 /**
  * Render the double opt-in confirmation email to HTML + plain text.

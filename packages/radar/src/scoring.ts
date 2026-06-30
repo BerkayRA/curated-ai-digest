@@ -10,7 +10,7 @@
 // and the pipeline type-check today.
 // ---------------------------------------------------------------------------
 
-import { normalizeWeights } from './config.js';
+import { normalizeWeights } from './config';
 import {
   DIMENSIONS,
   RINGS,
@@ -22,7 +22,7 @@ import {
   type RingGate,
   type RingGates,
   type ScoredSignal,
-} from './types.js';
+} from './types';
 
 /** Default per-dimension score used until real heuristics land (mid-range). */
 const DEFAULT_DIMENSION_SCORE = 0.5;

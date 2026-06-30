@@ -28,8 +28,8 @@ vi.mock('@azure/identity', () => ({
   ClientSecretCredential: vi.fn(function () { return {}; }),
 }));
 
-import { AcsEmailProvider } from '../../providers/acs.js';
-import type { EmailMessage } from '../../providers/provider.js';
+import { AcsEmailProvider } from '../../providers/acs';
+import type { EmailMessage } from '../../providers/provider';
 
 // ---------------------------------------------------------------------------
 // Fixture

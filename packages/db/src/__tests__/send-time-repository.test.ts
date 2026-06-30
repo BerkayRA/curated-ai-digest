@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import {
   createSendTimeRepository,
   MIN_OPENS_FOR_RECOMMENDATION,
-} from '../send-time-repository.js';
+} from '../send-time-repository';
 
 function makeFakePrisma(queryRaw: ReturnType<typeof vi.fn>) {
   return { $queryRaw: queryRaw } as unknown as import('@prisma/client').PrismaClient;

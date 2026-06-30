@@ -9,7 +9,7 @@ import {
   groupBySourceTopN,
   pickFirstUnused,
   type CandidateView,
-} from '../curate/heuristic.js';
+} from '../curate/heuristic';
 
 // ---------------------------------------------------------------------------
 // Helpers

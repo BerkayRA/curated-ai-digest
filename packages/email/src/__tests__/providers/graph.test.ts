@@ -28,8 +28,8 @@ vi.mock('@azure/identity', () => ({
 
 // Import after mocks are set up
 import { Client } from '@microsoft/microsoft-graph-client';
-import { GraphEmailProvider } from '../../providers/graph.js';
-import type { EmailMessage } from '../../providers/provider.js';
+import { GraphEmailProvider } from '../../providers/graph';
+import type { EmailMessage } from '../../providers/provider';
 
 // ---------------------------------------------------------------------------
 // Helpers to access the mocked internals at call time

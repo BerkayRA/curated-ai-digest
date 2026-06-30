@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 
-import { buildRssFeed, escapeXml, type RssFeedInput, type RssItem } from '../rss.js';
+import { buildRssFeed, escapeXml, type RssFeedInput, type RssItem } from '../rss';
 
 function makeItem(overrides: Partial<RssItem> = {}): RssItem {
   return {

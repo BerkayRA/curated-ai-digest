@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { createAnalyticsRepository } from '../analytics-repository.js';
+import { createAnalyticsRepository } from '../analytics-repository';
 
 function makeFakePrisma(opts: {
   queryRaw?: ReturnType<typeof vi.fn>;

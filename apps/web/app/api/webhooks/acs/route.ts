@@ -17,8 +17,8 @@ import {
   createSuppressionRepository,
 } from '@digest/db';
 import type { EmailEventType } from '@digest/db';
-import { ok, err } from '@/lib/api-response.js';
-import { constantTimeEqual } from '@/lib/webhook-verify.js';
+import { ok, err } from '@/lib/api-response';
+import { constantTimeEqual } from '@/lib/webhook-verify';
 
 export const dynamic = 'force-dynamic';
 

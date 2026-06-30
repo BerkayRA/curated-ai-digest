@@ -1,7 +1,7 @@
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { z } from 'zod';
-import type { EnrichedCandidate } from './types.js';
+import type { EnrichedCandidate } from './types';
 
 // ---------------------------------------------------------------------------
 // Artifact contract for the daily scan candidate pool

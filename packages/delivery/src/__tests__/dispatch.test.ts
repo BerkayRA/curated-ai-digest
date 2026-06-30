@@ -5,8 +5,8 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { dispatchIssue } from '../dispatch.js';
-import type { DispatchRepo } from '../dispatch.js';
+import { dispatchIssue } from '../dispatch';
+import type { DispatchRepo } from '../dispatch';
 import type { EmailProvider, EmailMessage, SendResult } from '@digest/email';
 import type { IssueStatus } from '@digest/shared';
 

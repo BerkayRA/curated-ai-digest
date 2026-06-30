@@ -69,8 +69,8 @@ vi.mock('@digest/db', () => {
 });
 
 // The test also needs defaultProviders to be consistent.
-vi.mock('../ingest/providers.js', async (importOriginal) => {
-  const original = await importOriginal<typeof import('../ingest/providers.js')>();
+vi.mock('../ingest/providers', async (importOriginal) => {
+  const original = await importOriginal<typeof import('../ingest/providers')>();
   return {
     ...original,
     defaultProviders: vi.fn().mockReturnValue([
@@ -104,7 +104,7 @@ describe('resolveProviders', () => {
     const fakeRepo = makeFakeSourceRepo([source]);
     createSourceRepository.mockReturnValue(fakeRepo);
 
-    const { resolveProviders } = await import('../ingest/resolve-providers.js');
+    const { resolveProviders } = await import('../ingest/resolve-providers');
     const providers = await resolveProviders({ repository: fakeRepo });
 
     const ids = providers.map((p) => p.id);
@@ -121,7 +121,7 @@ describe('resolveProviders', () => {
     const fakeRepo = makeFakeSourceRepo([source]);
     createSourceRepository.mockReturnValue(fakeRepo);
 
-    const { resolveProviders } = await import('../ingest/resolve-providers.js');
+    const { resolveProviders } = await import('../ingest/resolve-providers');
     const providers = await resolveProviders({ repository: fakeRepo });
 
     const ids = providers.map((p) => p.id);
@@ -138,7 +138,7 @@ describe('resolveProviders', () => {
     const fakeRepo = makeFakeSourceRepo([source]);
     createSourceRepository.mockReturnValue(fakeRepo);
 
-    const { resolveProviders } = await import('../ingest/resolve-providers.js');
+    const { resolveProviders } = await import('../ingest/resolve-providers');
     const providers = await resolveProviders({ repository: fakeRepo });
 
     const ids = providers.map((p) => p.id);
@@ -158,7 +158,7 @@ describe('resolveProviders', () => {
     ];
     const fakeRepo = makeFakeSourceRepo(sources);
 
-    const { resolveProviders } = await import('../ingest/resolve-providers.js');
+    const { resolveProviders } = await import('../ingest/resolve-providers');
     const providers = await resolveProviders({ repository: fakeRepo });
 
     const ids = providers.map((p) => p.id);
@@ -176,7 +176,7 @@ describe('resolveProviders', () => {
     });
     const fakeRepo = makeFakeSourceRepo([source]);
 
-    const { resolveProviders } = await import('../ingest/resolve-providers.js');
+    const { resolveProviders } = await import('../ingest/resolve-providers');
     const providers = await resolveProviders({ repository: fakeRepo });
 
     // The rss provider must be functional — it should have a fetch method.
@@ -195,7 +195,7 @@ describe('resolveProviders', () => {
     });
     const fakeRepo = makeFakeSourceRepo([source]);
 
-    const { resolveProviders } = await import('../ingest/resolve-providers.js');
+    const { resolveProviders } = await import('../ingest/resolve-providers');
     const providers = await resolveProviders({ repository: fakeRepo });
 
     const exaP = providers.find((p) => p.id === 'exa:exa-cfg');
@@ -207,8 +207,8 @@ describe('resolveProviders', () => {
     const fakeRepo = makeFakeSourceRepo([]);
     createSourceRepository.mockReturnValue(fakeRepo);
 
-    const { resolveProviders } = await import('../ingest/resolve-providers.js');
-    const { defaultProviders } = await import('../ingest/providers.js');
+    const { resolveProviders } = await import('../ingest/resolve-providers');
+    const { defaultProviders } = await import('../ingest/providers');
     const providers = await resolveProviders({ repository: fakeRepo });
 
     // With empty DB, we should fall back to defaultProviders output.
@@ -222,7 +222,7 @@ describe('resolveProviders', () => {
     const source = makeSource({ id: 'direct-1', type: 'exa', label: 'Direct Exa', url: null });
     const fakeRepo = makeFakeSourceRepo([source]);
 
-    const { resolveProviders } = await import('../ingest/resolve-providers.js');
+    const { resolveProviders } = await import('../ingest/resolve-providers');
     const providers = await resolveProviders({ repository: fakeRepo });
 
     // createSourceRepository should NOT have been called because we injected the repo.
@@ -239,7 +239,7 @@ describe('resolveProviders', () => {
     });
     const fakeRepo = makeFakeSourceRepo([source]);
 
-    const { resolveProviders } = await import('../ingest/resolve-providers.js');
+    const { resolveProviders } = await import('../ingest/resolve-providers');
     const providers = await resolveProviders({
       repository: fakeRepo,
       topicId: 'topic_enterprise_ai',
@@ -254,7 +254,7 @@ describe('resolveProviders', () => {
     const source = makeSource({ id: 'all-rss', type: 'rss', label: 'Feed', url: 'https://a.com/rss' });
     const fakeRepo = makeFakeSourceRepo([source]);
 
-    const { resolveProviders } = await import('../ingest/resolve-providers.js');
+    const { resolveProviders } = await import('../ingest/resolve-providers');
     await resolveProviders({ repository: fakeRepo });
 
     expect(fakeRepo.findEnabled).toHaveBeenCalled();

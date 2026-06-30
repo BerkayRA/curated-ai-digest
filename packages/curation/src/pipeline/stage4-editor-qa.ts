@@ -6,8 +6,8 @@
 // ---------------------------------------------------------------------------
 
 import { z } from 'zod';
-import { MODEL_MAP, calcCostUsd } from './config.js';
-import { callWithValidatedTool } from './llm-utils.js';
+import { MODEL_MAP, calcCostUsd } from './config';
+import { callWithValidatedTool } from './llm-utils';
 import type {
   ScoredCandidate,
   CopywriteOutput,
@@ -16,7 +16,7 @@ import type {
   StageOptions,
   PipelineRunRecord,
   TopicContext,
-} from './types.js';
+} from './types';
 
 // ---------------------------------------------------------------------------
 // Zod schema for LLM tool output

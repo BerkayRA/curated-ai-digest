@@ -3,8 +3,8 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { evaluateAutoSend } from '../guardrails.js';
-import type { AutoSendInput } from '../guardrails.js';
+import { evaluateAutoSend } from '../guardrails';
+import type { AutoSendInput } from '../guardrails';
 
 // ---------------------------------------------------------------------------
 // Helpers

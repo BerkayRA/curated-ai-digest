@@ -10,7 +10,7 @@
 // docs/RFC-001-mega-radar.md §3.5 and §6.
 // ---------------------------------------------------------------------------
 
-import type { Category, RadarEvent, Ring } from './types.js';
+import type { Category, RadarEvent, Ring } from './types';
 
 /** JSON Feed 1.1 version string used by `changes.json`. */
 export const JSON_FEED_VERSION = 'https://jsonfeed.org/version/1.1';

@@ -3,7 +3,7 @@
 // ---------------------------------------------------------------------------
 
 import { prisma } from '@digest/db';
-import type { PipelineRepository, PipelineRunRecord } from './types.js';
+import type { PipelineRepository, PipelineRunRecord } from './types';
 import type { CandidateArticle } from '@digest/db';
 
 /**

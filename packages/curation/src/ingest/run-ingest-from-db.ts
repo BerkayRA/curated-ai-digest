@@ -1,7 +1,7 @@
-import { runIngest } from './orchestrator.js';
-import { resolveProviders } from './resolve-providers.js';
-import { recordSourceHealth } from './record-health.js';
-import type { IngestResult, Logger } from './types.js';
+import { runIngest } from './orchestrator';
+import { resolveProviders } from './resolve-providers';
+import { recordSourceHealth } from './record-health';
+import type { IngestResult, Logger } from './types';
 
 // ---------------------------------------------------------------------------
 // DB-driven ingest: resolve → run → record health
@@ -19,7 +19,7 @@ export interface RunIngestFromDbOptions {
   /** Injected SourceRepository (for health recording). */
   sourceRepository?: import('@digest/db').SourceRepository;
   /** Injected IngestRepository (for candidate persistence). */
-  ingestRepository?: import('./types.js').IngestRepository;
+  ingestRepository?: import('./types').IngestRepository;
 }
 
 /**

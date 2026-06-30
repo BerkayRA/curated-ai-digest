@@ -5,7 +5,7 @@ import {
   exaConfigSchema,
   CreateSourceSchema,
   UpdateSourceSchema,
-} from '../source.js';
+} from '../source';
 
 // ---------------------------------------------------------------------------
 // SourceTypeSchema

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { deduplicateWithinRun, filterAgainstExisting } from '../ingest/dedup.js';
-import type { RawCandidate, EnrichedCandidate } from '../ingest/types.js';
+import { deduplicateWithinRun, filterAgainstExisting } from '../ingest/dedup';
+import type { RawCandidate, EnrichedCandidate } from '../ingest/types';
 
 // ---------------------------------------------------------------------------
 // Helpers

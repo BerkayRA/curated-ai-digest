@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { sendBatchWithLimits, createPerMinuteLimiter } from '../../providers/rate-limit.js';
+import { sendBatchWithLimits, createPerMinuteLimiter } from '../../providers/rate-limit';
 
 // ---------------------------------------------------------------------------
 // Helpers

@@ -60,64 +60,64 @@ export type {
 
 export { EmailEventType } from '@prisma/client';
 
-export { createSourceRepository } from './source-repository.js';
+export { createSourceRepository } from './source-repository';
 export type {
   SourceRepository,
   CreateSourceData,
   UpdateSourceData,
   HealthData,
-} from './source-repository.js';
+} from './source-repository';
 
-export { createTopicRepository } from './topic-repository.js';
-export type { TopicRepository, CreateTopicData, UpdateTopicData } from './topic-repository.js';
+export { createTopicRepository } from './topic-repository';
+export type { TopicRepository, CreateTopicData, UpdateTopicData } from './topic-repository';
 
-export { createSubscriberTopicRepository } from './subscriber-topic-repository.js';
+export { createSubscriberTopicRepository } from './subscriber-topic-repository';
 export type {
   SubscriberTopicRepository,
   SubscriberTopicSummary,
   UpsertSubscriberTopicData,
   TopicRecipient,
-} from './subscriber-topic-repository.js';
+} from './subscriber-topic-repository';
 
-export { createEmailEventRepository } from './email-event-repository.js';
-export type { EmailEventRepository, RecordEmailEventData } from './email-event-repository.js';
+export { createEmailEventRepository } from './email-event-repository';
+export type { EmailEventRepository, RecordEmailEventData } from './email-event-repository';
 
-export { createAnalyticsRepository } from './analytics-repository.js';
+export { createAnalyticsRepository } from './analytics-repository';
 export type {
   AnalyticsRepository,
   TopicAnalyticsSummary,
   IssueAnalyticsRow,
   ClickedUrlRow,
   GrowthPoint,
-} from './analytics-repository.js';
+} from './analytics-repository';
 
-export { createSuppressionRepository } from './suppression-repository.js';
-export type { SuppressionRepository, ListSuppressionsOptions } from './suppression-repository.js';
+export { createSuppressionRepository } from './suppression-repository';
+export type { SuppressionRepository, ListSuppressionsOptions } from './suppression-repository';
 
-export { createSubjectVariantRepository } from './subject-variant-repository.js';
+export { createSubjectVariantRepository } from './subject-variant-repository';
 export type {
   SubjectVariantRepository,
   CreateSubjectVariantData,
   VariantStatsRow,
-} from './subject-variant-repository.js';
+} from './subject-variant-repository';
 
-export { createSendTimeRepository, MIN_OPENS_FOR_RECOMMENDATION } from './send-time-repository.js';
-export type { SendTimeRepository, HourlyOpenBucket } from './send-time-repository.js';
+export { createSendTimeRepository, MIN_OPENS_FOR_RECOMMENDATION } from './send-time-repository';
+export type { SendTimeRepository, HourlyOpenBucket } from './send-time-repository';
 
-export { createSponsorRepository } from './sponsor-repository.js';
+export { createSponsorRepository } from './sponsor-repository';
 export type {
   SponsorRepository,
   CreateSponsorData,
   UpdateSponsorData,
-} from './sponsor-repository.js';
+} from './sponsor-repository';
 
 export {
   createSponsorAnalyticsRepository,
   mapSponsorClickRows,
-} from './sponsor-analytics-repository.js';
+} from './sponsor-analytics-repository';
 export type {
   SponsorAnalyticsRepository,
   SponsorIssueClickRow,
-} from './sponsor-analytics-repository.js';
+} from './sponsor-analytics-repository';
 
-export { getDefaultTopic, getDefaultTopicId } from './default-topic.js';
+export { getDefaultTopic, getDefaultTopicId } from './default-topic';

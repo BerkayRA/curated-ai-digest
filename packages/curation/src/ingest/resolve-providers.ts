@@ -1,8 +1,8 @@
-import { createRssProvider } from './rss-source.js';
-import { createExaProvider } from './exa-source.js';
-import { createRadarProvider } from './radar-source.js';
-import { defaultProviders } from './providers.js';
-import type { SourceProvider, Logger } from './types.js';
+import { createRssProvider } from './rss-source';
+import { createExaProvider } from './exa-source';
+import { createRadarProvider } from './radar-source';
+import { defaultProviders } from './providers';
+import type { SourceProvider, Logger } from './types';
 
 // ---------------------------------------------------------------------------
 // Resolve source providers from the DB

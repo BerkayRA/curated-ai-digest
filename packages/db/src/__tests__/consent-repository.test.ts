@@ -6,7 +6,7 @@
  */
 
 import { describe, it, expect, vi } from 'vitest';
-import { createSubscriberTopicRepository } from '../subscriber-topic-repository.js';
+import { createSubscriberTopicRepository } from '../subscriber-topic-repository';
 
 type MockFn = ReturnType<typeof vi.fn>;
 

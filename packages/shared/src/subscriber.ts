@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { SubscriberStatusSchema } from './enums.js';
-import { emailSchema } from './primitives.js';
-import { TopicSlugSchema } from './topic.js';
+import { SubscriberStatusSchema } from './enums';
+import { emailSchema } from './primitives';
+import { TopicSlugSchema } from './topic';
 
 // ---------------------------------------------------------------------------
 // Subscriber DTOs

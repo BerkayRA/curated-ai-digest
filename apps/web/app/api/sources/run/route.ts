@@ -13,9 +13,9 @@
  */
 
 import { NextResponse } from 'next/server';
-import { ok, err } from '@/lib/api-response.js';
-import { getErrorMessage } from '@/lib/error.js';
-import { assertSameOrigin } from '@/lib/assert-same-origin.js';
+import { ok, err } from '@/lib/api-response';
+import { getErrorMessage } from '@/lib/error';
+import { assertSameOrigin } from '@/lib/assert-same-origin';
 import type { Logger } from '@digest/curation';
 
 export const dynamic = 'force-dynamic';

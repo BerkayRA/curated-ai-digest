@@ -41,8 +41,8 @@ import {
   Link,
 } from '@react-email/components';
 import { color } from '@digest/brand';
-import type { DigestEmailData, DigestItem } from '../types.js';
-import { getStrings } from '../i18n.js';
+import type { DigestEmailData, DigestItem } from '../types';
+import { getStrings } from '../i18n';
 
 // ---------------------------------------------------------------------------
 // Constants — inline token literals (CSS custom properties unsupported in Outlook)

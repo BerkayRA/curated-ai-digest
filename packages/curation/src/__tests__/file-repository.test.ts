@@ -2,9 +2,9 @@ import { describe, it, expect } from 'vitest';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import * as fs from 'node:fs/promises';
-import { createFileRepository } from '../ingest/file-repository.js';
-import { readPool, LATEST_FILE, INDEX_FILE } from '../ingest/candidate-file.js';
-import type { EnrichedCandidate } from '../ingest/types.js';
+import { createFileRepository } from '../ingest/file-repository';
+import { readPool, LATEST_FILE, INDEX_FILE } from '../ingest/candidate-file';
+import type { EnrichedCandidate } from '../ingest/types';
 
 // ---------------------------------------------------------------------------
 // Fixtures

@@ -1,6 +1,6 @@
 import { Prisma, type PrismaClient } from '@prisma/client';
 
-import { prisma as defaultClient } from './index.js';
+import { prisma as defaultClient } from './index';
 
 // ---------------------------------------------------------------------------
 // Send-time optimization — buckets historical opens (EmailEvent.occurredAt) by

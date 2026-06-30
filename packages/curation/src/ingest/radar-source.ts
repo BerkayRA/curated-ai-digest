@@ -4,7 +4,7 @@ import type {
   SourceContext,
   SourceFetchResult,
   SourceProvider,
-} from './types.js';
+} from './types';
 
 // ---------------------------------------------------------------------------
 // On-Prem AI Adoption Radar source

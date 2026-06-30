@@ -19,7 +19,7 @@ import {
   type Category,
   type Dimension,
   type DimensionWeights,
-} from './types.js';
+} from './types';
 
 // ---- Leaf schemas ----------------------------------------------------------
 

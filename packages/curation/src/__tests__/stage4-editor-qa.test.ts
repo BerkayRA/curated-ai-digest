@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { runEditorQaStage, buildSystemPrompt } from '../pipeline/stage4-editor-qa.js';
+import { runEditorQaStage, buildSystemPrompt } from '../pipeline/stage4-editor-qa';
 import type {
   StageOptions,
   PipelineRepository,
@@ -7,9 +7,9 @@ import type {
   CopywriteOutput,
   PipelineRunRecord,
   TopicContext,
-} from '../pipeline/types.js';
-import type { Logger } from '../ingest/types.js';
-import type { AnthropicClient } from '../pipeline/types.js';
+} from '../pipeline/types';
+import type { Logger } from '../ingest/types';
+import type { AnthropicClient } from '../pipeline/types';
 
 // ---------------------------------------------------------------------------
 // Helpers

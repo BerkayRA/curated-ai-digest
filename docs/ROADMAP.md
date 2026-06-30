@@ -42,7 +42,7 @@ A self‑hosted, Claude‑powered weekly AI‑news digest for Mega Bilgisayar Ti
 
 Stabilize the flaky `web#test` source tests; baseline visual snapshots and make the E2E smoke a required gate; set `APP_BASE_URL` so email assets/links are absolute; confirm Claude pricing for trustworthy cost reporting; minor housekeeping (prune dead UI, clear stale dev drafts).
 
-> **Maintenance — done:** Next 14→**15.5.19** + Vitest 2→**3.2.6** upgrade shipped (async request APIs migrated; React kept at 18.3). See [ADR‑0013](adr/ADR-0013-next15-vitest3-upgrade.md). Tracked follow-ups (deferred): Turbopack migration (drop .js specifiers across /* packages, then remove --webpack) and ESLint 9 + flat config (to adopt eslint-config-next 16). See [ADR-0016](adr/ADR-0016-next16-vitest4-upgrade.md).
+> **Maintenance — done:** Next 14→**15.5.19** + Vitest 2→**3.2.6** upgrade shipped (async request APIs migrated; React kept at 18.3). See [ADR‑0013](adr/ADR-0013-next15-vitest3-upgrade.md). Next → **16.2.9** + Vitest → **4.1.9** ([ADR‑0016](adr/ADR-0016-next16-vitest4-upgrade.md)), React → **19.2.7** ([ADR‑0015](adr/ADR-0015-react-19-upgrade.md)), and **Turbopack** migration ([ADR‑0017](adr/ADR-0017-turbopack-migration.md)) all shipped. Remaining tracked follow-up (deferred): ESLint 9 + flat config (to adopt eslint-config-next 16).
 >
 > **Maintenance — done:** per-IP rate limiting on the public archive (+RSS). See [ADR‑0014](adr/ADR-0014-archive-rate-limiting.md).
 

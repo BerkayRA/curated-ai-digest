@@ -4,8 +4,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { assignVariant, selectWinner } from '../ab-split.js';
-import type { VariantStats } from '../ab-split.js';
+import { assignVariant, selectWinner } from '../ab-split';
+import type { VariantStats } from '../ab-split';
 
 describe('assignVariant', () => {
   it('assigns in-test recipients to 0/1 by modulo of position', () => {

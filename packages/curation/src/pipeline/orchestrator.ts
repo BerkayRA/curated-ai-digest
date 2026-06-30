@@ -5,24 +5,24 @@
 // ---------------------------------------------------------------------------
 
 import Anthropic from '@anthropic-ai/sdk';
-import { runIngest } from '../ingest/orchestrator.js';
-import { runRankStage } from './stage1-rank.js';
-import { runCurateStage } from './stage2-curate.js';
-import { runCopywriteStage } from './stage3-copywrite.js';
-import { runEditorQaStage } from './stage4-editor-qa.js';
-import { runRenderStage } from './stage5-render.js';
-import type { RenderFn } from './stage5-render.js';
-import { createPipelinePrismaRepository } from './repository.js';
-import { MAX_QA_RETRIES } from './config.js';
+import { runIngest } from '../ingest/orchestrator';
+import { runRankStage } from './stage1-rank';
+import { runCurateStage } from './stage2-curate';
+import { runCopywriteStage } from './stage3-copywrite';
+import { runEditorQaStage } from './stage4-editor-qa';
+import { runRenderStage } from './stage5-render';
+import type { RenderFn } from './stage5-render';
+import { createPipelinePrismaRepository } from './repository';
+import { MAX_QA_RETRIES } from './config';
 import type {
   PipelineRepository,
   PipelineResult,
   PipelineRunRecord,
   StageOptions,
   TopicContext,
-} from './types.js';
-import type { Logger } from '../ingest/types.js';
-import type { IngestOptions } from '../ingest/orchestrator.js';
+} from './types';
+import type { Logger } from '../ingest/types';
+import type { IngestOptions } from '../ingest/orchestrator';
 
 // ---------------------------------------------------------------------------
 // Public API types
@@ -155,7 +155,7 @@ export async function runWeeklyPipeline(
     ingestOptions = {},
     maxQaRetries = MAX_QA_RETRIES,
     candidateLimit = 30,
-    renderFn = async (_data: import('./stage5-render.js').DigestEmailData) => ({
+    renderFn = async (_data: import('./stage5-render').DigestEmailData) => ({
       html: '<!-- pipeline render stub — wire up renderDigestEmail from @digest/email in production -->',
       text: '',
     }),

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { MODEL_MAP, PRICING, calcCostUsd, MAX_QA_RETRIES } from '../pipeline/config.js';
+import { MODEL_MAP, PRICING, calcCostUsd, MAX_QA_RETRIES } from '../pipeline/config';
 
 describe('pipeline config', () => {
   it('MODEL_MAP has all required stages', () => {

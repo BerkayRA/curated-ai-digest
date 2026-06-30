@@ -11,9 +11,9 @@ import {
   CANDIDATES_DIR_DEFAULT,
   LATEST_FILE,
   INDEX_FILE,
-} from '../ingest/candidate-file.js';
-import type { StoredCandidate } from '../ingest/candidate-file.js';
-import type { EnrichedCandidate } from '../ingest/types.js';
+} from '../ingest/candidate-file';
+import type { StoredCandidate } from '../ingest/candidate-file';
+import type { EnrichedCandidate } from '../ingest/types';
 
 // ---------------------------------------------------------------------------
 // Fixtures

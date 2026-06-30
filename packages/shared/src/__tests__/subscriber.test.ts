@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { SubscriberImportRowSchema, CreateSubscriberSchema } from '../subscriber.js';
+import { SubscriberImportRowSchema, CreateSubscriberSchema } from '../subscriber';
 
 describe('SubscriberImportRowSchema', () => {
   it('parses a full valid row', () => {

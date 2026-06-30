@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { EmailProviderKindSchema } from './enums.js';
-import { emailSchema, timeHHmmSchema } from './primitives.js';
+import { EmailProviderKindSchema } from './enums';
+import { emailSchema, timeHHmmSchema } from './primitives';
 
 // ---------------------------------------------------------------------------
 // Settings DTO — mirrors the single-row Settings model

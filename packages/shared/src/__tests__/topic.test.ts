@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { CreateTopicSchema, UpdateTopicSchema } from '../topic.js';
+import { CreateTopicSchema, UpdateTopicSchema } from '../topic';
 
 describe('CreateTopicSchema — Phase 5 white-label fields', () => {
   const base = { slug: 'fintech-weekly', name: 'FinTech Weekly' };

@@ -6,8 +6,8 @@
  */
 
 import { prisma, createTopicRepository } from '@digest/db';
-import { logger } from './logger.js';
-import { startScheduler } from './scheduler.js';
+import { logger } from './logger';
+import { startScheduler } from './scheduler';
 
 // ---------------------------------------------------------------------------
 // Env validation

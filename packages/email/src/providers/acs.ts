@@ -25,16 +25,16 @@
 import { EmailClient, KnownEmailSendStatus } from '@azure/communication-email';
 import { DefaultAzureCredential } from '@azure/identity';
 import type { EmailProviderKind } from '@digest/shared';
-import { sendBatchWithLimits } from './rate-limit.js';
+import { sendBatchWithLimits } from './rate-limit';
 import type {
   EmailMessage,
   EmailProvider,
   EmailRecipient,
   ProviderLogger,
   SendResult,
-} from './provider.js';
-import { noopLogger } from './provider.js';
-import type { BatchSendOptions } from './rate-limit.js';
+} from './provider';
+import { noopLogger } from './provider';
+import type { BatchSendOptions } from './rate-limit';
 
 // ---------------------------------------------------------------------------
 // Config

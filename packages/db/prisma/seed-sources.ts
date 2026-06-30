@@ -1,9 +1,9 @@
 import type { PrismaClient } from '@prisma/client';
-import { FEEDS, EXA_QUERIES } from '../../curation/src/ingest/sources.js';
+import { FEEDS, EXA_QUERIES } from '../../curation/src/ingest/sources';
 import {
   DEFAULT_RADAR_FEED_URL,
   RADAR_CATEGORIES,
-} from '../../curation/src/ingest/radar-source.js';
+} from '../../curation/src/ingest/radar-source';
 
 // ---------------------------------------------------------------------------
 // Idempotent Source seed — upsert all static sources into the DB.

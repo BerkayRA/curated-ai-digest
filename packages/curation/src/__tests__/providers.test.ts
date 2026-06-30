@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { defaultProviders, isRadarEnabled } from '../ingest/providers.js';
-import { rssProvider } from '../ingest/rss-source.js';
-import { exaProvider, topicTunedQueries } from '../ingest/exa-source.js';
-import { radarProvider } from '../ingest/radar-source.js';
-import { DEFAULT_TOPIC } from '../ingest/sources.js';
-import type { Logger, SourceContext } from '../ingest/types.js';
+import { defaultProviders, isRadarEnabled } from '../ingest/providers';
+import { rssProvider } from '../ingest/rss-source';
+import { exaProvider, topicTunedQueries } from '../ingest/exa-source';
+import { radarProvider } from '../ingest/radar-source';
+import { DEFAULT_TOPIC } from '../ingest/sources';
+import type { Logger, SourceContext } from '../ingest/types';
 
 // ---------------------------------------------------------------------------
 // Source-provider unit tests — no network or DB.
