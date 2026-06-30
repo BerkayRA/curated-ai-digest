@@ -75,6 +75,9 @@ export function NewIssueForm({ defaultIsoWeek, topicSlug }: NewIssueFormProps) {
 
   useEffect(() => {
     let cancelled = false;
+    // Intentional loading-state set for an on-mount async fetch (not a
+    // props→state sync); this is the sanctioned data-fetch effect pattern.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCandLoading(true);
     fetch(`/api/candidates/recent${topicQuery(topicSlug)}`)
       .then((r) => r.json() as Promise<ApiResponse<CandData>>)

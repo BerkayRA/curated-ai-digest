@@ -69,41 +69,49 @@ export function TopicFormPanel({ open, topic, onClose, onSaved }: TopicFormPanel
   const [signupCopied, setSignupCopied] = useState(false);
 
   // ── Populate when editing ─────────────────────────────────
+  // Reset the form whenever the panel (re)opens or the edited topic changes —
+  // done during render (React's sanctioned alternative to a setState-in-effect
+  // sync; preserves the always-mounted slide animation).
 
-  useEffect(() => {
-    if (!open) return;
-    if (topic) {
-      setSlug(topic.slug);
-      setName(topic.name);
-      setDescription(topic.description ?? '');
-      setAudience(topic.audience ?? '');
-      setVoice(topic.voice ?? '');
-      setStatus(topic.status as TopicStatus);
-      setConsentMode(topic.consentMode as ConsentMode);
-      setTier((topic.tier as TopicTier) ?? 'free');
-      setLanguage((topic.language as Language) ?? 'tr');
-      setBrandName(topic.brandName ?? '');
-      setBrandLogoUrl(topic.brandLogoUrl ?? '');
-      setBrandColorHex(topic.brandColorHex ?? '');
-      setBrandFooterText(topic.brandFooterText ?? '');
-    } else {
-      setSlug('');
-      setName('');
-      setDescription('');
-      setAudience('');
-      setVoice('');
-      setStatus('active');
-      setConsentMode('business');
-      setTier('free');
-      setLanguage('tr');
-      setBrandName('');
-      setBrandLogoUrl('');
-      setBrandColorHex('');
-      setBrandFooterText('');
+  const [prevOpen, setPrevOpen] = useState(open);
+  const [prevTopic, setPrevTopic] = useState(topic);
+  if (open !== prevOpen || topic !== prevTopic) {
+    setPrevOpen(open);
+    setPrevTopic(topic);
+    if (open) {
+      if (topic) {
+        setSlug(topic.slug);
+        setName(topic.name);
+        setDescription(topic.description ?? '');
+        setAudience(topic.audience ?? '');
+        setVoice(topic.voice ?? '');
+        setStatus(topic.status as TopicStatus);
+        setConsentMode(topic.consentMode as ConsentMode);
+        setTier((topic.tier as TopicTier) ?? 'free');
+        setLanguage((topic.language as Language) ?? 'tr');
+        setBrandName(topic.brandName ?? '');
+        setBrandLogoUrl(topic.brandLogoUrl ?? '');
+        setBrandColorHex(topic.brandColorHex ?? '');
+        setBrandFooterText(topic.brandFooterText ?? '');
+      } else {
+        setSlug('');
+        setName('');
+        setDescription('');
+        setAudience('');
+        setVoice('');
+        setStatus('active');
+        setConsentMode('business');
+        setTier('free');
+        setLanguage('tr');
+        setBrandName('');
+        setBrandLogoUrl('');
+        setBrandColorHex('');
+        setBrandFooterText('');
+      }
+      setFormError(null);
+      setSignupCopied(false);
     }
-    setFormError(null);
-    setSignupCopied(false);
-  }, [open, topic]);
+  }
 
   // ── Focus management on open ──────────────────────────────
 

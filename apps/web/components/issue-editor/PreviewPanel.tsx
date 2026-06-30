@@ -88,6 +88,9 @@ export function PreviewPanel({ issueId, subject, preheader, isoWeek, items }: Pr
   }, [issueId, debouncedSubject, debouncedPreheader, isoWeek, debouncedItems]);
 
   useEffect(() => {
+    // Intentional loading/result-state set for an async preview fetch (not a
+    // props→state sync); this is the sanctioned data-fetch effect pattern.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void fetchPreview();
     return () => abortRef.current?.abort();
   }, [fetchPreview]);

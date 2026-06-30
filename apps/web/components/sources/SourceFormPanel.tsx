@@ -113,32 +113,40 @@ export function SourceFormPanel({
   const { showUrl, showRadar, showExa } = typeFieldsVisible(type);
 
   // ── Populate when editing ─────────────────────────────────
+  // Reset the form whenever the panel (re)opens or the edited source changes —
+  // done during render (React's sanctioned alternative to a setState-in-effect
+  // sync; preserves the always-mounted slide animation).
 
-  useEffect(() => {
-    if (!open) return;
-    if (source) {
-      setType(source.type as SourceType);
-      setLabel(source.label);
-      setUrl(source.url ?? '');
-      setExaQueries(extractQueriesText(source.config));
-      setRadarCategories(extractRadarCategories(source.config));
-      setRadarChangeTypes(extractRadarChangeTypes(source.config));
-      setRadarMaxItems(extractRadarMaxItems(source.config));
-      setRadarSiteRoot(extractRadarSiteRoot(source.config));
-      setEnabled(source.enabled);
-    } else {
-      setType('rss');
-      setLabel('');
-      setUrl('');
-      setExaQueries('');
-      setRadarCategories([]);
-      setRadarChangeTypes([]);
-      setRadarMaxItems('');
-      setRadarSiteRoot('');
-      setEnabled(true);
+  const [prevOpen, setPrevOpen] = useState(open);
+  const [prevSource, setPrevSource] = useState(source);
+  if (open !== prevOpen || source !== prevSource) {
+    setPrevOpen(open);
+    setPrevSource(source);
+    if (open) {
+      if (source) {
+        setType(source.type as SourceType);
+        setLabel(source.label);
+        setUrl(source.url ?? '');
+        setExaQueries(extractQueriesText(source.config));
+        setRadarCategories(extractRadarCategories(source.config));
+        setRadarChangeTypes(extractRadarChangeTypes(source.config));
+        setRadarMaxItems(extractRadarMaxItems(source.config));
+        setRadarSiteRoot(extractRadarSiteRoot(source.config));
+        setEnabled(source.enabled);
+      } else {
+        setType('rss');
+        setLabel('');
+        setUrl('');
+        setExaQueries('');
+        setRadarCategories([]);
+        setRadarChangeTypes([]);
+        setRadarMaxItems('');
+        setRadarSiteRoot('');
+        setEnabled(true);
+      }
+      setFormError(null);
     }
-    setFormError(null);
-  }, [open, source]);
+  }
 
   // ── Focus management on open ──────────────────────────────
 
