@@ -51,6 +51,12 @@ route handler or RSC page — and therefore before any DB query — runs.
     deployment, not a regression.
 - **No effect on authenticated routes** — the guard matches only `/archive` and
   `/archive/*`; everything else flows through the unchanged auth path.
+- **Out of scope: distributed (multi-IP) floods.** Per-IP limiting bounds a
+  single abusive client; a botnet or residential-proxy pool spreading load across
+  many IPs is not stopped by this control. Mitigating that requires edge-level
+  blocking (a WAF / Cloudflare), which is a deployment concern, not application
+  code. The matcher is also lowercase-only (`isArchivePath`), relying on Next.js
+  normalising incoming path case before middleware — pinned by a test.
 
 ## Verification
 

@@ -28,6 +28,13 @@ describe('isArchivePath', () => {
     expect(isArchivePath('/archived')).toBe(false); // must be exact or /archive/
     expect(isArchivePath('/api/topics')).toBe(false);
   });
+
+  it('is case-sensitive (Next.js normalises path case upstream)', () => {
+    // Documents the assumption: the matcher is lowercase-only; Next lowercases
+    // incoming pathnames before middleware runs, so this is not a real gap.
+    expect(isArchivePath('/Archive/foo')).toBe(false);
+    expect(isArchivePath('/ARCHIVE')).toBe(false);
+  });
 });
 
 describe('checkArchiveRateLimit', () => {
