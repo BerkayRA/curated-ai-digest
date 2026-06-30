@@ -8,9 +8,11 @@ const mockPollUntilDone = vi.fn();
 const mockBeginSend = vi.fn();
 
 vi.mock('@azure/communication-email', () => ({
-  EmailClient: vi.fn().mockImplementation(() => ({
-    beginSend: mockBeginSend,
-  })),
+  // Vitest 4 constructs mock impls via Reflect.construct — use a regular
+  // (constructable) function rather than an arrow.
+  EmailClient: vi.fn(function () {
+    return { beginSend: mockBeginSend };
+  }),
   KnownEmailSendStatus: {
     NotStarted: 'NotStarted',
     Running: 'Running',
@@ -22,8 +24,8 @@ vi.mock('@azure/communication-email', () => ({
 
 // Mock @azure/identity so DefaultAzureCredential doesn't try to auth
 vi.mock('@azure/identity', () => ({
-  DefaultAzureCredential: vi.fn().mockImplementation(() => ({})),
-  ClientSecretCredential: vi.fn().mockImplementation(() => ({})),
+  DefaultAzureCredential: vi.fn(function () { return {}; }),
+  ClientSecretCredential: vi.fn(function () { return {}; }),
 }));
 
 import { AcsEmailProvider } from '../../providers/acs.js';

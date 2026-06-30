@@ -34,9 +34,8 @@ export default function nextConfig(phase) {
       '@digest/delivery',
       '@digest/curation',
     ],
-    // argon2 uses native Node.js addons (node:crypto) and must never be bundled
-    // by webpack. Mark it as external so Next.js requires it at runtime instead.
-    // Renamed from experimental.serverComponentsExternalPackages in Next.js 15.
+    // argon2 (native Node addon) + Node-only libs kept out of the bundle and
+    // required at runtime. Bundler-agnostic.
     serverExternalPackages: ['argon2', 'exa-js', 'rss-parser'],
     async headers() {
       return [
@@ -80,25 +79,25 @@ export default function nextConfig(phase) {
         },
       ];
     },
+    // We build/dev with the `--webpack` flag (see package.json): the workspace
+    // packages import their own modules with explicit `.js` specifiers that point
+    // at `.ts` sources (NodeNext). Webpack's `extensionAlias` remaps those; Next
+    // 16's default Turbopack has no equivalent for this monorepo layout yet, so we
+    // stay on webpack. Migrating to Turbopack would mean dropping the `.js`
+    // specifiers across all @digest/* packages (tracked follow-up).
     webpack: (config, { nextRuntime }) => {
-      // Resolve .js extension imports in ESM workspace packages to .ts source files.
-      // Workspace packages use NodeNext module resolution with explicit .js extensions,
-      // but webpack resolves source .ts files directly via transpilePackages.
       config.resolve.extensionAlias = {
         '.js': ['.ts', '.tsx', '.js'],
         '.jsx': ['.tsx', '.jsx'],
       };
-
-      // argon2 is a native Node.js addon. Externalize it ONLY for the Node.js server
-      // build so it is required at runtime. It must NEVER be externalized (or imported)
-      // for the Edge Runtime — middleware uses auth.config.ts which doesn't import it.
+      // Belt-and-suspenders with serverExternalPackages: never bundle the native
+      // argon2 addon into the Node server build.
       if (nextRuntime === 'nodejs') {
         config.externals = [
           ...(Array.isArray(config.externals) ? config.externals : []),
           'argon2',
         ];
       }
-
       return config;
     },
   };

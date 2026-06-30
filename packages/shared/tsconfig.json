@@ -2,7 +2,12 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "rootDir": "src",
-    "outDir": "dist"
+    "outDir": "dist",
+    // @digest/shared runs in both Node and the browser. Declare the DOM lib so the
+    // universal `URL` global (used by the http(s) URL guards in primitives.ts)
+    // resolves explicitly, rather than relying on a transitive @types/node that a
+    // dependency bump can shift out of scope.
+    "lib": ["ES2022", "DOM"]
   },
   "include": ["src"]
 }

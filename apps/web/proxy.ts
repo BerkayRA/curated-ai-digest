@@ -1,5 +1,6 @@
 /**
- * Phase 11 — Authentication middleware.
+ * Authentication proxy (Next.js 16 renamed the `middleware` convention to
+ * `proxy`; same Edge handler + matcher API).
  *
  * Protects all routes except:
  *   /login              — sign-in page
@@ -16,7 +17,7 @@
 
 import NextAuth from 'next-auth';
 import { NextResponse } from 'next/server';
-import type { NextMiddleware } from 'next/server';
+import type { NextProxy } from 'next/server';
 import { authConfig } from '@/auth.config';
 import { isPublicPath, shouldReturnJson } from '@/lib/auth-guard';
 import { checkArchiveRateLimit } from '@/lib/public-rate-limit';
@@ -24,7 +25,7 @@ import { checkArchiveRateLimit } from '@/lib/public-rate-limit';
 // Build an Edge-safe auth() from the config that does NOT import argon2.
 const { auth } = NextAuth(authConfig);
 
-const middleware: NextMiddleware = auth((request) => {
+const proxy: NextProxy = auth((request) => {
   const { pathname } = request.nextUrl;
 
   // Per-IP rate limit for the public archive (+ RSS) — bounds abuse of the
@@ -55,9 +56,9 @@ const middleware: NextMiddleware = auth((request) => {
   }
 
   return NextResponse.next();
-}) as unknown as NextMiddleware;
+}) as unknown as NextProxy;
 
-export default middleware;
+export default proxy;
 
 /**
  * Run middleware on all routes. The handler itself skips public paths,

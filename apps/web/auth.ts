@@ -4,7 +4,7 @@
  * This file consumes the edge-safe `authConfig` and ADDS the argon2-based local
  * Credentials provider. It is imported ONLY by Node-runtime code (the
  * /api/auth/[...nextauth] route handler and server components via `auth()`).
- * `middleware.ts` must import `auth.config.ts` instead — never this file —
+ * `proxy.ts` must import `auth.config.ts` instead — never this file —
  * so argon2 (a native module) never enters the Edge Runtime bundle.
  *
  * See apps/web/.env.example for all required environment variables.

@@ -18,12 +18,12 @@ vi.mock('@microsoft/microsoft-graph-client', () => {
 });
 
 vi.mock('@microsoft/microsoft-graph-client/authProviders/azureTokenCredentials/index.js', () => ({
-  TokenCredentialAuthenticationProvider: vi.fn().mockImplementation(() => ({})),
+  TokenCredentialAuthenticationProvider: vi.fn(function () { return {}; }),
 }));
 
 vi.mock('@azure/identity', () => ({
-  ClientSecretCredential: vi.fn().mockImplementation(() => ({})),
-  DefaultAzureCredential: vi.fn().mockImplementation(() => ({})),
+  ClientSecretCredential: vi.fn(function () { return {}; }),
+  DefaultAzureCredential: vi.fn(function () { return {}; }),
 }));
 
 // Import after mocks are set up
