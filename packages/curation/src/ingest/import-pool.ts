@@ -94,8 +94,10 @@ export async function importCommittedCandidates(
   opts: ImportPoolOptions = {},
 ): Promise<ImportPoolResult> {
   const logger = opts.logger ?? silentLogger;
+  // turbopackIgnore: runtime filesystem path (the candidate pool dir), not a
+  // module for Turbopack to statically trace.
   const dir =
-    opts.dir ?? path.resolve(process.cwd(), CANDIDATES_DIR_DEFAULT);
+    opts.dir ?? path.resolve(/* turbopackIgnore: true */ process.cwd(), CANDIDATES_DIR_DEFAULT);
 
   logger.info('import-pool.start', { dir });
 
