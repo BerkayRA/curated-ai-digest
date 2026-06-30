@@ -22,10 +22,11 @@ import styles from '../archive.module.css';
 export const revalidate = 300;
 
 interface ArchiveIndexProps {
-  params: { topicSlug: string };
+  params: Promise<{ topicSlug: string }>;
 }
 
-export default async function ArchiveIndexPage({ params }: ArchiveIndexProps) {
+export default async function ArchiveIndexPage(props: ArchiveIndexProps) {
+  const params = await props.params;
   const topic = await createTopicRepository(prisma).findBySlug(params.topicSlug);
   if (!topic) {
     notFound();

@@ -19,7 +19,7 @@ import { assertSameOrigin } from '@/lib/assert-same-origin.js';
 export const dynamic = 'force-dynamic';
 
 interface RouteParams {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 const MembershipMutationSchema = z.object({
@@ -27,7 +27,8 @@ const MembershipMutationSchema = z.object({
   action: z.enum(['add', 'remove']),
 });
 
-export async function GET(_request: Request, { params }: RouteParams): Promise<NextResponse> {
+export async function GET(_request: Request, props: RouteParams): Promise<NextResponse> {
+  const params = await props.params;
   try {
     const repo = createSubscriberTopicRepository(prisma);
     const memberships = await repo.findBySubscriberId(params.id);
@@ -37,7 +38,8 @@ export async function GET(_request: Request, { params }: RouteParams): Promise<N
   }
 }
 
-export async function PUT(request: Request, { params }: RouteParams): Promise<NextResponse> {
+export async function PUT(request: Request, props: RouteParams): Promise<NextResponse> {
+  const params = await props.params;
   const csrfCheck = assertSameOrigin(request);
   if (csrfCheck !== null) return csrfCheck;
 

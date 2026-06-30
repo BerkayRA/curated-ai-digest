@@ -132,7 +132,7 @@ describe('DELETE /api/suppression/[id]', () => {
     suppressionFindUnique.mockResolvedValue({ id: 's-1', email: 'a@x.test', reason: 'manual' });
     auditLogCreate.mockResolvedValue({ id: 'al-1' });
 
-    const res = await DELETE(deleteRequest('s-1'), { params: { id: 's-1' } });
+    const res = await DELETE(deleteRequest('s-1'), { params: Promise.resolve({ id: 's-1' }) });
     const json = (await res.json()) as Envelope<{ deleted: boolean }>;
 
     expect(res.status).toBe(200);
@@ -150,7 +150,7 @@ describe('DELETE /api/suppression/[id]', () => {
   });
 
   it('rejects a cross-origin DELETE with 403', async () => {
-    const res = await DELETE(deleteRequest('s-1', 'http://evil.test'), { params: { id: 's-1' } });
+    const res = await DELETE(deleteRequest('s-1', 'http://evil.test'), { params: Promise.resolve({ id: 's-1' }) });
 
     expect(res.status).toBe(403);
     expect(remove).not.toHaveBeenCalled();

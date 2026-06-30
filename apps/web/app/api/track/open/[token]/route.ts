@@ -12,7 +12,7 @@ import { deriveTrackMeta } from '@/lib/track-meta';
 export const dynamic = 'force-dynamic';
 
 interface RouteParams {
-  params: { token: string };
+  params: Promise<{ token: string }>;
 }
 
 /** 1x1 transparent GIF body. */
@@ -35,7 +35,8 @@ function pixelResponse(): NextResponse {
   });
 }
 
-export async function GET(request: Request, { params }: RouteParams): Promise<NextResponse> {
+export async function GET(request: Request, props: RouteParams): Promise<NextResponse> {
+  const params = await props.params;
   try {
     const send = await prisma.send.findUnique({ where: { trackToken: params.token } });
     if (send) {

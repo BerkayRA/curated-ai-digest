@@ -1,4 +1,9 @@
+import { fileURLToPath } from 'node:url';
 import { PHASE_DEVELOPMENT_SERVER } from 'next/constants.js';
+
+// Monorepo root (two levels up from apps/web) — pins Next's file-tracing root so
+// it doesn't guess from multiple lockfiles (Next 15 warns otherwise).
+const repoRoot = fileURLToPath(new URL('../..', import.meta.url));
 
 /**
  * @param {string} phase - Next.js lifecycle phase (passed by the CLI).
@@ -20,6 +25,7 @@ export default function nextConfig(phase) {
 
   return {
     output: 'standalone',
+    outputFileTracingRoot: repoRoot,
     transpilePackages: [
       '@digest/brand',
       '@digest/shared',
@@ -30,11 +36,8 @@ export default function nextConfig(phase) {
     ],
     // argon2 uses native Node.js addons (node:crypto) and must never be bundled
     // by webpack. Mark it as external so Next.js requires it at runtime instead.
-    // Note: Next.js 14 uses the experimental key; this moves to a top-level key
-    // in Next.js 15.
-    experimental: {
-      serverComponentsExternalPackages: ['argon2', 'exa-js', 'rss-parser'],
-    },
+    // Renamed from experimental.serverComponentsExternalPackages in Next.js 15.
+    serverExternalPackages: ['argon2', 'exa-js', 'rss-parser'],
     async headers() {
       return [
         {

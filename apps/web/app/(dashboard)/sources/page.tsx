@@ -8,11 +8,12 @@ export const metadata = {
   title: 'Kaynaklar — Curated AI Digest',
 };
 
-export default async function SourcesPage({
-  searchParams,
-}: {
-  searchParams: { topic?: string };
-}) {
+export default async function SourcesPage(
+  props: {
+    searchParams: Promise<{ topic?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const topicId = await resolveTopicIdBySlug(searchParams.topic);
   const repo = createSourceRepository(prisma);
   const sources = await repo.findAllByTopic(topicId);

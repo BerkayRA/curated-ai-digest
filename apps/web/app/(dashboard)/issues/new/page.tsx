@@ -16,11 +16,12 @@ export const metadata = {
  * at the bottom of the form. The default ISO week is computed server-side so
  * the field is pre-filled with the upcoming week.
  */
-export default function NewIssuePage({
-  searchParams,
-}: {
-  searchParams: { topic?: string };
-}) {
+export default async function NewIssuePage(
+  props: {
+    searchParams: Promise<{ topic?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const defaultIsoWeek = nextIsoWeek();
 
   return (

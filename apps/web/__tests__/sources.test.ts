@@ -347,7 +347,7 @@ describe('GET /api/sources/[id]', () => {
 
     const { GET } = await import('../app/api/sources/[id]/route');
     const req = makeRequest('GET', '/api/sources/src-abc');
-    const res = await GET(req, { params: { id: 'src-abc' } });
+    const res = await GET(req, { params: Promise.resolve({ id: 'src-abc' }) });
     const body = (await res.json()) as { success: boolean; data: Source };
 
     expect(res.status).toBe(200);
@@ -361,7 +361,7 @@ describe('GET /api/sources/[id]', () => {
 
     const { GET } = await import('../app/api/sources/[id]/route');
     const req = makeRequest('GET', '/api/sources/missing');
-    const res = await GET(req, { params: { id: 'missing' } });
+    const res = await GET(req, { params: Promise.resolve({ id: 'missing' }) });
     const body = (await res.json()) as { success: boolean; error: string };
 
     expect(res.status).toBe(404);
@@ -384,7 +384,7 @@ describe('PATCH /api/sources/[id]', () => {
 
     const { PATCH } = await import('../app/api/sources/[id]/route');
     const req = makeRequest('PATCH', '/api/sources/src-1', { enabled: false });
-    const res = await PATCH(req, { params: { id: 'src-1' } });
+    const res = await PATCH(req, { params: Promise.resolve({ id: 'src-1' }) });
     const body = (await res.json()) as { success: boolean; data: Source };
 
     expect(res.status).toBe(200);
@@ -398,7 +398,7 @@ describe('PATCH /api/sources/[id]', () => {
     const req = makeRequest('PATCH', '/api/sources/src-1', {
       url: 'not-a-url',
     });
-    const res = await PATCH(req, { params: { id: 'src-1' } });
+    const res = await PATCH(req, { params: Promise.resolve({ id: 'src-1' }) });
     expect(res.status).toBe(400);
     const body = (await res.json()) as { success: boolean };
     expect(body.success).toBe(false);
@@ -410,7 +410,7 @@ describe('PATCH /api/sources/[id]', () => {
 
     const { PATCH } = await import('../app/api/sources/[id]/route');
     const req = makeRequest('PATCH', '/api/sources/missing', { enabled: false });
-    const res = await PATCH(req, { params: { id: 'missing' } });
+    const res = await PATCH(req, { params: Promise.resolve({ id: 'missing' }) });
     expect(res.status).toBe(404);
   });
 
@@ -418,7 +418,7 @@ describe('PATCH /api/sources/[id]', () => {
     await setupMocks();
     const { PATCH } = await import('../app/api/sources/[id]/route');
     const req = makeRequest('PATCH', '/api/sources/src-1', { enabled: false }, 'https://evil.com');
-    const res = await PATCH(req, { params: { id: 'src-1' } });
+    const res = await PATCH(req, { params: Promise.resolve({ id: 'src-1' }) });
     expect(res.status).toBe(403);
   });
 });
@@ -438,7 +438,7 @@ describe('DELETE /api/sources/[id]', () => {
 
     const { DELETE } = await import('../app/api/sources/[id]/route');
     const req = makeRequest('DELETE', '/api/sources/src-1');
-    const res = await DELETE(req, { params: { id: 'src-1' } });
+    const res = await DELETE(req, { params: Promise.resolve({ id: 'src-1' }) });
     const body = (await res.json()) as { success: boolean; data: Source };
 
     expect(res.status).toBe(200);
@@ -451,7 +451,7 @@ describe('DELETE /api/sources/[id]', () => {
 
     const { DELETE } = await import('../app/api/sources/[id]/route');
     const req = makeRequest('DELETE', '/api/sources/missing');
-    const res = await DELETE(req, { params: { id: 'missing' } });
+    const res = await DELETE(req, { params: Promise.resolve({ id: 'missing' }) });
     expect(res.status).toBe(404);
   });
 
@@ -459,7 +459,7 @@ describe('DELETE /api/sources/[id]', () => {
     await setupMocks();
     const { DELETE } = await import('../app/api/sources/[id]/route');
     const req = makeRequest('DELETE', '/api/sources/src-1', undefined, 'https://evil.com');
-    const res = await DELETE(req, { params: { id: 'src-1' } });
+    const res = await DELETE(req, { params: Promise.resolve({ id: 'src-1' }) });
     expect(res.status).toBe(403);
   });
 });
@@ -492,7 +492,7 @@ describe('POST /api/sources/[id]/test', () => {
 
     const { POST } = await import('../app/api/sources/[id]/test/route');
     const req = makeRequest('POST', '/api/sources/src-rss/test');
-    const res = await POST(req, { params: { id: 'src-rss' } });
+    const res = await POST(req, { params: Promise.resolve({ id: 'src-rss' }) });
     const body = (await res.json()) as {
       success: boolean;
       data: { ok: boolean; count: number; sample: Array<{ title: string; sourceUrl: string }>; errors: unknown[] };
@@ -527,7 +527,7 @@ describe('POST /api/sources/[id]/test', () => {
 
     const { POST } = await import('../app/api/sources/[id]/test/route');
     const req = makeRequest('POST', '/api/sources/src-exa/test');
-    const res = await POST(req, { params: { id: 'src-exa' } });
+    const res = await POST(req, { params: Promise.resolve({ id: 'src-exa' }) });
     const body = (await res.json()) as {
       success: boolean;
       data: { ok: boolean; count: number; sample: Array<{ title: string; sourceUrl: string }>; errors: unknown[] };
@@ -562,7 +562,7 @@ describe('POST /api/sources/[id]/test', () => {
 
     const { POST } = await import('../app/api/sources/[id]/test/route');
     const req = makeRequest('POST', '/api/sources/src-radar/test');
-    const res = await POST(req, { params: { id: 'src-radar' } });
+    const res = await POST(req, { params: Promise.resolve({ id: 'src-radar' }) });
     const body = (await res.json()) as {
       success: boolean;
       data: { ok: boolean; count: number; sample: unknown[]; errors: unknown[] };
@@ -586,7 +586,7 @@ describe('POST /api/sources/[id]/test', () => {
 
     const { POST } = await import('../app/api/sources/[id]/test/route');
     const req = makeRequest('POST', '/api/sources/src-rss/test');
-    await POST(req, { params: { id: 'src-rss' } });
+    await POST(req, { params: Promise.resolve({ id: 'src-rss' }) });
 
     expect(repo.create).not.toHaveBeenCalled();
     expect(repo.update).not.toHaveBeenCalled();
@@ -607,7 +607,7 @@ describe('POST /api/sources/[id]/test', () => {
 
     const { POST } = await import('../app/api/sources/[id]/test/route');
     const req = makeRequest('POST', '/api/sources/src-rss/test');
-    const res = await POST(req, { params: { id: 'src-rss' } });
+    const res = await POST(req, { params: Promise.resolve({ id: 'src-rss' }) });
     const body = (await res.json()) as {
       success: boolean;
       data: { ok: boolean; count: number; errors: unknown[] };
@@ -642,7 +642,7 @@ describe('POST /api/sources/[id]/test', () => {
 
     const { POST } = await import('../app/api/sources/[id]/test/route');
     const req = makeRequest('POST', '/api/sources/src-rss/test');
-    const res = await POST(req, { params: { id: 'src-rss' } });
+    const res = await POST(req, { params: Promise.resolve({ id: 'src-rss' }) });
     const body = (await res.json()) as {
       success: boolean;
       data: { ok: boolean; count: number; sample: unknown[] };
@@ -658,7 +658,7 @@ describe('POST /api/sources/[id]/test', () => {
 
     const { POST } = await import('../app/api/sources/[id]/test/route');
     const req = makeRequest('POST', '/api/sources/missing/test');
-    const res = await POST(req, { params: { id: 'missing' } });
+    const res = await POST(req, { params: Promise.resolve({ id: 'missing' }) });
     expect(res.status).toBe(404);
   });
 
@@ -666,7 +666,7 @@ describe('POST /api/sources/[id]/test', () => {
     await setupMocks();
     const { POST } = await import('../app/api/sources/[id]/test/route');
     const req = makeRequest('POST', '/api/sources/src-1/test', undefined, 'https://evil.com');
-    const res = await POST(req, { params: { id: 'src-1' } });
+    const res = await POST(req, { params: Promise.resolve({ id: 'src-1' }) });
     expect(res.status).toBe(403);
   });
 });

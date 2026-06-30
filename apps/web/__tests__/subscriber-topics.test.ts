@@ -94,7 +94,7 @@ describe('GET /api/subscribers/[id]/topics', () => {
     const { repo } = await setupMocks();
     const { GET } = await import('../app/api/subscribers/[id]/topics/route');
     const res = await GET(makeRequest('GET', '/api/subscribers/sub-1/topics'), {
-      params: { id: 'sub-1' },
+      params: Promise.resolve({ id: 'sub-1' }),
     });
     const body = (await res.json()) as { success: boolean; data: SubscriberTopic[] };
 
@@ -108,7 +108,7 @@ describe('GET /api/subscribers/[id]/topics', () => {
     vi.mocked(repo.findBySubscriberId).mockRejectedValue(new Error('DB down'));
     const { GET } = await import('../app/api/subscribers/[id]/topics/route');
     const res = await GET(makeRequest('GET', '/api/subscribers/sub-1/topics'), {
-      params: { id: 'sub-1' },
+      params: Promise.resolve({ id: 'sub-1' }),
     });
     expect(res.status).toBe(500);
   });
@@ -126,7 +126,7 @@ describe('PUT /api/subscribers/[id]/topics', () => {
     const { PUT } = await import('../app/api/subscribers/[id]/topics/route');
     const res = await PUT(
       makeRequest('PUT', '/api/subscribers/sub-1/topics', { topicId: 'topic-2', action: 'add' }),
-      { params: { id: 'sub-1' } },
+      { params: Promise.resolve({ id: 'sub-1' }) },
     );
     expect(res.status).toBe(200);
     expect(vi.mocked(repo.upsert)).toHaveBeenCalledWith({
@@ -142,7 +142,7 @@ describe('PUT /api/subscribers/[id]/topics', () => {
     const { PUT } = await import('../app/api/subscribers/[id]/topics/route');
     const res = await PUT(
       makeRequest('PUT', '/api/subscribers/sub-1/topics', { topicId: 'topic-2', action: 'remove' }),
-      { params: { id: 'sub-1' } },
+      { params: Promise.resolve({ id: 'sub-1' }) },
     );
     expect(res.status).toBe(200);
     expect(vi.mocked(repo.delete)).toHaveBeenCalledWith('sub-1', 'topic-2');
@@ -154,7 +154,7 @@ describe('PUT /api/subscribers/[id]/topics', () => {
     const { PUT } = await import('../app/api/subscribers/[id]/topics/route');
     const res = await PUT(
       makeRequest('PUT', '/api/subscribers/sub-1/topics', { topicId: 'topic-2', action: 'nope' }),
-      { params: { id: 'sub-1' } },
+      { params: Promise.resolve({ id: 'sub-1' }) },
     );
     expect(res.status).toBe(400);
   });
@@ -164,7 +164,7 @@ describe('PUT /api/subscribers/[id]/topics', () => {
     const { PUT } = await import('../app/api/subscribers/[id]/topics/route');
     const res = await PUT(
       makeRequest('PUT', '/api/subscribers/sub-1/topics', { action: 'add' }),
-      { params: { id: 'sub-1' } },
+      { params: Promise.resolve({ id: 'sub-1' }) },
     );
     expect(res.status).toBe(400);
   });
@@ -179,7 +179,7 @@ describe('PUT /api/subscribers/[id]/topics', () => {
         { topicId: 'topic-2', action: 'add' },
         'https://evil.com',
       ),
-      { params: { id: 'sub-1' } },
+      { params: Promise.resolve({ id: 'sub-1' }) },
     );
     expect(res.status).toBe(403);
   });
@@ -202,7 +202,7 @@ describe('GET /api/topics/[id]/subscribers', () => {
 
     const { GET } = await import('../app/api/topics/[id]/subscribers/route');
     const res = await GET(makeRequest('GET', '/api/topics/topic-1/subscribers'), {
-      params: { id: 'topic-1' },
+      params: Promise.resolve({ id: 'topic-1' }),
     });
     const body = (await res.json()) as {
       success: boolean;
@@ -222,7 +222,7 @@ describe('GET /api/topics/[id]/subscribers', () => {
     vi.mocked(repo.findByTopicId).mockRejectedValue(new Error('DB down'));
     const { GET } = await import('../app/api/topics/[id]/subscribers/route');
     const res = await GET(makeRequest('GET', '/api/topics/topic-1/subscribers'), {
-      params: { id: 'topic-1' },
+      params: Promise.resolve({ id: 'topic-1' }),
     });
     expect(res.status).toBe(500);
   });

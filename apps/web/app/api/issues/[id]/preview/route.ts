@@ -29,10 +29,12 @@ const PreviewBodySchema = z.object({
 });
 
 interface RouteParams {
-  params: { id: string };
+  // Next 15: route params are async. Unused here (preview renders from the body),
+  // but the type must be a Promise for the build's route-signature validation.
+  params: Promise<{ id: string }>;
 }
 
-export async function POST(request: Request, { params: _params }: RouteParams) {
+export async function POST(request: Request, _context: RouteParams) {
   try {
     const body: unknown = await request.json();
     const parsed = PreviewBodySchema.safeParse(body);

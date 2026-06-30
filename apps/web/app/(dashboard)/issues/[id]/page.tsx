@@ -17,10 +17,11 @@ import styles from './issue-detail.module.css';
 export const dynamic = 'force-dynamic';
 
 interface IssueDetailPageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
-export async function generateMetadata({ params }: IssueDetailPageProps) {
+export async function generateMetadata(props: IssueDetailPageProps) {
+  const params = await props.params;
   const issue = await prisma.issue.findUnique({
     where: { id: params.id },
     select: { subject: true, isoWeek: true },
@@ -33,7 +34,8 @@ export async function generateMetadata({ params }: IssueDetailPageProps) {
   };
 }
 
-export default async function IssueDetailPage({ params }: IssueDetailPageProps) {
+export default async function IssueDetailPage(props: IssueDetailPageProps) {
+  const params = await props.params;
   const issue = await prisma.issue.findUnique({
     where: { id: params.id },
     include: {

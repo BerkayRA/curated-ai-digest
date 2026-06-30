@@ -19,10 +19,8 @@ function baseUrl(): string {
   return (process.env['APP_BASE_URL'] ?? 'http://localhost:3100').replace(/\/$/, '');
 }
 
-export async function GET(
-  _request: Request,
-  { params }: { params: { topicSlug: string } },
-): Promise<Response> {
+export async function GET(_request: Request, props: { params: Promise<{ topicSlug: string }> }): Promise<Response> {
+  const params = await props.params;
   const topic = await createTopicRepository(prisma).findBySlug(params.topicSlug);
   if (!topic) {
     return new Response('Not found', { status: 404 });

@@ -74,10 +74,11 @@ async function entraSignIn(): Promise<void> {
 // ---------------------------------------------------------------------------
 
 interface LoginPageProps {
-  searchParams: { error?: string; callbackUrl?: string };
+  searchParams: Promise<{ error?: string; callbackUrl?: string }>;
 }
 
-export default async function LoginPage({ searchParams }: LoginPageProps) {
+export default async function LoginPage(props: LoginPageProps) {
+  const searchParams = await props.searchParams;
   // Already signed in — go to dashboard
   const session = await auth();
   if (session) {
@@ -123,7 +124,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
           {authMode === 'entra' ? (
             /* ── Entra SSO ── */
-            <form action={entraSignIn}>
+            (<form action={entraSignIn}>
               <button type="submit" className={styles.ssoButton}>
                 {/* Microsoft logo (simplified inline SVG) */}
                 <svg
@@ -139,10 +140,10 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                 </svg>
                 Microsoft ile giriş yap
               </button>
-            </form>
+            </form>)
           ) : (
             /* ── Local credentials form ── */
-            <form action={localSignIn} className={styles.form}>
+            (<form action={localSignIn} className={styles.form}>
               <div className={styles.fieldGroup}>
                 <label htmlFor="email" className={styles.label}>
                   E-posta
@@ -157,7 +158,6 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                   className={styles.input}
                 />
               </div>
-
               <div className={styles.fieldGroup}>
                 <label htmlFor="password" className={styles.label}>
                   Şifre
@@ -172,11 +172,10 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                   className={styles.input}
                 />
               </div>
-
               <button type="submit" className={styles.submitButton}>
                 Giriş Yap
               </button>
-            </form>
+            </form>)
           )}
         </div>
       </article>

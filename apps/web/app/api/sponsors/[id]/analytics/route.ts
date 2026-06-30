@@ -18,7 +18,7 @@ import { getErrorMessage } from '@/lib/error.js';
 export const dynamic = 'force-dynamic';
 
 interface RouteParams {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export interface SponsorAnalyticsPayload {
@@ -26,7 +26,8 @@ export interface SponsorAnalyticsPayload {
   byIssue: SponsorIssueClickRow[];
 }
 
-export async function GET(_request: Request, { params }: RouteParams): Promise<NextResponse> {
+export async function GET(_request: Request, props: RouteParams): Promise<NextResponse> {
+  const params = await props.params;
   try {
     const sponsorRepo = createSponsorRepository(prisma);
     const sponsor = await sponsorRepo.findById(params.id);
