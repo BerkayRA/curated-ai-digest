@@ -24,10 +24,11 @@ import styles from '../../archive.module.css';
 export const revalidate = 300;
 
 interface ArchiveIssueProps {
-  params: { topicSlug: string; isoWeek: string };
+  params: Promise<{ topicSlug: string; isoWeek: string }>;
 }
 
-export default async function ArchiveIssuePage({ params }: ArchiveIssueProps) {
+export default async function ArchiveIssuePage(props: ArchiveIssueProps) {
+  const params = await props.params;
   // Reject malformed week params before touching the DB (e.g. oversized strings).
   const week = isoWeekSchema.safeParse(params.isoWeek);
   if (!week.success) {

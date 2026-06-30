@@ -7,10 +7,11 @@ import { getErrorMessage } from '@/lib/error';
 export const dynamic = 'force-dynamic';
 
 interface RouteContext {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
-export async function GET(_request: NextRequest, { params }: RouteContext) {
+export async function GET(_request: NextRequest, props: RouteContext) {
+  const params = await props.params;
   try {
     const subscriber = await prisma.subscriber.findUnique({ where: { id: params.id } });
     if (!subscriber) {
@@ -22,7 +23,8 @@ export async function GET(_request: NextRequest, { params }: RouteContext) {
   }
 }
 
-export async function PATCH(request: NextRequest, { params }: RouteContext) {
+export async function PATCH(request: NextRequest, props: RouteContext) {
+  const params = await props.params;
   try {
     const body: unknown = await request.json();
     const parsed = UpdateSubscriberSchema.safeParse(body);
@@ -47,7 +49,8 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
   }
 }
 
-export async function DELETE(_request: NextRequest, { params }: RouteContext) {
+export async function DELETE(_request: NextRequest, props: RouteContext) {
+  const params = await props.params;
   try {
     const existing = await prisma.subscriber.findUnique({ where: { id: params.id } });
     if (!existing) {

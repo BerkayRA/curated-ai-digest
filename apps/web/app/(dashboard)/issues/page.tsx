@@ -11,11 +11,12 @@ export const metadata = {
   title: 'Arşiv — Curated AI Digest',
 };
 
-export default async function IssuesPage({
-  searchParams,
-}: {
-  searchParams: { topic?: string };
-}) {
+export default async function IssuesPage(
+  props: {
+    searchParams: Promise<{ topic?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const topicId = await resolveTopicIdBySlug(searchParams.topic);
   const issues = await prisma.issue.findMany({
     where: { topicId },

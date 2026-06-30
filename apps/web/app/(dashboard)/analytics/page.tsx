@@ -14,11 +14,12 @@ export const metadata = {
   title: 'Analitik — Curated AI Digest',
 };
 
-export default async function AnalyticsPage({
-  searchParams,
-}: {
-  searchParams?: { topic?: string };
-}) {
+export default async function AnalyticsPage(
+  props: {
+    searchParams?: Promise<{ topic?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const topicId = await resolveTopicIdBySlug(searchParams?.topic);
   const analytics = createAnalyticsRepository(prisma);
 

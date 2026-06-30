@@ -40,7 +40,9 @@ A self‑hosted, Claude‑powered weekly AI‑news digest for Mega Bilgisayar Ti
 
 ## Phase 0 — Hardening _(quick wins, no blockers)_
 
-Stabilize the flaky `web#test` source tests; baseline visual snapshots and make the E2E smoke a required gate; set `APP_BASE_URL` so email assets/links are absolute; confirm Claude pricing for trustworthy cost reporting; minor housekeeping (prune dead UI, clear stale dev drafts). Node 20→22 and Next 14→15 upgrades tracked separately.
+Stabilize the flaky `web#test` source tests; baseline visual snapshots and make the E2E smoke a required gate; set `APP_BASE_URL` so email assets/links are absolute; confirm Claude pricing for trustworthy cost reporting; minor housekeeping (prune dead UI, clear stale dev drafts).
+
+> **Maintenance — done:** Next 14→**15.5.19** + Vitest 2→**3.2.6** upgrade shipped (async request APIs migrated; React kept at 18.3). See [ADR‑0013](adr/ADR-0013-next15-vitest3-upgrade.md). Tracked follow-ups: React 18→19, and the next majors (Next 16 / Vitest 4).
 
 ## Phase 1 — Multi‑topic foundation _(flagship)_
 

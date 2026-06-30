@@ -20,7 +20,7 @@ export const metadata = {
 };
 
 interface PreferencesPageProps {
-  params: { token: string };
+  params: Promise<{ token: string }>;
 }
 
 /** Neutral standalone shell (invalid link, rate limit) — no subscriber data. */
@@ -57,8 +57,9 @@ function NoticeShell({
   );
 }
 
-export default async function PreferencesPage({ params }: PreferencesPageProps) {
-  const ip = getClientIp(headers() as unknown as Headers);
+export default async function PreferencesPage(props: PreferencesPageProps) {
+  const params = await props.params;
+  const ip = getClientIp(await headers() as unknown as Headers);
   const rate = checkRateLimit(ip, 'prefs-get', 30, 60_000);
   if (!rate.allowed) {
     return (

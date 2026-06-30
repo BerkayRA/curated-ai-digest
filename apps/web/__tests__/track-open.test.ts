@@ -31,7 +31,7 @@ describe('GET /api/track/open/[token]', () => {
     findUnique.mockResolvedValue({ id: 'send-1', trackToken: 'tok-known' });
 
     const res = await GET(makeRequest('tok-known', { 'user-agent': 'Mozilla iPhone' }), {
-      params: { token: 'tok-known' },
+      params: Promise.resolve({ token: 'tok-known' }),
     });
 
     expect(res.status).toBe(200);
@@ -47,7 +47,7 @@ describe('GET /api/track/open/[token]', () => {
   it('returns the pixel WITHOUT recording for an unknown token', async () => {
     findUnique.mockResolvedValue(null);
 
-    const res = await GET(makeRequest('tok-unknown'), { params: { token: 'tok-unknown' } });
+    const res = await GET(makeRequest('tok-unknown'), { params: Promise.resolve({ token: 'tok-unknown' }) });
 
     expect(res.status).toBe(200);
     expect(res.headers.get('Content-Type')).toBe('image/gif');
@@ -58,7 +58,7 @@ describe('GET /api/track/open/[token]', () => {
     findUnique.mockResolvedValue({ id: 'send-1', trackToken: 'tok-known' });
     hasRecentOpen.mockResolvedValue(true);
 
-    const res = await GET(makeRequest('tok-known'), { params: { token: 'tok-known' } });
+    const res = await GET(makeRequest('tok-known'), { params: Promise.resolve({ token: 'tok-known' }) });
 
     expect(res.status).toBe(200);
     expect(record).not.toHaveBeenCalled();
@@ -67,7 +67,7 @@ describe('GET /api/track/open/[token]', () => {
   it('still returns the pixel when the DB throws', async () => {
     findUnique.mockRejectedValue(new Error('db down'));
 
-    const res = await GET(makeRequest('tok-known'), { params: { token: 'tok-known' } });
+    const res = await GET(makeRequest('tok-known'), { params: Promise.resolve({ token: 'tok-known' }) });
 
     expect(res.status).toBe(200);
     expect(res.headers.get('Content-Type')).toBe('image/gif');

@@ -276,7 +276,7 @@ describe('GET /api/topics/[id]', () => {
     vi.mocked(repo.findById).mockResolvedValue(makeTopic({ id: 'topic-abc' }));
 
     const { GET } = await import('../app/api/topics/[id]/route');
-    const res = await GET(makeRequest('GET', '/api/topics/topic-abc'), { params: { id: 'topic-abc' } });
+    const res = await GET(makeRequest('GET', '/api/topics/topic-abc'), { params: Promise.resolve({ id: 'topic-abc' }) });
     const body = (await res.json()) as { success: boolean; data: Topic };
 
     expect(res.status).toBe(200);
@@ -288,7 +288,7 @@ describe('GET /api/topics/[id]', () => {
     vi.mocked(repo.findById).mockResolvedValue(null);
 
     const { GET } = await import('../app/api/topics/[id]/route');
-    const res = await GET(makeRequest('GET', '/api/topics/missing'), { params: { id: 'missing' } });
+    const res = await GET(makeRequest('GET', '/api/topics/missing'), { params: Promise.resolve({ id: 'missing' }) });
     expect(res.status).toBe(404);
   });
 });
@@ -307,7 +307,7 @@ describe('PATCH /api/topics/[id]', () => {
 
     const { PATCH } = await import('../app/api/topics/[id]/route');
     const res = await PATCH(makeRequest('PATCH', '/api/topics/topic-1', { name: 'Renamed' }), {
-      params: { id: 'topic-1' },
+      params: Promise.resolve({ id: 'topic-1' }),
     });
     const body = (await res.json()) as { success: boolean; data: Topic };
 
@@ -322,7 +322,7 @@ describe('PATCH /api/topics/[id]', () => {
 
     const { PATCH } = await import('../app/api/topics/[id]/route');
     const res = await PATCH(makeRequest('PATCH', '/api/topics/topic-1', { status: 'paused' }), {
-      params: { id: 'topic-1' },
+      params: Promise.resolve({ id: 'topic-1' }),
     });
 
     expect(res.status).toBe(200);
@@ -333,7 +333,7 @@ describe('PATCH /api/topics/[id]', () => {
     await setupMocks();
     const { PATCH } = await import('../app/api/topics/[id]/route');
     const res = await PATCH(makeRequest('PATCH', '/api/topics/topic-1', { slug: 'Bad Slug' }), {
-      params: { id: 'topic-1' },
+      params: Promise.resolve({ id: 'topic-1' }),
     });
     expect(res.status).toBe(400);
   });
@@ -352,7 +352,7 @@ describe('PATCH /api/topics/[id]', () => {
         brandLogoUrl: 'https://cdn.example.com/logo.png',
         brandFooterText: 'A weekly edge AI brief.',
       }),
-      { params: { id: 'topic-1' } },
+      { params: Promise.resolve({ id: 'topic-1' }) },
     );
 
     expect(res.status).toBe(200);
@@ -372,7 +372,7 @@ describe('PATCH /api/topics/[id]', () => {
     const { PATCH } = await import('../app/api/topics/[id]/route');
     await PATCH(
       makeRequest('PATCH', '/api/topics/topic-1', { brandColorHex: null, brandName: null }),
-      { params: { id: 'topic-1' } },
+      { params: Promise.resolve({ id: 'topic-1' }) },
     );
 
     expect(vi.mocked(repo.update)).toHaveBeenCalledWith('topic-1', {
@@ -387,7 +387,7 @@ describe('PATCH /api/topics/[id]', () => {
 
     const { PATCH } = await import('../app/api/topics/[id]/route');
     const res = await PATCH(makeRequest('PATCH', '/api/topics/missing', { name: 'X' }), {
-      params: { id: 'missing' },
+      params: Promise.resolve({ id: 'missing' }),
     });
     expect(res.status).toBe(404);
   });
@@ -397,7 +397,7 @@ describe('PATCH /api/topics/[id]', () => {
     const { PATCH } = await import('../app/api/topics/[id]/route');
     const res = await PATCH(
       makeRequest('PATCH', '/api/topics/topic-1', { name: 'X' }, 'https://evil.com'),
-      { params: { id: 'topic-1' } },
+      { params: Promise.resolve({ id: 'topic-1' }) },
     );
     expect(res.status).toBe(403);
   });

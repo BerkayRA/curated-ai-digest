@@ -18,10 +18,11 @@ import { assertSameOrigin } from '@/lib/assert-same-origin.js';
 export const dynamic = 'force-dynamic';
 
 interface RouteParams {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
-export async function GET(_request: Request, { params }: RouteParams): Promise<NextResponse> {
+export async function GET(_request: Request, props: RouteParams): Promise<NextResponse> {
+  const params = await props.params;
   try {
     const repo = createTopicRepository(prisma);
     const topic = await repo.findById(params.id);
@@ -36,7 +37,8 @@ export async function GET(_request: Request, { params }: RouteParams): Promise<N
   }
 }
 
-export async function PATCH(request: Request, { params }: RouteParams): Promise<NextResponse> {
+export async function PATCH(request: Request, props: RouteParams): Promise<NextResponse> {
+  const params = await props.params;
   const csrfCheck = assertSameOrigin(request);
   if (csrfCheck !== null) return csrfCheck;
 
