@@ -46,26 +46,34 @@ export function SponsorFormPanel({ open, sponsor, onClose, onSaved }: SponsorFor
   const [formError, setFormError] = useState<string | null>(null);
 
   // ── Populate when editing ─────────────────────────────────
+  // Reset the form whenever the panel (re)opens or the edited sponsor changes —
+  // done during render (React's sanctioned alternative to a setState-in-effect
+  // sync; preserves the always-mounted slide animation).
 
-  useEffect(() => {
-    if (!open) return;
-    if (sponsor) {
-      setName(sponsor.name);
-      setWebsiteUrl(sponsor.websiteUrl);
-      setLogoUrl(sponsor.logoUrl ?? '');
-      setContactEmail(sponsor.contactEmail ?? '');
-      setNotes(sponsor.notes ?? '');
-      setActive(sponsor.active);
-    } else {
-      setName('');
-      setWebsiteUrl('');
-      setLogoUrl('');
-      setContactEmail('');
-      setNotes('');
-      setActive(true);
+  const [prevOpen, setPrevOpen] = useState(open);
+  const [prevSponsor, setPrevSponsor] = useState(sponsor);
+  if (open !== prevOpen || sponsor !== prevSponsor) {
+    setPrevOpen(open);
+    setPrevSponsor(sponsor);
+    if (open) {
+      if (sponsor) {
+        setName(sponsor.name);
+        setWebsiteUrl(sponsor.websiteUrl);
+        setLogoUrl(sponsor.logoUrl ?? '');
+        setContactEmail(sponsor.contactEmail ?? '');
+        setNotes(sponsor.notes ?? '');
+        setActive(sponsor.active);
+      } else {
+        setName('');
+        setWebsiteUrl('');
+        setLogoUrl('');
+        setContactEmail('');
+        setNotes('');
+        setActive(true);
+      }
+      setFormError(null);
     }
-    setFormError(null);
-  }, [open, sponsor]);
+  }
 
   // ── Focus management on open ──────────────────────────────
 
