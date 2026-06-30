@@ -23,20 +23,16 @@ function formatEntry(level: LogLevel, msg: string, meta?: Record<string, unknown
 export const logger: Logger = {
   debug(msg, meta) {
     if (process.env['LOG_LEVEL'] === 'debug') {
-      // eslint-disable-next-line no-console
       console.debug(formatEntry('debug', msg, meta));
     }
   },
   info(msg, meta) {
-    // eslint-disable-next-line no-console
     console.info(formatEntry('info', msg, meta));
   },
   warn(msg, meta) {
-    // eslint-disable-next-line no-console
     console.warn(formatEntry('warn', msg, meta));
   },
   error(msg, meta) {
-    // eslint-disable-next-line no-console
     console.error(formatEntry('error', msg, meta));
   },
 };

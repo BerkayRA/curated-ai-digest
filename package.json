@@ -22,52 +22,14 @@
     "scan": "pnpm --filter @digest/curation scan"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^8.61.1",
-    "@typescript-eslint/parser": "^8.61.1",
-    "eslint": "^8.57.1",
+    "@eslint/js": "^9.39.4",
+    "eslint": "^9.39.4",
+    "globals": "^17.7.0",
     "prettier": "^3.4.2",
     "tsx": "^4.19.2",
     "turbo": "^2.3.3",
-    "typescript": "^5.7.2"
-  },
-  "eslintConfig": {
-    "root": true,
-    "parser": "@typescript-eslint/parser",
-    "parserOptions": { "ecmaVersion": 2022, "sourceType": "module" },
-    "plugins": ["@typescript-eslint"],
-    "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended"],
-    "env": { "node": true, "es2022": true },
-    "ignorePatterns": [
-      "node_modules/",
-      "dist/",
-      ".next/",
-      "coverage/",
-      "data/",
-      "**/*.config.cjs",
-      "**/*.config.js",
-      "**/*.config.mjs",
-      "**/*.config.ts",
-      "**/prisma/generated/**",
-      "**/*.tsx",
-      "**/*.jsx"
-    ],
-    "rules": {
-      "@typescript-eslint/no-unused-vars": [
-        "error",
-        { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_", "caughtErrorsIgnorePattern": "^_" }
-      ],
-      "@typescript-eslint/no-explicit-any": "off",
-      "no-constant-condition": ["error", { "checkLoops": false }]
-    },
-    "overrides": [
-      {
-        "files": ["**/*.test.ts", "**/__tests__/**/*.ts"],
-        "rules": {
-          "@typescript-eslint/no-explicit-any": "off",
-          "@typescript-eslint/no-non-null-assertion": "off"
-        }
-      }
-    ]
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.62.1"
   },
   "prettier": {
     "semi": true,

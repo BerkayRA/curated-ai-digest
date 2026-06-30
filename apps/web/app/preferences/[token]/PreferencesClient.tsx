@@ -76,7 +76,6 @@ export function PreferencesClient({ subscriberToken, topics }: PreferencesClient
       if (row.status === 'active' || row.status === 'pending') {
         // Sequential so each mutation observes a clean busy state and rolls back
         // independently on failure.
-        // eslint-disable-next-line no-await-in-loop
         await mutate(row.topicId, 'unsubscribe');
       }
     }

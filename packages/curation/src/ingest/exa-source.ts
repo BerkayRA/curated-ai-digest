@@ -61,7 +61,6 @@ export async function fetchExaCandidates(
   // both the default and a named export; we use the named export to avoid
   // esModuleInterop ambiguity with { default: ... }.
   const exaModule = await import('exa-js');
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const ExaClass: new (key: string) => import('exa-js').default =
     (exaModule as any).Exa ?? exaModule.default;
   const client = new ExaClass(apiKey);

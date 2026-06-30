@@ -48,7 +48,6 @@ export const MAX_QA_RETRIES = 2;
 export function calcCostUsd(model: string, tokensIn: number, tokensOut: number): number {
   const rates = PRICING[model] ?? PRICING['unknown'];
   // rates is always defined because 'unknown' is a fallback above
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const { inputPerMillion, outputPerMillion } = rates!;
   return (tokensIn * inputPerMillion + tokensOut * outputPerMillion) / 1_000_000;
 }
