@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 3100",
-    "build": "next build",
+    "dev": "next dev --webpack -p 3100",
+    "build": "next build --webpack",
     "start": "next start -p 3100",
-    "lint": "next lint --max-warnings 0",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx --max-warnings 0",
     "type-check": "tsc --noEmit",
     "test": "vitest run",
     "test:e2e": "playwright test --config playwright.config.cjs",
@@ -20,7 +20,7 @@
     "@digest/email": "workspace:*",
     "@digest/shared": "workspace:*",
     "argon2": "^0.41.1",
-    "next": "^15.5.19",
+    "next": "^16.2.9",
     "next-auth": "5.0.0-beta.31",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
@@ -35,10 +35,11 @@
     "eslint": "^8.57.1",
     "eslint-config-next": "^15.5.19",
     "typescript": "^5.7.2",
-    "vitest": "^3.2.6"
+    "vitest": "^4.1.9"
   },
   "eslintConfig": {
     "root": true,
-    "extends": "next/core-web-vitals"
+    "extends": "next/core-web-vitals",
+    "ignorePatterns": [".next/", "node_modules/", "next-env.d.ts"]
   }
 }
