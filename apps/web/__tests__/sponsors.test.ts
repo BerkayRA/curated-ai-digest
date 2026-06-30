@@ -136,7 +136,7 @@ describe('PATCH /api/sponsors/[id]', () => {
     const repo = await setupRepo();
     const res = await patchSponsor(
       makeRequest('PATCH', '/api/sponsors/sp-1', { active: false }, ORIGIN),
-      { params: { id: 'sp-1' } },
+      { params: Promise.resolve({ id: 'sp-1' }) },
     );
     expect(res.status).toBe(200);
     expect(vi.mocked(repo.update)).toHaveBeenCalledOnce();
@@ -178,7 +178,7 @@ describe('GET /api/sponsors/[id]/analytics', () => {
     vi.mocked(createSponsorAnalyticsRepository).mockReturnValue(setupAnalytics());
 
     const res = await sponsorAnalytics(makeRequest('GET', '/api/sponsors/sp-1/analytics'), {
-      params: { id: 'sp-1' },
+      params: Promise.resolve({ id: 'sp-1' }),
     });
     const json = await res.json();
     expect(res.status).toBe(200);
@@ -189,7 +189,7 @@ describe('GET /api/sponsors/[id]/analytics', () => {
   it('returns 404 for an unknown sponsor', async () => {
     await setupRepo({ findById: vi.fn().mockResolvedValue(null) });
     const res = await sponsorAnalytics(makeRequest('GET', '/api/sponsors/nope/analytics'), {
-      params: { id: 'nope' },
+      params: Promise.resolve({ id: 'nope' }),
     });
     expect(res.status).toBe(404);
   });

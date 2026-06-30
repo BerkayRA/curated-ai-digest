@@ -16,10 +16,11 @@ import styles from './signup.module.css';
 export const dynamic = 'force-dynamic';
 
 interface SignupPageProps {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
-export default async function SignupPage({ params }: SignupPageProps) {
+export default async function SignupPage(props: SignupPageProps) {
+  const params = await props.params;
   const topic = await createTopicRepository(prisma).findBySlug(params.slug);
 
   if (!topic || topic.consentMode !== 'public' || topic.status !== 'active') {

@@ -16,7 +16,7 @@ import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
 export const dynamic = 'force-dynamic';
 
 interface RouteParams {
-  params: { token: string };
+  params: Promise<{ token: string }>;
 }
 
 const PreferenceMutationSchema = z.object({
@@ -27,10 +27,8 @@ const PreferenceMutationSchema = z.object({
 const RATE_LIMIT_MAX = 20;
 const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
 
-export async function POST(
-  request: NextRequest,
-  { params }: RouteParams,
-): Promise<NextResponse> {
+export async function POST(request: NextRequest, props: RouteParams): Promise<NextResponse> {
+  const params = await props.params;
   const rate = checkRateLimit(
     getClientIp(request.headers),
     'preferences',

@@ -35,7 +35,7 @@ describe('GET /api/track/click/[token]/[urlIndex]', () => {
     findUnique.mockResolvedValue(sendWith([{ order: 0, sourceUrl: 'https://dest.example.com/a' }]));
 
     const res = await GET(makeRequest('tok-known', '0'), {
-      params: { token: 'tok-known', urlIndex: '0' },
+      params: Promise.resolve({ token: 'tok-known', urlIndex: '0' }),
     });
 
     expect(res.status).toBe(302);
@@ -56,7 +56,7 @@ describe('GET /api/track/click/[token]/[urlIndex]', () => {
     );
 
     const res = await GET(makeRequest('tok-known', '2'), {
-      params: { token: 'tok-known', urlIndex: '2' },
+      params: Promise.resolve({ token: 'tok-known', urlIndex: '2' }),
     });
 
     expect(res.status).toBe(302);
@@ -67,7 +67,7 @@ describe('GET /api/track/click/[token]/[urlIndex]', () => {
     findUnique.mockResolvedValue(null);
 
     const res = await GET(makeRequest('tok-unknown', '0'), {
-      params: { token: 'tok-unknown', urlIndex: '0' },
+      params: Promise.resolve({ token: 'tok-unknown', urlIndex: '0' }),
     });
 
     expect(res.status).toBe(302);
@@ -79,7 +79,7 @@ describe('GET /api/track/click/[token]/[urlIndex]', () => {
     findUnique.mockResolvedValue(sendWith([{ order: 0, sourceUrl: 'https://dest.example.com/a' }]));
 
     const res = await GET(makeRequest('tok-known', '9'), {
-      params: { token: 'tok-known', urlIndex: '9' },
+      params: Promise.resolve({ token: 'tok-known', urlIndex: '9' }),
     });
 
     expect(res.status).toBe(302);
@@ -93,7 +93,7 @@ describe('GET /api/track/click/[token]/[urlIndex]', () => {
     );
 
     const res = await GET(makeRequest('tok-known', '0'), {
-      params: { token: 'tok-known', urlIndex: '0' },
+      params: Promise.resolve({ token: 'tok-known', urlIndex: '0' }),
     });
 
     expect(res.status).toBe(302);
@@ -105,7 +105,7 @@ describe('GET /api/track/click/[token]/[urlIndex]', () => {
     findUnique.mockRejectedValue(new Error('db down'));
 
     const res = await GET(makeRequest('tok-known', '0'), {
-      params: { token: 'tok-known', urlIndex: '0' },
+      params: Promise.resolve({ token: 'tok-known', urlIndex: '0' }),
     });
 
     expect(res.status).toBe(302);

@@ -6,20 +6,22 @@ import { SponsorAnalyticsPanel } from '@/components/sponsors/SponsorAnalyticsPan
 export const dynamic = 'force-dynamic';
 
 interface SponsorAnalyticsPageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 // Deduplicate the sponsor lookup between generateMetadata and the page render
 // within a single request (React cache) — one DB round-trip, not two.
 const getSponsor = cache((id: string) => createSponsorRepository(prisma).findById(id));
 
-export async function generateMetadata({ params }: SponsorAnalyticsPageProps) {
+export async function generateMetadata(props: SponsorAnalyticsPageProps) {
+  const params = await props.params;
   const sponsor = await getSponsor(params.id);
   if (!sponsor) return { title: 'Bulunamadı — Curated AI Digest' };
   return { title: `${sponsor.name} performansı — Curated AI Digest` };
 }
 
-export default async function SponsorAnalyticsPage({ params }: SponsorAnalyticsPageProps) {
+export default async function SponsorAnalyticsPage(props: SponsorAnalyticsPageProps) {
+  const params = await props.params;
   const sponsor = await getSponsor(params.id);
 
   if (!sponsor) {

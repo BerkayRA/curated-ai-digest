@@ -16,10 +16,11 @@ import { getErrorMessage } from '@/lib/error.js';
 export const dynamic = 'force-dynamic';
 
 interface RouteParams {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
-export async function GET(_request: Request, { params }: RouteParams): Promise<NextResponse> {
+export async function GET(_request: Request, props: RouteParams): Promise<NextResponse> {
+  const params = await props.params;
   try {
     const repo = createSubscriberTopicRepository(prisma);
     const memberships = await repo.findByTopicId(params.id);

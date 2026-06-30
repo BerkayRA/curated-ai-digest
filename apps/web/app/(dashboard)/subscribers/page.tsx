@@ -10,11 +10,12 @@ export const metadata = {
   title: 'Aboneler — Curated AI Digest',
 };
 
-export default async function SubscribersPage({
-  searchParams,
-}: {
-  searchParams: { topic?: string };
-}) {
+export default async function SubscribersPage(
+  props: {
+    searchParams: Promise<{ topic?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const [subscribers, topics, activeTopicId] = await Promise.all([
     prisma.subscriber.findMany({ orderBy: { createdAt: 'desc' } }),
     createTopicRepository(prisma).findAll(),

@@ -14,7 +14,7 @@ export const metadata = {
 };
 
 interface UnsubscribePageProps {
-  searchParams: { token?: string };
+  searchParams: Promise<{ token?: string }>;
 }
 
 type UnsubscribeResult = 'ok' | 'topic' | 'already' | 'invalid';
@@ -68,7 +68,8 @@ async function processUnsubscribe(token: string): Promise<UnsubscribeResult> {
   return 'topic';
 }
 
-export default async function UnsubscribePage({ searchParams }: UnsubscribePageProps) {
+export default async function UnsubscribePage(props: UnsubscribePageProps) {
+  const searchParams = await props.searchParams;
   const { token } = searchParams;
 
   if (!token) {

@@ -11,10 +11,11 @@ import { getErrorMessage } from '@/lib/error';
 export const dynamic = 'force-dynamic';
 
 interface RouteParams {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
-export async function GET(_request: Request, { params }: RouteParams) {
+export async function GET(_request: Request, props: RouteParams) {
+  const params = await props.params;
   try {
     const logs = await prisma.auditLog.findMany({
       where: { entity: 'Issue', entityId: params.id },

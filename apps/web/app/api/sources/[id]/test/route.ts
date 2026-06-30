@@ -31,7 +31,7 @@ import { assertSameOrigin } from '@/lib/assert-same-origin.js';
 export const dynamic = 'force-dynamic';
 
 interface RouteParams {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 /** No-op logger for isolated test-fetches — keeps provider internals quiet. */
@@ -93,7 +93,8 @@ type TestFetchPayload = {
   readonly errors: readonly { source: string; message: string }[];
 };
 
-export async function POST(request: Request, { params }: RouteParams): Promise<NextResponse> {
+export async function POST(request: Request, props: RouteParams): Promise<NextResponse> {
+  const params = await props.params;
   const csrfCheck = assertSameOrigin(request);
   if (csrfCheck !== null) return csrfCheck;
 

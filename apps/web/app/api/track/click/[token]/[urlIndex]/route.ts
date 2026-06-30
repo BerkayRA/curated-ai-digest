@@ -13,7 +13,7 @@ import { deriveTrackMeta } from '@/lib/track-meta';
 export const dynamic = 'force-dynamic';
 
 interface RouteParams {
-  params: { token: string; urlIndex: string };
+  params: Promise<{ token: string; urlIndex: string }>;
 }
 
 /** Only redirect to absolute http(s) destinations (open-redirect guard). */
@@ -25,7 +25,8 @@ function homeRedirect(request: Request): NextResponse {
   return NextResponse.redirect(new URL('/', request.url), 302);
 }
 
-export async function GET(request: Request, { params }: RouteParams): Promise<NextResponse> {
+export async function GET(request: Request, props: RouteParams): Promise<NextResponse> {
+  const params = await props.params;
   try {
     const urlIndex = Number(params.urlIndex);
     const send = await prisma.send.findUnique({

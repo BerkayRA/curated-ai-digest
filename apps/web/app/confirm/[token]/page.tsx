@@ -20,7 +20,7 @@ export const metadata = {
 };
 
 interface ConfirmPageProps {
-  params: { token: string };
+  params: Promise<{ token: string }>;
 }
 
 /** Branded standalone shell wrapping a heading + body line. */
@@ -51,8 +51,9 @@ function Shell({ heading, body }: { heading: string; body: string }) {
   );
 }
 
-export default async function ConfirmPage({ params }: ConfirmPageProps) {
-  const ip = getClientIp(headers() as unknown as Headers);
+export default async function ConfirmPage(props: ConfirmPageProps) {
+  const params = await props.params;
+  const ip = getClientIp(await headers() as unknown as Headers);
   const rate = checkRateLimit(ip, 'confirm-get', 30, 60_000);
   if (!rate.allowed) {
     return <Shell heading="Çok fazla istek" body="Çok fazla istek. Lütfen biraz sonra tekrar deneyin." />;

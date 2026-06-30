@@ -50,7 +50,7 @@ function makeRequest(body: unknown): NextRequest {
   });
 }
 
-const params = { params: { token: TOKEN } };
+const params = { params: Promise.resolve({ token: TOKEN }) };
 
 async function setup(opts: {
   subscriber?: { id: string } | null;
