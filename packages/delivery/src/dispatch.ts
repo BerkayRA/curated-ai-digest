@@ -13,10 +13,10 @@ import type { DigestEmailData, DigestItem } from '@digest/email';
 import type { IssueStatus } from '@digest/shared';
 import type { Issue, IssueItem, Settings, TopicRecipient } from '@digest/db';
 import { randomUUID } from 'node:crypto';
-import { transitionIssue } from './issue-transition.js';
-import type { TransitionOptions, TransitionResult } from './issue-transition.js';
-import { injectTrackingHooks } from './track.js';
-import { assignVariant } from './ab-split.js';
+import { transitionIssue } from './issue-transition';
+import type { TransitionOptions, TransitionResult } from './issue-transition';
+import { injectTrackingHooks } from './track';
+import { assignVariant } from './ab-split';
 
 // ---------------------------------------------------------------------------
 // PII scrubbing

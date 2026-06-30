@@ -14,7 +14,7 @@ vi.mock('@digest/db', () => ({
   createSubjectVariantRepository: vi.fn(),
 }));
 
-const { runAbWinnerJob } = await import('../ab-winner-job.js');
+const { runAbWinnerJob } = await import('../ab-winner-job');
 
 // ---------------------------------------------------------------------------
 // Fixtures

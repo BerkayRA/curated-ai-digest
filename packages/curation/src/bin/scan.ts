@@ -18,9 +18,9 @@
  */
 
 import * as path from 'node:path';
-import { runScan, DEFAULT_TOPIC_SLUG } from '../scan/run-scan.js';
-import { DEFAULT_TOPIC } from '../ingest/sources.js';
-import type { Logger } from '../ingest/types.js';
+import { runScan, DEFAULT_TOPIC_SLUG } from '../scan/run-scan';
+import { DEFAULT_TOPIC } from '../ingest/sources';
+import type { Logger } from '../ingest/types';
 
 // ---------------------------------------------------------------------------
 // Console-based logger: logs to STDERR so STDOUT stays clean for JSON output.

@@ -13,13 +13,13 @@
  */
 
 import type { EmailProviderKind } from '@digest/shared';
-import { AcsEmailProvider } from './acs.js';
-import { GraphEmailProvider } from './graph.js';
-import { ResendEmailProvider } from './resend.js';
-import type { EmailProvider } from './provider.js';
-import type { AcsEmailProviderOptions } from './acs.js';
-import type { GraphEmailProviderOptions } from './graph.js';
-import type { ResendEmailProviderOptions } from './resend.js';
+import { AcsEmailProvider } from './acs';
+import { GraphEmailProvider } from './graph';
+import { ResendEmailProvider } from './resend';
+import type { EmailProvider } from './provider';
+import type { AcsEmailProviderOptions } from './acs';
+import type { GraphEmailProviderOptions } from './graph';
+import type { ResendEmailProviderOptions } from './resend';
 
 // ---------------------------------------------------------------------------
 // Per-provider option types

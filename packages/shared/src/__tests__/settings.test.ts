@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { UpdateSettingsSchema } from '../settings.js';
+import { UpdateSettingsSchema } from '../settings';
 
 describe('UpdateSettingsSchema', () => {
   it('accepts a valid full update', () => {

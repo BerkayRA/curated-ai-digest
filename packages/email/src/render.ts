@@ -16,8 +16,8 @@
 
 import * as React from 'react';
 import { render, toPlainText } from '@react-email/render';
-import { DigestEmail } from './templates/DigestEmail.js';
-import type { DigestEmailData, RenderedEmail } from './types.js';
+import { DigestEmail } from './templates/DigestEmail';
+import type { DigestEmailData, RenderedEmail } from './types';
 
 /**
  * Renders the digest email to both HTML and plain-text parts.

@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import {
   createSponsorAnalyticsRepository,
   mapSponsorClickRows,
-} from '../sponsor-analytics-repository.js';
+} from '../sponsor-analytics-repository';
 
 function makeFakePrisma(queryRaw: ReturnType<typeof vi.fn>) {
   return { $queryRaw: queryRaw } as unknown as import('@prisma/client').PrismaClient;

@@ -1,6 +1,6 @@
 import { PrismaClient, EmailProviderKind } from '@prisma/client';
 import { randomUUID } from 'node:crypto';
-import { seedSources, ENTERPRISE_AI_TOPIC_ID } from './seed-sources.js';
+import { seedSources, ENTERPRISE_AI_TOPIC_ID } from './seed-sources';
 
 const prisma = new PrismaClient();
 

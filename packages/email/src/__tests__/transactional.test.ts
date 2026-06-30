@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
-import { renderConfirmEmail, sendTransactionalEmail } from '../transactional.js';
-import type { EmailMessage, EmailProvider, SendResult } from '../providers/provider.js';
+import { renderConfirmEmail, sendTransactionalEmail } from '../transactional';
+import type { EmailMessage, EmailProvider, SendResult } from '../providers/provider';
 
 const CONFIRM_URL = 'https://digest.megabilgisayar.com.tr/confirm/tok-123';
 

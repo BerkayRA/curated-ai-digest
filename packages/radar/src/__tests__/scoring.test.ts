@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { scoreSignal, classifyRing, classifyChangeType, scoreDimensions } from '../scoring.js';
-import { DIMENSIONS, type DimensionWeights, type RawSignal, type RingGates } from '../types.js';
+import { scoreSignal, classifyRing, classifyChangeType, scoreDimensions } from '../scoring';
+import { DIMENSIONS, type DimensionWeights, type RawSignal, type RingGates } from '../types';
 
 // ---------------------------------------------------------------------------
 // Pure scoring + classification — deterministic, no I/O. The real heuristics are

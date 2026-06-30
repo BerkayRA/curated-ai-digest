@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { Logger } from '../logger.js';
+import type { Logger } from '../logger';
 
 // ---------------------------------------------------------------------------
 // Mocks
@@ -29,7 +29,7 @@ vi.mock('@digest/email', () => ({
   renderDigestEmail: vi.fn().mockResolvedValue({ html: '<html/>', text: '' }),
 }));
 
-const { runCurationJob } = await import('../jobs/curate.js');
+const { runCurationJob } = await import('../jobs/curate');
 const { runWeeklyPipeline, importCommittedCandidates } = await import('@digest/curation');
 const { renderDigestEmail } = await import('@digest/email');
 

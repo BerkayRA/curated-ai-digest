@@ -1,6 +1,6 @@
-import { deduplicateWithinRun, filterAgainstExisting } from './dedup.js';
-import { defaultProviders } from './providers.js';
-import { DEFAULT_TOPIC } from './sources.js';
+import { deduplicateWithinRun, filterAgainstExisting } from './dedup';
+import { defaultProviders } from './providers';
+import { DEFAULT_TOPIC } from './sources';
 import type {
   IngestResult,
   IngestRepository,
@@ -9,7 +9,7 @@ import type {
   SourceContext,
   SourceError,
   SourceProvider,
-} from './types.js';
+} from './types';
 
 // ---------------------------------------------------------------------------
 // Ingest orchestrator
@@ -81,7 +81,7 @@ export async function runIngest(opts: IngestOptions = {}): Promise<IngestResult>
   const logger = opts.logger ?? silentLogger;
   const repo =
     opts.repository ??
-    (await import('./repository.js')).createPrismaRepository();
+    (await import('./repository')).createPrismaRepository();
   const providers = opts.providers ?? defaultProviders();
   const topic = opts.topic ?? DEFAULT_TOPIC;
 

@@ -12,7 +12,7 @@
 
 import { runWeeklyPipeline, importCommittedCandidates } from '@digest/curation';
 import { renderDigestEmail } from '@digest/email';
-import type { Logger } from '../logger.js';
+import type { Logger } from '../logger';
 
 export interface CurationJobOptions {
   readonly logger: Logger;

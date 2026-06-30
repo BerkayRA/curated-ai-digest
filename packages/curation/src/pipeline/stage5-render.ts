@@ -10,8 +10,8 @@
 // pass a lightweight stub.
 // ---------------------------------------------------------------------------
 
-import type { CopywriteOutput, RenderOutput, StageOptions, PipelineRunRecord, QaFlag } from './types.js';
-import { calcCostUsd } from './config.js';
+import type { CopywriteOutput, RenderOutput, StageOptions, PipelineRunRecord, QaFlag } from './types';
+import { calcCostUsd } from './config';
 
 // ---------------------------------------------------------------------------
 // Injected render function type — matches renderDigestEmail from @digest/email

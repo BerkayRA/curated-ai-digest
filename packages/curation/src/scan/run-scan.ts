@@ -1,9 +1,9 @@
-import { runIngest } from '../ingest/orchestrator.js';
-import { createFileRepository } from '../ingest/file-repository.js';
-import { rssProvider } from '../ingest/rss-source.js';
-import { radarProvider } from '../ingest/radar-source.js';
-import { DEFAULT_TOPIC } from '../ingest/sources.js';
-import type { IngestResult, SourceProvider, Logger } from '../ingest/types.js';
+import { runIngest } from '../ingest/orchestrator';
+import { createFileRepository } from '../ingest/file-repository';
+import { rssProvider } from '../ingest/rss-source';
+import { radarProvider } from '../ingest/radar-source';
+import { DEFAULT_TOPIC } from '../ingest/sources';
+import type { IngestResult, SourceProvider, Logger } from '../ingest/types';
 
 // ---------------------------------------------------------------------------
 // Scan runner — keyless, no DB, writes to local NDJSON pool

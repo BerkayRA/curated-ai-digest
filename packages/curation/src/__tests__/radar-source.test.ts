@@ -7,8 +7,8 @@ import {
   DEFAULT_RADAR_REPO_URL,
   type FetchImpl,
   type RadarProviderConfig,
-} from '../ingest/radar-source.js';
-import type { Logger, SourceContext } from '../ingest/types.js';
+} from '../ingest/radar-source';
+import type { Logger, SourceContext } from '../ingest/types';
 
 // ---------------------------------------------------------------------------
 // Radar source — tested against static fixtures with an injected fetch.

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { createSuppressionRepository } from '../suppression-repository.js';
+import { createSuppressionRepository } from '../suppression-repository';
 
 function makeFakePrisma(overrides: {
   upsert?: ReturnType<typeof vi.fn>;

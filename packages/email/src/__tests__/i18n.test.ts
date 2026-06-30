@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { strings, getStrings, type EmailStrings } from '../i18n.js';
+import { strings, getStrings, type EmailStrings } from '../i18n';
 
 describe('email i18n', () => {
   const keys: Array<keyof EmailStrings> = [

@@ -1,6 +1,6 @@
 import { prisma } from '@digest/db';
-import type { IngestRepository, PersistRunOpts } from './types.js';
-import type { EnrichedCandidate } from './types.js';
+import type { IngestRepository, PersistRunOpts } from './types';
+import type { EnrichedCandidate } from './types';
 
 // ---------------------------------------------------------------------------
 // Prisma-backed implementation of IngestRepository

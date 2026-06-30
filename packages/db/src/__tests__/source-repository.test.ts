@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { createSourceRepository } from '../source-repository.js';
+import { createSourceRepository } from '../source-repository';
 
 // ---------------------------------------------------------------------------
 // Fake PrismaClient — records calls and returns controlled responses.

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { canonicalizeUrl, contentHash } from '../ingest/canonicalize.js';
+import { canonicalizeUrl, contentHash } from '../ingest/canonicalize';
 
 // ---------------------------------------------------------------------------
 // canonicalizeUrl
@@ -118,7 +118,7 @@ describe('contentHash', () => {
 // isAllowedScheme
 // ---------------------------------------------------------------------------
 
-import { isAllowedScheme } from '../ingest/canonicalize.js';
+import { isAllowedScheme } from '../ingest/canonicalize';
 
 describe('isAllowedScheme', () => {
   it('allows http URLs', () => {

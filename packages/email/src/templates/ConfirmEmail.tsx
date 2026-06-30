@@ -22,7 +22,7 @@ import {
   Link,
 } from '@react-email/components';
 import { color } from '@digest/brand';
-import type { ConfirmEmailData } from '../types.js';
+import type { ConfirmEmailData } from '../types';
 
 // ---------------------------------------------------------------------------
 // Constants — inline token literals (CSS custom properties unsupported in Outlook)

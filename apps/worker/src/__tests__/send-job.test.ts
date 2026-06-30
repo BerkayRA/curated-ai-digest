@@ -13,8 +13,8 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { SendJobRepo } from '../jobs/send.js';
-import type { Logger } from '../logger.js';
+import type { SendJobRepo } from '../jobs/send';
+import type { Logger } from '../logger';
 
 // ---------------------------------------------------------------------------
 // Mocks
@@ -38,7 +38,7 @@ vi.mock('@digest/email', () => ({
   }),
 }));
 
-const { runSendJob } = await import('../jobs/send.js');
+const { runSendJob } = await import('../jobs/send');
 const { dispatchIssue, evaluateAutoSend, transitionIssue } = await import('@digest/delivery');
 const { createEmailProvider } = await import('@digest/email');
 

@@ -34,7 +34,10 @@ RUN DATABASE_URL="postgresql://x:x@localhost:5432/x" \
 
 
 # ─── Stage 2: builder ────────────────────────────────────────────────────────
-# Compile TypeScript → dist/
+# Assemble the full source tree + node_modules. The worker is run via tsx (no
+# compile step): the workspace packages are TypeScript-source-only (their exports
+# point at src/*.ts), so a bare `node dist/…` cannot load them — tsx resolves
+# both the .ts sources and the extensionless imports the same way dev does.
 FROM node:20-alpine AS builder
 
 RUN apk add --no-cache libc6-compat && \
@@ -50,7 +53,8 @@ COPY . .
 # Restore the full pnpm virtual store so workspace symlinks resolve.
 COPY --from=deps /repo/node_modules/.pnpm ./node_modules/.pnpm
 
-RUN pnpm --filter @digest/worker build
+# Type-check the worker (no emit) so a broken build still fails the image.
+RUN pnpm --filter @digest/worker type-check
 
 
 # ─── Stage 3: runner ─────────────────────────────────────────────────────────
@@ -66,21 +70,24 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
-# Copy compiled output.
-COPY --from=builder --chown=worker:nodejs /repo/apps/worker/dist ./apps/worker/dist
+# Copy the worker source (run via tsx, not a compiled dist) + its package.json
+# and tsconfig.
+COPY --from=builder --chown=worker:nodejs /repo/apps/worker/src ./apps/worker/src
+COPY --from=builder --chown=worker:nodejs /repo/apps/worker/package.json ./apps/worker/package.json
+COPY --from=builder --chown=worker:nodejs /repo/apps/worker/tsconfig.json ./apps/worker/tsconfig.json
+COPY --from=builder --chown=worker:nodejs /repo/tsconfig.base.json ./tsconfig.base.json
 
-# Copy the full node_modules tree (pnpm hoisted) including workspace packages'
-# compiled Prisma client. Production installs are not re-run here to keep the
-# image deterministic; the full install from the builder stage is copied.
-# An alternative is `pnpm deploy` for a leaner tree, but that requires network
-# access or a mounted cache — the full copy is simpler for self-hosted deploy.
+# Copy the full node_modules tree (pnpm hoisted) — includes tsx and the workspace
+# packages' generated Prisma client. Production installs are not re-run here to
+# keep the image deterministic; the full install from the builder stage is copied.
 COPY --from=builder --chown=worker:nodejs /repo/node_modules ./node_modules
 COPY --from=builder --chown=worker:nodejs /repo/packages     ./packages
 
 USER worker
 
 HEALTHCHECK --interval=60s --timeout=5s --start-period=30s --retries=3 \
-    CMD node -e "require('fs').statSync('/app/apps/worker/dist/index.js')" || exit 1
+    CMD node -e "require('fs').statSync('/app/apps/worker/src/index.ts')" || exit 1
 
-# The worker is an ESM package ("type": "module") compiled to dist/.
-CMD ["node", "apps/worker/dist/index.js"]
+# Run the TypeScript entrypoint directly via tsx (resolves .ts workspace sources
+# + extensionless imports, matching dev). tsx is in the copied node_modules.
+CMD ["node_modules/.bin/tsx", "apps/worker/src/index.ts"]

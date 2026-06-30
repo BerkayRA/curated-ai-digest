@@ -7,7 +7,7 @@
 
 import { prisma } from '@digest/db';
 import type { IssueStatus } from '@digest/shared';
-import { assertTransition } from './issue-status.js';
+import { assertTransition } from './issue-status';
 
 export interface TransitionOptions {
   /** ID of the issue to transition. */

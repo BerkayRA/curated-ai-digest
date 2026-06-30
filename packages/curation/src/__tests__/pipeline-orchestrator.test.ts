@@ -4,27 +4,27 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 // Mock all stage modules before importing orchestrator
 // ---------------------------------------------------------------------------
 
-vi.mock('../pipeline/stage1-rank.js', () => ({
+vi.mock('../pipeline/stage1-rank', () => ({
   runRankStage: vi.fn(),
 }));
 
-vi.mock('../pipeline/stage2-curate.js', () => ({
+vi.mock('../pipeline/stage2-curate', () => ({
   runCurateStage: vi.fn(),
 }));
 
-vi.mock('../pipeline/stage3-copywrite.js', () => ({
+vi.mock('../pipeline/stage3-copywrite', () => ({
   runCopywriteStage: vi.fn(),
 }));
 
-vi.mock('../pipeline/stage4-editor-qa.js', () => ({
+vi.mock('../pipeline/stage4-editor-qa', () => ({
   runEditorQaStage: vi.fn(),
 }));
 
-vi.mock('../pipeline/stage5-render.js', () => ({
+vi.mock('../pipeline/stage5-render', () => ({
   runRenderStage: vi.fn(),
 }));
 
-vi.mock('../ingest/orchestrator.js', () => ({
+vi.mock('../ingest/orchestrator', () => ({
   runIngest: vi.fn().mockResolvedValue({ ingestRunId: 'ingest-1', persisted: 5 }),
 }));
 
@@ -32,14 +32,14 @@ vi.mock('../ingest/orchestrator.js', () => ({
 // Import after mocks
 // ---------------------------------------------------------------------------
 
-import { runRankStage } from '../pipeline/stage1-rank.js';
-import { runCurateStage } from '../pipeline/stage2-curate.js';
-import { runCopywriteStage } from '../pipeline/stage3-copywrite.js';
-import { runEditorQaStage } from '../pipeline/stage4-editor-qa.js';
-import { runRenderStage } from '../pipeline/stage5-render.js';
-import { runWeeklyPipeline } from '../pipeline/orchestrator.js';
-import type { PipelineRepository, PipelineRunRecord } from '../pipeline/types.js';
-import type { Logger } from '../ingest/types.js';
+import { runRankStage } from '../pipeline/stage1-rank';
+import { runCurateStage } from '../pipeline/stage2-curate';
+import { runCopywriteStage } from '../pipeline/stage3-copywrite';
+import { runEditorQaStage } from '../pipeline/stage4-editor-qa';
+import { runRenderStage } from '../pipeline/stage5-render';
+import { runWeeklyPipeline } from '../pipeline/orchestrator';
+import type { PipelineRepository, PipelineRunRecord } from '../pipeline/types';
+import type { Logger } from '../ingest/types';
 import type { CandidateArticle } from '@digest/db';
 
 // ---------------------------------------------------------------------------

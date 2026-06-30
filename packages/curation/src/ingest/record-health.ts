@@ -1,4 +1,4 @@
-import type { IngestResult, Logger } from './types.js';
+import type { IngestResult, Logger } from './types';
 
 // ---------------------------------------------------------------------------
 // Record per-source health after an ingest run

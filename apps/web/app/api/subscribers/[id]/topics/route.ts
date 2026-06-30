@@ -12,9 +12,9 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma, createSubscriberTopicRepository } from '@digest/db';
-import { ok, err } from '@/lib/api-response.js';
-import { getErrorMessage } from '@/lib/error.js';
-import { assertSameOrigin } from '@/lib/assert-same-origin.js';
+import { ok, err } from '@/lib/api-response';
+import { getErrorMessage } from '@/lib/error';
+import { assertSameOrigin } from '@/lib/assert-same-origin';
 
 export const dynamic = 'force-dynamic';
 

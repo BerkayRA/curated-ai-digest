@@ -10,8 +10,8 @@
 
 import { NextResponse } from 'next/server';
 import { prisma, createSubscriberTopicRepository } from '@digest/db';
-import { ok, err } from '@/lib/api-response.js';
-import { getErrorMessage } from '@/lib/error.js';
+import { ok, err } from '@/lib/api-response';
+import { getErrorMessage } from '@/lib/error';
 
 export const dynamic = 'force-dynamic';
 

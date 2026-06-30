@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { HTTPS_URL_MESSAGE, isHttpsUrl } from './primitives.js';
+import { HTTPS_URL_MESSAGE, isHttpsUrl } from './primitives';
 
 // ---------------------------------------------------------------------------
 // Sponsor DTOs (Phase 6 — monetization).

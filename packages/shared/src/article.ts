@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { ArticleStatusSchema } from './enums.js';
-import { httpUrlSchema } from './primitives.js';
+import { ArticleStatusSchema } from './enums';
+import { httpUrlSchema } from './primitives';
 
 // ---------------------------------------------------------------------------
 // CandidateArticle DTOs

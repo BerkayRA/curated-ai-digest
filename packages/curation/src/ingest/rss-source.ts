@@ -5,9 +5,9 @@ import type {
   SourceContext,
   SourceFetchResult,
   SourceProvider,
-} from './types.js';
-import type { FeedDefinition } from './sources.js';
-import { FEEDS } from './sources.js';
+} from './types';
+import type { FeedDefinition } from './sources';
+import { FEEDS } from './sources';
 
 // ---------------------------------------------------------------------------
 // RSS source: fetch + parse all configured feeds, map to RawCandidate

@@ -5,7 +5,7 @@ import {
   type SubscriberTopic,
 } from '@prisma/client';
 
-import { prisma as defaultClient } from './index.js';
+import { prisma as defaultClient } from './index';
 
 // ---------------------------------------------------------------------------
 // Types

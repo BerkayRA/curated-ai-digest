@@ -8,7 +8,7 @@ import { describe, it, expect } from 'vitest';
 import {
   selectionSchema,
   resolveIsoWeek,
-} from '../manual-curate.js';
+} from '../manual-curate';
 
 // ---------------------------------------------------------------------------
 // selectionSchema — valid inputs

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseFeedXml } from '../ingest/rss-source.js';
+import { parseFeedXml } from '../ingest/rss-source';
 
 // ---------------------------------------------------------------------------
 // RSS source — tested against a static XML fixture (no network I/O)

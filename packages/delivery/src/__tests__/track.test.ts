@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { injectTrackingHooks } from '../track.js';
+import { injectTrackingHooks } from '../track';
 
 const BASE_URL = 'https://digest.example.com';
 const TOKEN = 'tok-123';

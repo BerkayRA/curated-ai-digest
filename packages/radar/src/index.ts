@@ -15,7 +15,7 @@ export {
   CHANGE_TYPES,
   SOURCE_TYPES,
   DIMENSIONS,
-} from './types.js';
+} from './types';
 export type {
   Category,
   Ring,
@@ -39,7 +39,7 @@ export type {
   Scorer,
   RingClassifier,
   RadarResult,
-} from './types.js';
+} from './types';
 
 // ---- Config ----------------------------------------------------------------
 export {
@@ -52,14 +52,14 @@ export {
   parseRadarConfig,
   normalizeWeights,
   quotaForCategory,
-} from './config.js';
+} from './config';
 export type {
   RadarConfig,
   SourceConfig,
   QuotasConfig,
   ScoringConfig,
   LlmConfig,
-} from './config.js';
+} from './config';
 
 // ---- Scoring + classification ----------------------------------------------
 export {
@@ -67,7 +67,7 @@ export {
   scoreDimensions,
   classifyRing,
   classifyChangeType,
-} from './scoring.js';
+} from './scoring';
 
 // ---- Emit (contract-shaped serializers) ------------------------------------
 export {
@@ -76,11 +76,11 @@ export {
   eventId,
   JSON_FEED_VERSION,
   CHANGES_FEED_MAX_ITEMS,
-} from './emit.js';
-export type { ChangesFeed, ChangesFeedItem } from './emit.js';
+} from './emit';
+export type { ChangesFeed, ChangesFeedItem } from './emit';
 
-import type { RadarConfig } from './config.js';
-import type { RadarResult } from './types.js';
+import type { RadarConfig } from './config';
+import type { RadarResult } from './types';
 
 /**
  * Run the full radar pipeline: collect → normalize → score → ring-classify →
