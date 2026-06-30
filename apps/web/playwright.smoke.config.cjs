@@ -49,7 +49,9 @@ module.exports = defineConfig({
   webServer: {
     // `next dev` needs no separate build step; the smoke job has no prebuilt .next.
     // Env is passed via the `env` block (not inline) to match the full config.
-    command: `node_modules/.bin/next dev -p ${PORT}`,
+    // `--webpack`: Next 16 defaults to Turbopack, which can't resolve the
+    // workspace packages' `.js`→`.ts` specifiers (see next.config.mjs); pin webpack.
+    command: `node_modules/.bin/next dev --webpack -p ${PORT}`,
     url: `${BASE_URL}/api/health`,
     reuseExistingServer: !process.env.CI,
     // Generous timeout: a cold `next dev` compiles the first route on demand.

@@ -1,7 +1,7 @@
 /**
  * Edge-safe Auth.js config for Curated AI Digest.
  *
- * This file is imported by `middleware.ts` (Edge Runtime) and therefore MUST NOT
+ * This file is imported by `proxy.ts` (Edge Runtime) and therefore MUST NOT
  * import any Node-only modules (argon2, node:fs, native addons). The argon2-based
  * Credentials provider lives in `auth.ts` (Node runtime) only.
  *

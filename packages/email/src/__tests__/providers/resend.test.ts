@@ -7,9 +7,11 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 const mockEmailsSend = vi.fn();
 
 vi.mock('resend', () => ({
-  Resend: vi.fn().mockImplementation(() => ({
-    emails: { send: mockEmailsSend },
-  })),
+  // Vitest 4 constructs mock impls via Reflect.construct; arrow fns aren't
+  // constructable, so use a regular function (returns the instance shape).
+  Resend: vi.fn(function () {
+    return { emails: { send: mockEmailsSend } };
+  }),
 }));
 
 import { ResendEmailProvider } from '../../providers/resend.js';

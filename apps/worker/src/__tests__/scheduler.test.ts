@@ -24,23 +24,24 @@ interface FakeCron {
 
 const cronInstances: FakeCron[] = [];
 
-const CronMock = vi.fn(
-  (
-    expression: string,
-    options: { name: string; timezone: string },
-    fn: () => unknown,
-  ): FakeCron => {
-    const instance: FakeCron = {
-      expression,
-      name: options.name,
-      timezone: options.timezone,
-      fn,
-      stop: vi.fn(),
-    };
-    cronInstances.push(instance);
-    return instance;
-  },
-);
+// Regular (constructable) function — the scheduler calls `new Cron(...)`, and
+// Vitest 4 constructs mock implementations via Reflect.construct (arrow fns are
+// not constructable). Returning an object makes `new CronMock()` yield it.
+const CronMock = vi.fn(function (
+  expression: string,
+  options: { name: string; timezone: string },
+  fn: () => unknown,
+): FakeCron {
+  const instance: FakeCron = {
+    expression,
+    name: options.name,
+    timezone: options.timezone,
+    fn,
+    stop: vi.fn(),
+  };
+  cronInstances.push(instance);
+  return instance;
+});
 
 vi.mock('croner', () => ({ Cron: CronMock }));
 
