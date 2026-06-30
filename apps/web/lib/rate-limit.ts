@@ -66,16 +66,33 @@ function pruneStale(now: number, windowMs: number): void {
 }
 
 /**
- * Best-effort client IP from proxy headers. Trusts `x-forwarded-for` (first
- * value) then `x-real-ip`, falling back to localhost when neither is present.
+ * Best-effort client IP from request headers.
+ *
+ * Resolution order:
+ *   1. `TRUSTED_CLIENT_IP_HEADER` (if set) — the canonical client-IP header of
+ *      the fronting CDN / load balancer (e.g. `cf-connecting-ip` behind
+ *      Cloudflare, `x-real-ip` behind nginx). Such a header is set and stripped
+ *      by the provider, so it is NOT spoofable by the client — prefer it when
+ *      deployed behind a cloud LB.
+ *   2. `x-forwarded-for` (first value) — only trustworthy behind a reverse proxy
+ *      that sets/strips it (the single-instance self-hosted default).
+ *   3. `x-real-ip`, then localhost.
+ *
+ * Set `TRUSTED_CLIENT_IP_HEADER` when fronting the app with a CDN/LB so the rate
+ * limiter keys on a non-spoofable IP. (Horizontal scaling additionally needs a
+ * shared limiter store — see rate-limit's module note — which is out of scope
+ * for the single-instance deployment.)
  */
 export function getClientIp(headers: Headers): string {
-  // NOTE: trusts `x-forwarded-for`; only safe behind a reverse proxy that
-  // sets/strips that header (single-instance self-hosted assumption).
-  // TODO: if this ever runs behind a cloud load balancer (Cloudflare, GCP/AWS
-  // LB), read that provider's canonical client-IP header (e.g. CF-Connecting-IP)
-  // instead of the user-supplied x-forwarded-for — pair with the Redis shared
-  // store needed for horizontal scaling.
+  const trustedHeader = process.env.TRUSTED_CLIENT_IP_HEADER?.trim().toLowerCase();
+  if (trustedHeader) {
+    const trusted = headers.get(trustedHeader);
+    if (trusted) {
+      const first = trusted.split(',')[0]?.trim();
+      if (first) return first;
+    }
+  }
+
   const forwarded = headers.get('x-forwarded-for');
   if (forwarded) {
     const first = forwarded.split(',')[0]?.trim();

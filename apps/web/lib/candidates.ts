@@ -22,8 +22,13 @@ export interface RecentCandidates {
 }
 
 function candidatesDir(): string {
-  // Web app cwd is apps/web; the committed pool lives at the repo root.
-  return process.env.CANDIDATES_DIR ?? path.resolve(process.cwd(), '..', '..', 'data', 'candidates');
+  // Web app cwd is apps/web; the committed pool lives at the repo root. The
+  // turbopackIgnore annotation tells Turbopack this is a runtime filesystem path,
+  // not a module to statically trace (silences a cosmetic build-time warning).
+  return (
+    process.env.CANDIDATES_DIR ??
+    path.resolve(/* turbopackIgnore: true */ process.cwd(), '..', '..', 'data', 'candidates')
+  );
 }
 
 function latestIso(dates: ReadonlyArray<Date | null | undefined>): string | null {

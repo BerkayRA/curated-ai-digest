@@ -67,4 +67,29 @@ describe('getClientIp', () => {
   it('falls back to localhost when no proxy headers are present', () => {
     expect(getClientIp(new Headers())).toBe('127.0.0.1');
   });
+
+  describe('TRUSTED_CLIENT_IP_HEADER (cloud LB / CDN)', () => {
+    afterEach(() => {
+      delete process.env.TRUSTED_CLIENT_IP_HEADER;
+    });
+
+    it('prefers the configured trusted header over x-forwarded-for', () => {
+      process.env.TRUSTED_CLIENT_IP_HEADER = 'cf-connecting-ip';
+      const headers = new Headers({
+        'cf-connecting-ip': '3.3.3.3',
+        'x-forwarded-for': '9.9.9.9', // would be used without the trusted header
+      });
+      expect(getClientIp(headers)).toBe('3.3.3.3');
+    });
+
+    it('is case-insensitive and trims the configured header name', () => {
+      process.env.TRUSTED_CLIENT_IP_HEADER = '  CF-Connecting-IP  ';
+      expect(getClientIp(new Headers({ 'cf-connecting-ip': '4.4.4.4' }))).toBe('4.4.4.4');
+    });
+
+    it('falls back to x-forwarded-for when the trusted header is absent on the request', () => {
+      process.env.TRUSTED_CLIENT_IP_HEADER = 'cf-connecting-ip';
+      expect(getClientIp(new Headers({ 'x-forwarded-for': '9.9.9.9' }))).toBe('9.9.9.9');
+    });
+  });
 });
