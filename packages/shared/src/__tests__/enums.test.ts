@@ -5,7 +5,7 @@ import {
   SendStatusSchema,
   EmailProviderKindSchema,
   SubscriberStatusSchema,
-} from '../enums.js';
+} from '../enums';
 
 describe('IssueStatusSchema', () => {
   const validValues = ['draft', 'in_review', 'approved', 'scheduled', 'sent', 'failed', 'cancelled'] as const;

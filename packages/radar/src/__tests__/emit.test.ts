@@ -5,8 +5,8 @@ import {
   eventId,
   JSON_FEED_VERSION,
   CHANGES_FEED_MAX_ITEMS,
-} from '../emit.js';
-import type { RadarEvent } from '../types.js';
+} from '../emit';
+import type { RadarEvent } from '../types';
 
 // ---------------------------------------------------------------------------
 // emit.ts produces history.jsonl + changes.json that conform EXACTLY to

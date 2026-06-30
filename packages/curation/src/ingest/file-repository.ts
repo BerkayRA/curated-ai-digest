@@ -1,5 +1,5 @@
-import { toStored, readPool, writePool, writeIndex } from './candidate-file.js';
-import type { IngestRepository, PersistRunOpts } from './types.js';
+import { toStored, readPool, writePool, writeIndex } from './candidate-file';
+import type { IngestRepository, PersistRunOpts } from './types';
 
 // ---------------------------------------------------------------------------
 // File-based implementation of IngestRepository

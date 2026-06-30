@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@digest/db';
 import { ok, err } from '@/lib/api-response';
 import { getErrorMessage } from '@/lib/error';
-import { assertSameOrigin } from '@/lib/assert-same-origin.js';
+import { assertSameOrigin } from '@/lib/assert-same-origin';
 import { resolveTopicIdBySlug, resolveTopicIdFromRequest } from '@/lib/resolve-topic';
 // CreateIssueDraftSchema is defined in ./schema (not inline) because Next.js
 // Route Handlers only allow a fixed set of named exports (HTTP verbs + config).

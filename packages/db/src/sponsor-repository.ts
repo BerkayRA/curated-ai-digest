@@ -1,6 +1,6 @@
 import { Prisma, type PrismaClient, type Sponsor } from '@prisma/client';
 
-import { prisma as defaultClient } from './index.js';
+import { prisma as defaultClient } from './index';
 
 // ---------------------------------------------------------------------------
 // Sponsor CRUD (Phase 6). Mirrors the source/topic repository factory pattern so

@@ -1,9 +1,9 @@
 import { describe, it, expect, vi } from 'vitest';
-import { runRankStage, buildSystemPrompt } from '../pipeline/stage1-rank.js';
-import type { StageOptions, PipelineRepository, TopicContext } from '../pipeline/types.js';
-import type { Logger } from '../ingest/types.js';
+import { runRankStage, buildSystemPrompt } from '../pipeline/stage1-rank';
+import type { StageOptions, PipelineRepository, TopicContext } from '../pipeline/types';
+import type { Logger } from '../ingest/types';
 import type { CandidateArticle } from '@digest/db';
-import type { AnthropicClient } from '../pipeline/types.js';
+import type { AnthropicClient } from '../pipeline/types';
 
 // ---------------------------------------------------------------------------
 // Helpers

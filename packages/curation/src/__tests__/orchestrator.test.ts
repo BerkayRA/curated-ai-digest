@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
-import { runIngest } from '../ingest/orchestrator.js';
-import { DEFAULT_TOPIC } from '../ingest/sources.js';
+import { runIngest } from '../ingest/orchestrator';
+import { DEFAULT_TOPIC } from '../ingest/sources';
 import type {
   IngestRepository,
   Logger,
@@ -10,7 +10,7 @@ import type {
   SourceContext,
   SourceFetchResult,
   SourceProvider,
-} from '../ingest/types.js';
+} from '../ingest/types';
 
 // ---------------------------------------------------------------------------
 // Orchestrator tests — providers are injected as fakes; no network or DB.

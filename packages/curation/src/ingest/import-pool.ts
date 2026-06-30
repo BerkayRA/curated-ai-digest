@@ -14,9 +14,9 @@
  */
 
 import * as path from 'node:path';
-import { readPool, CANDIDATES_DIR_DEFAULT } from './candidate-file.js';
-import type { IngestRepository, Logger, EnrichedCandidate } from './types.js';
-import type { StoredCandidate } from './candidate-file.js';
+import { readPool, CANDIDATES_DIR_DEFAULT } from './candidate-file';
+import type { IngestRepository, Logger, EnrichedCandidate } from './types';
+import type { StoredCandidate } from './candidate-file';
 
 // ---------------------------------------------------------------------------
 // Public option types
@@ -108,7 +108,7 @@ export async function importCommittedCandidates(
 
   const repo: IngestRepository =
     opts.repository ??
-    (await import('./repository.js')).createPrismaRepository();
+    (await import('./repository')).createPrismaRepository();
 
   // Resolve the topic id for dedup-scoping + persistence. On the production
   // path (no injected repository) resolve the default active topic from the DB;

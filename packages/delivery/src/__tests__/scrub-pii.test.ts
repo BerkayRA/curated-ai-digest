@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { scrubPii } from '../dispatch.js';
+import { scrubPii } from '../dispatch';
 
 describe('scrubPii', () => {
   it('replaces a plain email address with [redacted]', () => {

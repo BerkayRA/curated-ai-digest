@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { IssueItemKindSchema, IssueStatusSchema } from './enums.js';
-import { httpUrlSchema, isoWeekSchema } from './primitives.js';
+import { IssueItemKindSchema, IssueStatusSchema } from './enums';
+import { httpUrlSchema, isoWeekSchema } from './primitives';
 
 // ---------------------------------------------------------------------------
 // Issue DTOs

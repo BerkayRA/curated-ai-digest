@@ -54,22 +54,22 @@ vi.mock('@digest/db', () => ({
 
 vi.mock('@digest/delivery', () => ({ runAbWinnerJob: vi.fn().mockResolvedValue(null) }));
 
-vi.mock('../jobs/send.js', () => ({ runSendJob: vi.fn().mockResolvedValue(undefined) }));
-vi.mock('../jobs/curate.js', () => ({ runCurationJob: vi.fn().mockResolvedValue(undefined) }));
+vi.mock('../jobs/send', () => ({ runSendJob: vi.fn().mockResolvedValue(undefined) }));
+vi.mock('../jobs/curate', () => ({ runCurationJob: vi.fn().mockResolvedValue(undefined) }));
 
-const { runSendJob } = await import('../jobs/send.js');
+const { runSendJob } = await import('../jobs/send');
 const { runAbWinnerJob } = await import('@digest/delivery');
 
 const { settingsToCronExpressions, startScheduler, SCHEDULE_RELOAD_INTERVAL_MS } = await import(
-  '../scheduler.js'
+  '../scheduler'
 );
 import type {
   SchedulerSettings,
   ScheduleTopic,
   GlobalSchedulerSettings,
   SchedulerDataSource,
-} from '../scheduler.js';
-import type { Logger } from '../logger.js';
+} from '../scheduler';
+import type { Logger } from '../logger';
 
 // ---------------------------------------------------------------------------
 // settingsToCronExpressions

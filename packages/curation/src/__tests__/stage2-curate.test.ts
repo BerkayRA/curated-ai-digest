@@ -1,13 +1,13 @@
 import { describe, it, expect, vi } from 'vitest';
-import { runCurateStage, buildSystemPrompt } from '../pipeline/stage2-curate.js';
+import { runCurateStage, buildSystemPrompt } from '../pipeline/stage2-curate';
 import type {
   StageOptions,
   PipelineRepository,
   ScoredCandidate,
   TopicContext,
-} from '../pipeline/types.js';
-import type { Logger } from '../ingest/types.js';
-import type { AnthropicClient } from '../pipeline/types.js';
+} from '../pipeline/types';
+import type { Logger } from '../ingest/types';
+import type { AnthropicClient } from '../pipeline/types';
 
 // ---------------------------------------------------------------------------
 // Helpers

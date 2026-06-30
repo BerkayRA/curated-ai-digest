@@ -6,7 +6,7 @@ import {
   httpUrlSchema,
   isHttpUrl,
   isHttpsUrl,
-} from '../primitives.js';
+} from '../primitives';
 
 describe('emailSchema', () => {
   it('accepts a valid lowercase email', () => {

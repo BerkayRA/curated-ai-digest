@@ -14,8 +14,8 @@ vi.mock('resend', () => ({
   }),
 }));
 
-import { ResendEmailProvider } from '../../providers/resend.js';
-import type { EmailMessage } from '../../providers/provider.js';
+import { ResendEmailProvider } from '../../providers/resend';
+import type { EmailMessage } from '../../providers/provider';
 
 // ---------------------------------------------------------------------------
 // Fixture

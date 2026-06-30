@@ -2,9 +2,9 @@ import { describe, it, expect } from 'vitest';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import * as fs from 'node:fs/promises';
-import { runScan } from '../scan/run-scan.js';
-import { readPool } from '../ingest/candidate-file.js';
-import type { SourceProvider, SourceContext, SourceFetchResult, RawCandidate, Logger } from '../ingest/types.js';
+import { runScan } from '../scan/run-scan';
+import { readPool } from '../ingest/candidate-file';
+import type { SourceProvider, SourceContext, SourceFetchResult, RawCandidate, Logger } from '../ingest/types';
 
 // ---------------------------------------------------------------------------
 // Fixtures

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { createEmailEventRepository } from '../email-event-repository.js';
+import { createEmailEventRepository } from '../email-event-repository';
 
 type MockFn = ReturnType<typeof vi.fn>;
 

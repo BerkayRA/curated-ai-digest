@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { createTopicRepository } from '../topic-repository.js';
+import { createTopicRepository } from '../topic-repository';
 
 // ---------------------------------------------------------------------------
 // Fake PrismaClient — records calls, returns controlled responses. No live DB.

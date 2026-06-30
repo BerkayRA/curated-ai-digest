@@ -1,6 +1,6 @@
 import { Prisma, type PrismaClient } from '@prisma/client';
 
-import { prisma as defaultClient } from './index.js';
+import { prisma as defaultClient } from './index';
 
 // ---------------------------------------------------------------------------
 // Analytics aggregation — computed on the fly (≤ low-thousands of sends, so no

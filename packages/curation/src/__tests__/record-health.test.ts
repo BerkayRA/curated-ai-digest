@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import type { IngestResult } from '../ingest/types.js';
+import type { IngestResult } from '../ingest/types';
 import type { SourceRepository } from '@digest/db';
 
 // ---------------------------------------------------------------------------
@@ -47,7 +47,7 @@ describe('recordSourceHealth', () => {
       'exa:src-2': 3,
     });
 
-    const { recordSourceHealth } = await import('../ingest/record-health.js');
+    const { recordSourceHealth } = await import('../ingest/record-health');
     await recordSourceHealth(result, { repository: repo, now: () => FIXED_NOW });
 
     expect(vi.mocked(repo.recordHealth)).toHaveBeenCalledTimes(2);
@@ -57,7 +57,7 @@ describe('recordSourceHealth', () => {
     const repo = makeFakeRepo();
     const result = makeResult({ 'rss:src-ok': 7 });
 
-    const { recordSourceHealth } = await import('../ingest/record-health.js');
+    const { recordSourceHealth } = await import('../ingest/record-health');
     await recordSourceHealth(result, { repository: repo, now: () => FIXED_NOW });
 
     expect(vi.mocked(repo.recordHealth)).toHaveBeenCalledWith('src-ok', {
@@ -75,7 +75,7 @@ describe('recordSourceHealth', () => {
       [{ source: 'radar:src-err', message: 'Network timeout' }],
     );
 
-    const { recordSourceHealth } = await import('../ingest/record-health.js');
+    const { recordSourceHealth } = await import('../ingest/record-health');
     await recordSourceHealth(result, { repository: repo, now: () => FIXED_NOW });
 
     expect(vi.mocked(repo.recordHealth)).toHaveBeenCalledWith('src-err', {
@@ -91,7 +91,7 @@ describe('recordSourceHealth', () => {
     // 'rss' and 'exa' have no colon — they are the static fallback providers.
     const result = makeResult({ rss: 5, exa: 3 });
 
-    const { recordSourceHealth } = await import('../ingest/record-health.js');
+    const { recordSourceHealth } = await import('../ingest/record-health');
     await recordSourceHealth(result, { repository: repo, now: () => FIXED_NOW });
 
     expect(vi.mocked(repo.recordHealth)).not.toHaveBeenCalled();
@@ -105,7 +105,7 @@ describe('recordSourceHealth', () => {
       'exa:src-db-2': 2, // DB-backed — record
     });
 
-    const { recordSourceHealth } = await import('../ingest/record-health.js');
+    const { recordSourceHealth } = await import('../ingest/record-health');
     await recordSourceHealth(result, { repository: repo, now: () => FIXED_NOW });
 
     expect(vi.mocked(repo.recordHealth)).toHaveBeenCalledTimes(2);
@@ -120,7 +120,7 @@ describe('recordSourceHealth', () => {
     // A cuid id shouldn't contain colons but we test splitting on the FIRST colon only.
     const result = makeResult({ 'rss:cuid-abc123': 4 });
 
-    const { recordSourceHealth } = await import('../ingest/record-health.js');
+    const { recordSourceHealth } = await import('../ingest/record-health');
     await recordSourceHealth(result, { repository: repo, now: () => FIXED_NOW });
 
     expect(vi.mocked(repo.recordHealth)).toHaveBeenCalledWith('cuid-abc123', expect.any(Object));
@@ -131,7 +131,7 @@ describe('recordSourceHealth', () => {
     const customNow = new Date('2025-01-15T08:30:00.000Z');
     const result = makeResult({ 'exa:src-ts': 1 });
 
-    const { recordSourceHealth } = await import('../ingest/record-health.js');
+    const { recordSourceHealth } = await import('../ingest/record-health');
     await recordSourceHealth(result, { repository: repo, now: () => customNow });
 
     expect(vi.mocked(repo.recordHealth)).toHaveBeenCalledWith(
@@ -145,7 +145,7 @@ describe('recordSourceHealth', () => {
     const before = new Date();
     const result = makeResult({ 'rss:src-default': 2 });
 
-    const { recordSourceHealth } = await import('../ingest/record-health.js');
+    const { recordSourceHealth } = await import('../ingest/record-health');
     await recordSourceHealth(result, { repository: repo });
     const after = new Date();
 
@@ -162,7 +162,7 @@ describe('recordSourceHealth', () => {
       [{ source: 'exa:src-bad', message: 'API failure' }],
     );
 
-    const { recordSourceHealth } = await import('../ingest/record-health.js');
+    const { recordSourceHealth } = await import('../ingest/record-health');
     await recordSourceHealth(result, { repository: repo, now: () => FIXED_NOW });
 
     const okCall = vi

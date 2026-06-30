@@ -1,6 +1,6 @@
 import { type PrismaClient, type Suppression } from '@prisma/client';
 
-import { prisma as defaultClient } from './index.js';
+import { prisma as defaultClient } from './index';
 
 // ---------------------------------------------------------------------------
 // Global suppression list — a do-not-send firewall keyed by email, applied

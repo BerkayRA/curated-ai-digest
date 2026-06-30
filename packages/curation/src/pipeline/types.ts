@@ -3,8 +3,8 @@
 // ---------------------------------------------------------------------------
 
 import type { CandidateArticle } from '@digest/db';
-import type { Logger } from '../ingest/types.js';
-import type { PipelineStage } from './config.js';
+import type { Logger } from '../ingest/types';
+import type { PipelineStage } from './config';
 import type Anthropic from '@anthropic-ai/sdk';
 
 // ---------------------------------------------------------------------------

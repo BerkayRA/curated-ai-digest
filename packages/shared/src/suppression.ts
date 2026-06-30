@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { emailSchema } from './primitives.js';
+import { emailSchema } from './primitives';
 
 // ---------------------------------------------------------------------------
 // Global suppression list — values MUST match the Prisma SuppressionReason enum.

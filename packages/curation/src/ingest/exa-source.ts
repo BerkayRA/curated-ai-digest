@@ -5,8 +5,8 @@ import type {
   SourceContext,
   SourceFetchResult,
   SourceProvider,
-} from './types.js';
-import { EXA_QUERIES } from './sources.js';
+} from './types';
+import { EXA_QUERIES } from './sources';
 
 // ---------------------------------------------------------------------------
 // Exa neural-search source

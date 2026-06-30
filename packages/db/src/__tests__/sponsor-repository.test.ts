@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { createSponsorRepository } from '../sponsor-repository.js';
+import { createSponsorRepository } from '../sponsor-repository';
 
 type MockFn = ReturnType<typeof vi.fn>;
 

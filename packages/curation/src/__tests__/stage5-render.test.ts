@@ -1,13 +1,13 @@
 import { describe, it, expect, vi } from 'vitest';
-import { runRenderStage } from '../pipeline/stage5-render.js';
+import { runRenderStage } from '../pipeline/stage5-render';
 import type {
   StageOptions,
   PipelineRepository,
   CopywriteOutput,
   TopicContext,
-} from '../pipeline/types.js';
-import type { Logger } from '../ingest/types.js';
-import type { RenderFn } from '../pipeline/stage5-render.js';
+} from '../pipeline/types';
+import type { Logger } from '../ingest/types';
+import type { RenderFn } from '../pipeline/stage5-render';
 
 // ---------------------------------------------------------------------------
 // Helpers

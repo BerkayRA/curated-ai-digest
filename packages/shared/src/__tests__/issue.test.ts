@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { CreateIssueSchema, UpdateIssueSchema, CreateIssueItemSchema } from '../issue.js';
+import { CreateIssueSchema, UpdateIssueSchema, CreateIssueItemSchema } from '../issue';
 
 describe('CreateIssueSchema', () => {
   it('parses a valid create payload', () => {

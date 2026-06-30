@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
-import { callWithTool, callWithValidatedTool } from '../pipeline/llm-utils.js';
+import { callWithTool, callWithValidatedTool } from '../pipeline/llm-utils';
 import { z } from 'zod';
-import type { AnthropicClient } from '../pipeline/types.js';
+import type { AnthropicClient } from '../pipeline/types';
 
 // ---------------------------------------------------------------------------
 // Mock Anthropic client factory

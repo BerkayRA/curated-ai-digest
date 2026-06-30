@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { getDefaultTopic, getDefaultTopicId } from '../default-topic.js';
+import { getDefaultTopic, getDefaultTopicId } from '../default-topic';
 
 // ---------------------------------------------------------------------------
 // Fake PrismaClient — only the topic.findMany delegate is exercised here.

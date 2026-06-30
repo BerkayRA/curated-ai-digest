@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { renderDigestEmail } from '../render.js';
-import { sampleIssue, sampleIssueTwoItems } from '../fixtures/sampleIssue.js';
-import type { DigestEmailData } from '../types.js';
+import { renderDigestEmail } from '../render';
+import { sampleIssue, sampleIssueTwoItems } from '../fixtures/sampleIssue';
+import type { DigestEmailData } from '../types';
 
 /**
  * React Email HTML-encodes apostrophes (') as &#x27;.

@@ -1,6 +1,6 @@
 import { Prisma, type PrismaClient, type SubjectVariant, type AbStatus } from '@prisma/client';
 
-import { prisma as defaultClient } from './index.js';
+import { prisma as defaultClient } from './index';
 
 // ---------------------------------------------------------------------------
 // SubjectVariant access — authoring A/B subject variants on an issue and

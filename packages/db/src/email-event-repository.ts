@@ -4,7 +4,7 @@ import {
   type EmailEventType,
 } from '@prisma/client';
 
-import { prisma as defaultClient } from './index.js';
+import { prisma as defaultClient } from './index';
 
 // ---------------------------------------------------------------------------
 // Types

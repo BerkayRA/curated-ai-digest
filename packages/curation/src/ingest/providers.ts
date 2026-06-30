@@ -1,7 +1,7 @@
-import { rssProvider } from './rss-source.js';
-import { exaProvider } from './exa-source.js';
-import { radarProvider } from './radar-source.js';
-import type { SourceProvider } from './types.js';
+import { rssProvider } from './rss-source';
+import { exaProvider } from './exa-source';
+import { radarProvider } from './radar-source';
+import type { SourceProvider } from './types';
 
 // ---------------------------------------------------------------------------
 // Default source-provider registry (ADR-0003, decision 1)

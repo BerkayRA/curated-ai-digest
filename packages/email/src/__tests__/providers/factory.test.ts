@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { createEmailProvider } from '../../providers/factory.js';
-import { AcsEmailProvider } from '../../providers/acs.js';
-import { GraphEmailProvider } from '../../providers/graph.js';
-import { ResendEmailProvider } from '../../providers/resend.js';
+import { createEmailProvider } from '../../providers/factory';
+import { AcsEmailProvider } from '../../providers/acs';
+import { GraphEmailProvider } from '../../providers/graph';
+import { ResendEmailProvider } from '../../providers/resend';
 
 describe('createEmailProvider factory', () => {
   it('returns AcsEmailProvider for "acs_email"', () => {

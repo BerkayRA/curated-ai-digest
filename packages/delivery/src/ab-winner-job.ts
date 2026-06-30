@@ -13,8 +13,8 @@
 import { prisma, createSubjectVariantRepository } from '@digest/db';
 import type { SubjectVariantRepository } from '@digest/db';
 import type { AbWinnerResult } from '@digest/shared';
-import { dispatchIssue } from './dispatch.js';
-import { selectWinner } from './ab-split.js';
+import { dispatchIssue } from './dispatch';
+import { selectWinner } from './ab-split';
 
 /** Minimal structured logger (matches the worker's Logger shape). */
 export interface AbWinnerLogger {

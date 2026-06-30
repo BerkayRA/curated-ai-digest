@@ -9,10 +9,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import * as fs from 'node:fs/promises';
-import type { IngestRepository, PersistRunOpts, EnrichedCandidate } from '../ingest/types.js';
-import type { StoredCandidate } from '../ingest/candidate-file.js';
-import { writePool } from '../ingest/candidate-file.js';
-import { importCommittedCandidates } from '../ingest/import-pool.js';
+import type { IngestRepository, PersistRunOpts, EnrichedCandidate } from '../ingest/types';
+import type { StoredCandidate } from '../ingest/candidate-file';
+import { writePool } from '../ingest/candidate-file';
+import { importCommittedCandidates } from '../ingest/import-pool';
 
 // ---------------------------------------------------------------------------
 // Fixtures

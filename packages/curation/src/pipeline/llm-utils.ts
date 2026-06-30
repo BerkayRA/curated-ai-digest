@@ -3,7 +3,7 @@
 // ---------------------------------------------------------------------------
 
 import { z } from 'zod';
-import type { AnthropicClient } from './types.js';
+import type { AnthropicClient } from './types';
 import type Anthropic from '@anthropic-ai/sdk';
 
 // ---------------------------------------------------------------------------

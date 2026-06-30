@@ -16,7 +16,7 @@ import { prisma, createSubscriberTopicRepository, createSubjectVariantRepository
 import type { IssueStatus } from '@digest/shared';
 import { dispatchIssue, evaluateAutoSend, transitionIssue, scrubPii } from '@digest/delivery';
 import { createEmailProvider } from '@digest/email';
-import type { Logger } from '../logger.js';
+import type { Logger } from '../logger';
 
 // ---------------------------------------------------------------------------
 // Repository interface — injectable for tests

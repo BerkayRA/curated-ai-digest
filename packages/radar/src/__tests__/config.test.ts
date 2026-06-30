@@ -4,8 +4,8 @@ import {
   normalizeWeights,
   quotaForCategory,
   radarConfigSchema,
-} from '../config.js';
-import { DIMENSIONS, type DimensionWeights } from '../types.js';
+} from '../config';
+import { DIMENSIONS, type DimensionWeights } from '../types';
 
 // ---------------------------------------------------------------------------
 // A minimal-but-complete valid config (mirrors radar.config.yaml in RFC-001).

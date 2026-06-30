@@ -1,4 +1,4 @@
-import type { DigestEmailData } from '../types.js';
+import type { DigestEmailData } from '../types';
 
 /**
  * Realistic Turkish-language sample issue for dev preview and vitest tests.

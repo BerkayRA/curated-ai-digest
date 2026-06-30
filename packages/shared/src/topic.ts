@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
-import { ConsentModeSchema, LanguageSchema, TopicTierSchema } from './enums.js';
-import { HTTPS_URL_MESSAGE, isHttpsUrl } from './primitives.js';
+import { ConsentModeSchema, LanguageSchema, TopicTierSchema } from './enums';
+import { HTTPS_URL_MESSAGE, isHttpsUrl } from './primitives';
 
 // ---------------------------------------------------------------------------
 // Topic status enum — values MUST match the Prisma TopicStatus enum exactly.

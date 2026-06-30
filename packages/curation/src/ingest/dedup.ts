@@ -1,5 +1,5 @@
-import { canonicalizeUrl, contentHash, isAllowedScheme } from './canonicalize.js';
-import type { RawCandidate, EnrichedCandidate } from './types.js';
+import { canonicalizeUrl, contentHash, isAllowedScheme } from './canonicalize';
+import type { RawCandidate, EnrichedCandidate } from './types';
 
 // ---------------------------------------------------------------------------
 // Deduplication: within-run and against existing DB rows

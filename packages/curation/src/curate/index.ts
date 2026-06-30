@@ -11,7 +11,7 @@ export {
   candidateToDraftItem,
   groupBySourceTopN,
   pickFirstUnused,
-} from './heuristic.js';
+} from './heuristic';
 
 export type {
   CandidateView,
@@ -19,4 +19,4 @@ export type {
   ScoreOptions,
   CurateOptions,
   SourceGroup,
-} from './heuristic.js';
+} from './heuristic';

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { CreateSponsorSchema, UpdateSponsorSchema } from '../sponsor.js';
+import { CreateSponsorSchema, UpdateSponsorSchema } from '../sponsor';
 
 describe('CreateSponsorSchema', () => {
   const base = { name: 'Acme', websiteUrl: 'https://acme.example.com' };
