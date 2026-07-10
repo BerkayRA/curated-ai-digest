@@ -277,7 +277,7 @@ describe('createClaudeCodeClient (default spawn runner)', () => {
     tools: [{ name: 't', description: 'd', input_schema: { type: 'object' } }],
   } as never;
 
-  it('spawns with a fixed argv allow-list including --bare, no shell, prompt via stdin', async () => {
+  it('spawns with a fixed argv allow-list, no shell, neutral cwd, prompt via stdin', async () => {
     const child = makeFakeChild();
     spawnMock.mockReturnValue(child);
     const client = createClaudeCodeClient();
@@ -292,8 +292,12 @@ describe('createClaudeCodeClient (default spawn runner)', () => {
 
     const [bin, args, opts] = spawnMock.mock.calls[0]!;
     expect(bin).toBe('claude');
-    expect(args).toEqual(['-p', '--bare', '--output-format', 'json']);
-    expect(opts).toEqual({ shell: false });
+    expect(args).toEqual(['-p', '--output-format', 'json']);
+    // No shell (no injection) and a neutral cwd (no CLAUDE.md/hook auto-discovery).
+    expect((opts as { shell: boolean }).shell).toBe(false);
+    expect(typeof (opts as { cwd: string }).cwd).toBe('string');
+    // `--bare` must NOT be passed — it skips keychain auth reads.
+    expect((args as string[]).includes('--bare')).toBe(false);
     // Untrusted prompt goes to stdin, never argv.
     expect(child.stdin.write).toHaveBeenCalledOnce();
     expect(child.stdin.end).toHaveBeenCalledOnce();
@@ -315,7 +319,7 @@ describe('createClaudeCodeClient (default spawn runner)', () => {
     await p;
 
     const args = spawnMock.mock.calls[0]![1] as string[];
-    expect(args).toEqual(['-p', '--bare', '--output-format', 'json', '--model', 'claude-opus-4-8']);
+    expect(args).toEqual(['-p', '--output-format', 'json', '--model', 'claude-opus-4-8']);
   });
 
   it('rejects with a friendly message when the CLI is not found (ENOENT)', async () => {
