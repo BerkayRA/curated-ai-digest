@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="400" viewBox="0 0 1280 400" role="img" aria-label="Curated AI Digest — Claude-powered weekly Turkish AI-news digest">
+  <title>Curated AI Digest</title>
+  <defs>
+    <!-- Portal hero band: Process-Blue diagonal gradient (#0083c4 → #0082b3 → #005f85) -->
+    <linearGradient id="heroBlue" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0083c4"/>
+      <stop offset="0.58" stop-color="#0082b3"/>
+      <stop offset="1" stop-color="#005f85"/>
+    </linearGradient>
+    <!-- Buka white dot field, 28px tile, low opacity (mirrors the portal hero-dot) -->
+    <pattern id="bukaDots" width="28" height="28" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.5" fill="#ffffff" fill-opacity="0.07"/>
+    </pattern>
+    <!-- Soft glow used under the dissolving particle cluster -->
+    <radialGradient id="coreGlow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#4fc3ec" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#4fc3ec" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Fade so the dot field dissolves toward the right (the Buka particle motif) -->
+    <linearGradient id="dissolveMask" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="1"/>
+      <stop offset="0.6" stop-color="#ffffff" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <mask id="dotFade">
+      <rect width="1280" height="400" fill="url(#dissolveMask)"/>
+    </mask>
+  </defs>
+
+  <!-- Base band -->
+  <rect width="1280" height="400" fill="url(#heroBlue)"/>
+  <rect width="1280" height="400" fill="url(#bukaDots)" mask="url(#dotFade)"/>
+
+  <!-- Glow behind the dissolving cluster -->
+  <ellipse cx="1030" cy="180" rx="360" ry="300" fill="url(#coreGlow)"/>
+
+  <!-- ── Buka dot-dissolve cluster (right side): dense core scattering up-and-right,
+       a few dots picking up the accent palette — teal / orange / magenta ── -->
+  <g>
+    <!-- dense core -->
+    <circle cx="946" cy="214" r="7" fill="#ffffff" fill-opacity="0.95"/>
+    <circle cx="972" cy="196" r="6" fill="#ffffff" fill-opacity="0.9"/>
+    <circle cx="928" cy="238" r="5.5" fill="#ffffff" fill-opacity="0.85"/>
+    <circle cx="964" cy="238" r="5" fill="#e6f6fc" fill-opacity="0.85"/>
+    <circle cx="996" cy="222" r="6.5" fill="#ffffff" fill-opacity="0.92"/>
+    <circle cx="912" cy="206" r="4.5" fill="#ffffff" fill-opacity="0.75"/>
+    <circle cx="988" cy="256" r="4.5" fill="#ffffff" fill-opacity="0.7"/>
+    <!-- accents dispersing -->
+    <circle cx="1024" cy="196" r="6" fill="#36b39a" fill-opacity="0.9"/>
+    <circle cx="1052" cy="222" r="5" fill="#ffffff" fill-opacity="0.85"/>
+    <circle cx="1044" cy="168" r="4.5" fill="#f39200" fill-opacity="0.9"/>
+    <circle cx="1082" cy="196" r="5.5" fill="#ffffff" fill-opacity="0.8"/>
+    <circle cx="1076" cy="150" r="4" fill="#e6007e" fill-opacity="0.85"/>
+    <circle cx="1108" cy="176" r="4" fill="#ffffff" fill-opacity="0.7"/>
+    <circle cx="1120" cy="214" r="4.5" fill="#36b39a" fill-opacity="0.7"/>
+    <!-- fading scatter toward the edges -->
+    <circle cx="1136" cy="146" r="3.5" fill="#ffffff" fill-opacity="0.55"/>
+    <circle cx="1150" cy="196" r="3" fill="#ffffff" fill-opacity="0.45"/>
+    <circle cx="1112" cy="118" r="3" fill="#f39200" fill-opacity="0.55"/>
+    <circle cx="1168" cy="164" r="2.5" fill="#ffffff" fill-opacity="0.4"/>
+    <circle cx="1184" cy="210" r="2.5" fill="#ffffff" fill-opacity="0.32"/>
+    <circle cx="1146" cy="96" r="2.5" fill="#ffffff" fill-opacity="0.35"/>
+    <circle cx="1200" cy="150" r="2" fill="#e6007e" fill-opacity="0.4"/>
+    <circle cx="1210" cy="188" r="2" fill="#ffffff" fill-opacity="0.28"/>
+    <circle cx="1176" cy="118" r="2" fill="#ffffff" fill-opacity="0.3"/>
+    <circle cx="1226" cy="164" r="1.5" fill="#ffffff" fill-opacity="0.22"/>
+    <circle cx="1240" cy="198" r="1.5" fill="#36b39a" fill-opacity="0.3"/>
+    <circle cx="1198" cy="98" r="1.5" fill="#ffffff" fill-opacity="0.22"/>
+    <circle cx="1120" cy="270" r="3.5" fill="#ffffff" fill-opacity="0.5"/>
+    <circle cx="1058" cy="278" r="3" fill="#ffffff" fill-opacity="0.45"/>
+    <circle cx="1150" cy="248" r="2.5" fill="#f39200" fill-opacity="0.4"/>
+  </g>
+
+  <!-- ── Left column: eyebrow pill, title, subtitle, faux hero-nav ── -->
+  <g font-family="'Hanken Grotesk', 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif">
+    <!-- Eyebrow pill (echoes the portal's EyebrowLabel) -->
+    <g>
+      <rect x="80" y="86" width="220" height="30" rx="15" fill="#ffffff" fill-opacity="0.14"/>
+      <circle cx="100" cy="101" r="4" fill="#36b39a"/>
+      <text x="116" y="106" fill="#ffffff" fill-opacity="0.95" font-size="13" font-weight="700" letter-spacing="1.6">MEGA BİLGİSAYAR · AI</text>
+    </g>
+
+    <!-- Title -->
+    <text x="78" y="196" fill="#ffffff" font-size="66" font-weight="800" letter-spacing="-1.5">Curated AI Digest</text>
+
+    <!-- Subtitle -->
+    <text x="80" y="238" fill="#ffffff" fill-opacity="0.82" font-size="21" font-weight="400">Claude ile küratörlüğü yapılan, haftalık Türkçe yapay zekâ bülteni.</text>
+    <text x="80" y="266" fill="#ffffff" fill-opacity="0.62" font-size="16" font-weight="400">Curate · brand · approve · send — with a human gate by default.</text>
+
+    <!-- Faux hero-nav (mirrors the real horizontal nav) -->
+    <g font-size="14" font-weight="600">
+      <rect x="80" y="300" width="78" height="30" rx="15" fill="#ffffff" fill-opacity="0.18"/>
+      <text x="119" y="320" fill="#ffffff" text-anchor="middle">Arşiv</text>
+      <rect x="166" y="300" width="104" height="30" rx="15" fill="#ffffff" fill-opacity="0.1"/>
+      <text x="218" y="320" fill="#ffffff" fill-opacity="0.9" text-anchor="middle">Kaynaklar</text>
+      <rect x="278" y="300" width="104" height="30" rx="15" fill="#ffffff" fill-opacity="0.1"/>
+      <text x="330" y="320" fill="#ffffff" fill-opacity="0.9" text-anchor="middle">Aboneler</text>
+      <rect x="390" y="300" width="86" height="30" rx="15" fill="#ffffff" fill-opacity="0.1"/>
+      <text x="433" y="320" fill="#ffffff" fill-opacity="0.9" text-anchor="middle">Ayarlar</text>
+    </g>
+  </g>
+</svg>
