@@ -24,6 +24,7 @@
 // ---------------------------------------------------------------------------
 
 import { spawn } from 'node:child_process';
+import { tmpdir } from 'node:os';
 import type Anthropic from '@anthropic-ai/sdk';
 import type { AnthropicClient } from './types';
 
@@ -195,15 +196,16 @@ function defaultRunner(binary: string, timeoutMs: number) {
       // scraped article titles/excerpts) is written to stdin, never argv, and
       // `shell` is false — so no article content can be interpreted as a flag
       // or shell metacharacter.
-      // `--bare` skips hooks, LSP, plugin sync, attribution, auto-memory and
-      // CLAUDE.md auto-discovery — none of which are wanted for a single-shot
-      // JSON extraction, and any of which could alter output or hang until the
-      // timeout if the worker's cwd contains project config.
-      const args = ['-p', '--bare', '--output-format', 'json'];
+      const args = ['-p', '--output-format', 'json'];
       const model = process.env[DEV_CLIENT_MODEL_ENV];
       if (model) args.push('--model', model);
 
-      const child = spawn(binary, args, { shell: false });
+      // Run from a neutral cwd so the repo's CLAUDE.md / project hooks are not
+      // auto-discovered into a single-shot JSON extraction (they could alter the
+      // output or hang until the timeout). NB: we deliberately do NOT pass
+      // `--bare` — it also skips keychain reads, which is where the Claude Code
+      // subscription auth lives, so `--bare` would fail with "Not logged in".
+      const child = spawn(binary, args, { shell: false, cwd: tmpdir() });
 
       let stdout = '';
       let stderr = '';
