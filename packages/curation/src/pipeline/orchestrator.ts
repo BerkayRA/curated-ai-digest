@@ -161,14 +161,21 @@ export async function runWeeklyPipeline(
     }),
   } = opts;
 
-  const apiKey = process.env['ANTHROPIC_API_KEY'];
-  if (!apiKey) {
-    throw new Error(
-      'ANTHROPIC_API_KEY environment variable is not set. Set it before invoking the pipeline.',
-    );
+  // Only the default SDK client needs the API key. When a client is injected
+  // (tests, or the Claude Code dev client which uses no API credits) we skip the
+  // key requirement entirely.
+  let anthropicClient: Pick<Anthropic, 'messages'>;
+  if (opts.anthropicClient) {
+    anthropicClient = opts.anthropicClient;
+  } else {
+    const apiKey = process.env['ANTHROPIC_API_KEY'];
+    if (!apiKey) {
+      throw new Error(
+        'ANTHROPIC_API_KEY environment variable is not set. Set it before invoking the pipeline.',
+      );
+    }
+    anthropicClient = new Anthropic({ apiKey });
   }
-
-  const anthropicClient = opts.anthropicClient ?? new Anthropic({ apiKey });
 
   // Resolve the topic context. When provided explicitly, use it. When a
   // repository is injected (tests) we avoid DB access and synthesise a context
