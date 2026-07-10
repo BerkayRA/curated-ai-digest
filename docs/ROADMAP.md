@@ -92,6 +92,18 @@ Phase 6  (monetization; rides Phase 2 clicks + per-topic subscriptions)
 
 Natural demo milestones for leadership: **after 1b** (multiple newsletters visible) and **after Phase 2** (engagement numbers).
 
+## Operability — credits-free curation backends
+
+The LLM stages talk to Claude through one injectable `AnthropicClient` seam, so
+the curation backend is swappable without touching stage logic. Two **zero-cost**
+paths exist today, plus one deferred:
+
+- **Human-as-LLM** (shipped, `curate:manual`) — export the pool, curate in Claude, paste back. Claude-quality, manual, ToS-clean.
+- **Claude Code dev client** (shipped, dev/test only, `pipeline:dev`) — routes the full pipeline through the local `claude -p` CLI on the operator's subscription. Hard-blocked in production, never on the cron path. See [ADR-0020](adr/ADR-0020-pluggable-llm-backends.md).
+- **Ollama local adapter** (deferred, future) — the same seam wrapped around the self-hosted `ollama-gpu` box. Unlike the Claude Code client this is ToS-clean and automatable, so it could take the **scheduled/production** send path off metered API credits entirely. Build when there's a need; validate the copywrite stage against the local model first.
+
+Hosting is documented end-to-end in [DEPLOYMENT.md](DEPLOYMENT.md) (Vercel web + Render worker + Neon/Render Postgres).
+
 ## How we build it
 
 Each phase ships as its own pull request: design → tests‑first → implementation → code/security review → CI green → merge. New visual surfaces are designed in Open Design against the brand guide before they're built. Migrations are proven to leave the existing newsletter byte‑identical. Architecture decisions are recorded as ADRs (see `docs/adr/`); this roadmap and the architecture docs are updated as the surface grows.

@@ -11,6 +11,7 @@
     "type-check": "tsc --noEmit",
     "test": "vitest run",
     "curate:manual": "tsx src/manual-curate.ts",
+    "pipeline:dev": "tsx src/dev-pipeline.ts",
     "test-send": "tsx src/test-send.ts"
   },
   "dependencies": {

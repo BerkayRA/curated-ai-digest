@@ -100,6 +100,19 @@ export { fetchAllFeeds, fetchFeed, parseFeedXml } from './ingest/rss-source';
 export { runWeeklyPipeline } from './pipeline/orchestrator';
 export type { RunWeeklyPipelineOptions } from './pipeline/orchestrator';
 
+// Claude Code headless client — DEV/TEST ONLY backend that routes the pipeline
+// through the local `claude` CLI (no API credits). Never wired into the cron path.
+export {
+  createClaudeCodeClient,
+  assertDevOnly,
+  buildToolPrompt,
+  parseCliOutput,
+  stripJsonFence,
+  DEV_CLIENT_ENV_FLAG,
+  DEV_CLIENT_MODEL_ENV,
+} from './pipeline/claude-code-client';
+export type { ClaudeCodeClientOptions } from './pipeline/claude-code-client';
+
 // Stage functions (for use when stages need to be run individually)
 // Stage 5 types (DigestItem, RenderFn) are exported for consumers who inject the render function
 export { runRankStage } from './pipeline/stage1-rank';
