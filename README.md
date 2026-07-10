@@ -1,14 +1,47 @@
-# Curated AI Digest
+<p align="center">
+  <img src="docs/assets/hero.png" alt="Curated AI Digest — Claude ile küratörlüğü yapılan, haftalık Türkçe yapay zekâ bülteni" width="100%">
+</p>
 
-**A self-hosted, Claude-powered system that curates, writes, brands, and sends a weekly Turkish AI-news digest — with a human approval gate by default and guarded auto-send for holidays.**
+<h1 align="center">Curated AI Digest</h1>
 
-[![CI](https://github.com/BerkayRA/curated-ai-digest/actions/workflows/ci.yml/badge.svg)](https://github.com/BerkayRA/curated-ai-digest/actions/workflows/ci.yml)
-![Node](https://img.shields.io/badge/node-%E2%89%A520-339933?logo=node.js&logoColor=white)
-![pnpm](https://img.shields.io/badge/pnpm-10-F69220?logo=pnpm&logoColor=white)
-![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)
-![Tests](https://img.shields.io/badge/tests-512%20passing-brightgreen)
-![Build](https://img.shields.io/badge/build-passing-brightgreen)
-![License](https://img.shields.io/badge/license-MIT-blue)
+<p align="center">
+  <strong>A self-hosted, Claude-powered system that curates, writes, brands, and sends a weekly Turkish AI-news digest — with a human approval gate by default and guarded auto-send for holidays.</strong>
+</p>
+
+<p align="center">
+  <a href="https://github.com/BerkayRA/curated-ai-digest/actions/workflows/ci.yml"><img src="https://github.com/BerkayRA/curated-ai-digest/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <img src="https://img.shields.io/badge/node-%E2%89%A520-339933?logo=node.js&logoColor=white" alt="Node">
+  <img src="https://img.shields.io/badge/pnpm-10-F69220?logo=pnpm&logoColor=white" alt="pnpm">
+  <img src="https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white" alt="TypeScript">
+  <img src="https://img.shields.io/badge/tests-1%2C100%2B%20passing-brightgreen" alt="Tests">
+  <img src="https://img.shields.io/badge/license-MIT-blue" alt="License">
+</p>
+
+## Özet (Türkçe)
+
+**Curated AI Digest**, haftanın yapay zekâ haberlerini **markalı, pazarlama kalitesinde bir Türkçe
+bültene** dönüştüren, kendi sunucunuzda çalışan (self-hosted) bir sistemdir. Mega Bilgisayar'ın
+müşterileri ve potansiyel müşterileri için tasarlandı.
+
+Claude ajanları her hafta en önemli **2–3 haberi** seçer, Mega'nın marka sesiyle **Türkçe** metinleri
+yazar, içeriği kaynaklara karşı **doğrular (fact-check)** ve **markalı bir HTML e-posta** hazırlar.
+Bir yönetim panosu; arşivi, taslak inceleme/onay akışını, canlı önizlemeyi, abone yönetimini ve
+ayarları barındırır. Varsayılan akış her zaman **bir insanı devrede tutar**
+(`taslak → incelemede → onaylı → planlandı → gönderildi`); korumalı bir anahtarla otomatik gönderim
+de açılabilir.
+
+**Öne çıkanlar**
+
+- **Modüler kaynak toplama** — küratörlü RSS akışları, Exa nöral arama ve isteğe bağlı bir haber radarı.
+- **Maliyet-yönlendirmeli Claude hattı** — sırala → seç → Türkçe yaz → editör/QA → markalı render.
+- **Çok konulu platform** — her konu kendi kaynaklarına, sesine, takvimine, abonelerine ve markasına sahiptir.
+- **API kredisi harcamadan çalıştırma** — insan-LLM akışı ya da yerel Claude Code CLI ile (dev).
+- **Mega tasarım standardı** — Process Blue, Buka nokta-dağılım motifi, otomatik açık/koyu tema.
+
+> Yönetim panosunun arayüzü **Türkçedir**; yalnızca abonelere giden içerik konu bazında yerelleştirilir.
+> Ayrıntılı teknik dokümanlar İngilizce olarak aşağıda ve [`docs/`](docs/) altında yer alır.
+
+## Overview
 
 Curated AI Digest is a **standalone, self-hosted** system that turns the week's AI news into a
 **branded, marketing-grade Turkish newsletter** for customers and prospects. Its ingestion is
@@ -203,6 +236,7 @@ docs/         PRD, ARCHITECTURE, BRAND, BUILD_PLAN, RUNBOOK, SECURITY, ADRs, RFC
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — system overview, packages, pipeline, guardrails
 - [`docs/BUILD_PLAN.md`](docs/BUILD_PLAN.md) — phased, subagent-driven build plan + status
 - [`docs/RUNBOOK.md`](docs/RUNBOOK.md) — production deployment and weekly operation
+- [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) — Vercel (web) + Render (worker) + Neon/Render Postgres wiring
 - [`docs/BRAND.md`](docs/BRAND.md) — the Mega design standard (palette, Buka motif, wordmark rules)
 - [`docs/RADAR-DESIGN-LANGUAGE.md`](docs/RADAR-DESIGN-LANGUAGE.md) — how the UI echoes the radar's system
 - [`docs/RADAR-DATA-CONTRACT.md`](docs/RADAR-DATA-CONTRACT.md) — the radar feed the `radar` provider consumes
@@ -217,7 +251,7 @@ docs/         PRD, ARCHITECTURE, BRAND, BUILD_PLAN, RUNBOOK, SECURITY, ADRs, RFC
 ```bash
 pnpm install
 pnpm type-check     # tsc --noEmit across every workspace
-pnpm test           # Vitest unit/integration suites (512 passing)
+pnpm test           # Vitest unit/integration suites (1,100+ passing)
 pnpm test:e2e       # Playwright E2E + visual + axe a11y
 pnpm build          # turbo build (web standalone + worker)
 pnpm format         # prettier
