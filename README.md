@@ -128,6 +128,31 @@ Copy `.env.example` to `.env` and fill in secrets before running the worker pipe
 
 For step-by-step production deployment (DNS/SPF/DKIM/DMARC, secret generation, Entra app
 registration, first-run checklist, weekly operation), follow [`docs/RUNBOOK.md`](docs/RUNBOOK.md).
+For hosting on Vercel + Render + Neon specifically, see [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
+
+### Create an issue with Claude — no API key (human-as-LLM)
+
+You can draft an issue by curating with Claude **interactively** — no `ANTHROPIC_API_KEY` required.
+Print the live candidate pool, curate it in Claude (in this app, or any Claude chat), then persist
+the returned selection as a draft issue:
+
+```bash
+# 1. Print the candidate pool for review (optionally filter by source / cap the count)
+pnpm --filter @digest/worker curate:manual list [--source <substr>] [--limit <n>]
+
+# 2. Curate the pool in Claude, and save its reply as selection.json:
+#    { "subject": "...", "preheader": "...", "isoWeek": "2026-W29",   // isoWeek optional
+#      "items": [ { "titleTr": "...", "summaryTr": "...",
+#                   "sourceUrl": "https://...", "sourceName": "..." }, ... ] }   // 2–3 items
+
+# 3. Persist the curated selection as a draft issue
+pnpm --filter @digest/worker curate:manual draft selection.json
+```
+
+The draft then appears in the dashboard for review, editing, and approval like any other issue.
+For an automated, credits-free dev run of the *full* pipeline through the local Claude Code CLI,
+use `pnpm --filter @digest/worker pipeline:dev` (dev/test only — see
+[`docs/adr/ADR-0020-pluggable-llm-backends.md`](docs/adr/ADR-0020-pluggable-llm-backends.md)).
 
 ## Configuration
 
@@ -211,9 +236,12 @@ workspace layout, coding conventions, the test bar, and PR expectations, and abi
 ## Author
 
 Built by **Berkay Adanalı** — Software Engineer at
-[Mega Bilgisayar Tic. Ltd. Şti](https://megabilgisayar.com.tr).
+[Mega Bilgisayar Tic. Ltd. Şti](https://megabilgisayar.com.tr) — **within and primarily _for_ Mega
+Bilgisayar**, to run the company's own weekly Turkish AI-news digest. It is open-sourced under MIT
+so anyone can self-host their own.
 
 ## License
 
-Released under the **[MIT License](LICENSE)** — © 2026 Berkay Adanalı. Free to use, modify, and
+Released under the **[MIT License](LICENSE)** — © 2026 Berkay Adanalı. Originally built within and
+for **Mega Bilgisayar Tic. Ltd. Şti**; open-sourced for the community. Free to use, modify, and
 distribute; keep the copyright notice.
