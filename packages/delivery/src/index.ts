@@ -5,12 +5,13 @@
  */
 
 // Dispatch
-export { dispatchIssue, defaultDispatchRepo, scrubPii } from './dispatch';
+export { dispatchIssue, defaultDispatchRepo, scrubPii, buildDigestEmailData } from './dispatch';
 export type {
   DispatchRepo,
   DispatchOptions,
   DispatchResult,
   SubjectVariantRow,
+  TopicBranding,
 } from './dispatch';
 
 // A/B subject-line split (pure helpers)

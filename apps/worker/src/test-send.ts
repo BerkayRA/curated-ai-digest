@@ -26,39 +26,9 @@
  *   - With a verified domain, `from` is anything@your-domain and `to` is anyone.
  */
 
-import { existsSync } from 'node:fs';
 import { renderDigestEmail, ResendEmailProvider } from '@digest/email';
 import type { DigestEmailData, EmailMessage } from '@digest/email';
-
-/**
- * Load apps/worker/.env.local (gitignored) if present, so RESEND_API_KEY and the
- * test recipient can live in a file instead of the command line / shell history.
- * Explicit inline env vars still win (loadEnvFile does not overwrite existing).
- */
-function loadEnvLocal(): void {
-  const envPath = new URL('../.env.local', import.meta.url).pathname;
-  if (existsSync(envPath) && typeof process.loadEnvFile === 'function') {
-    process.loadEnvFile(envPath);
-  }
-}
-
-function required(name: string): string {
-  const v = process.env[name];
-  if (!v) {
-    console.error(`✗ Missing required env var: ${name}`);
-    process.exit(1);
-  }
-  return v;
-}
-
-/** Parse "Name <email@host>" or a bare "email@host" into a recipient. */
-function parseAddress(raw: string): { email: string; name?: string } {
-  const m = raw.match(/^\s*(.*?)\s*<\s*([^>]+)\s*>\s*$/);
-  if (m && m[2]) {
-    return m[1] ? { email: m[2], name: m[1] } : { email: m[2] };
-  }
-  return { email: raw.trim() };
-}
+import { loadEnvLocal, required, parseAddress } from './send-helpers';
 
 async function main(): Promise<void> {
   loadEnvLocal();
