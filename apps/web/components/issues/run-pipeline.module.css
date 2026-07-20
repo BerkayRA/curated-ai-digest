@@ -68,3 +68,61 @@
 .runBtn {
   align-self: flex-start;
 }
+
+/* CLI reminder — surfaces the credits-free pipeline:dev command. Tokens
+   only → dark mode is automatic. */
+.devReminder {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding: var(--space-md);
+  border: 1px solid var(--color-border-mid);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface, var(--color-bg));
+}
+
+.devReminderHint {
+  font-size: var(--text-sm);
+  color: var(--color-ink-muted);
+  margin: 0;
+  max-width: 60ch;
+}
+
+.devReminderCmd {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.devReminderCmd code {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-x: auto;
+  white-space: nowrap;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: var(--text-sm);
+  color: var(--color-ink);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border-subtle, var(--color-border-mid));
+  border-radius: var(--radius-sm);
+  padding: var(--space-xs) var(--space-sm);
+}
+
+.devReminderCopy {
+  appearance: none;
+  flex: 0 0 auto;
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--color-brand-dark);
+  background: none;
+  border: 1px solid var(--color-border-mid);
+  border-radius: var(--radius-sm);
+  padding: var(--space-xs) var(--space-sm);
+  cursor: pointer;
+}
+
+.devReminderCopy:hover {
+  border-color: var(--color-brand-dark);
+}
