@@ -229,7 +229,15 @@ function resolveBrandProps(
   };
 }
 
-function buildDigestEmailData(
+/**
+ * Maps a stored Issue + its items to the DigestEmailData render contract.
+ *
+ * Exported so single-recipient preview tooling (e.g. the worker `send-issue`
+ * script) renders a real drafted issue with the exact same mapping — including
+ * the sponsored-slot consent gate and per-topic brand/language props — that the
+ * production dispatcher uses. Preview callers pass a placeholder unsubscribeUrl.
+ */
+export function buildDigestEmailData(
   issue: Issue & { items: IssueItem[] },
   unsubscribeUrl: string,
   senderAddress: string,

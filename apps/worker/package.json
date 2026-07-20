@@ -12,7 +12,8 @@
     "test": "vitest run",
     "curate:manual": "tsx src/manual-curate.ts",
     "pipeline:dev": "tsx src/dev-pipeline.ts",
-    "test-send": "tsx src/test-send.ts"
+    "test-send": "tsx src/test-send.ts",
+    "send-issue": "tsx src/send-issue.ts"
   },
   "dependencies": {
     "@digest/db": "workspace:*",
