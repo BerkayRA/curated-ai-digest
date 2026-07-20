@@ -33,6 +33,21 @@ export function RunPipelineButton({ isoWeek }: RunPipelineButtonProps) {
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<PipelineResult | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  // Credits-free command — routes the pipeline through the local Claude CLI
+  // (`claude -p`) instead of the paid API. Shown as a reminder for devs.
+  const devCommand = `pnpm --filter @digest/worker pipeline:dev --iso-week ${isoWeek || 'YYYY-Wnn'}`;
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(devCommand);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard blocked (e.g. non-secure context) — the command stays visible to copy by hand.
+    }
+  };
 
   const handleRun = async () => {
     setError(null);
@@ -101,6 +116,24 @@ export function RunPipelineButton({ isoWeek }: RunPipelineButtonProps) {
       >
         Curation&apos;ı şimdi çalıştır
       </Button>
+
+      <aside className={styles.devReminder} aria-label="CLI hatırlatması">
+        <EyebrowLabel as="span">CLI · Hatırlatma</EyebrowLabel>
+        <p className={styles.devReminderHint}>
+          API kredisi harcamadan pipeline&apos;ı yerel Claude CLI ile çalıştırın:
+        </p>
+        <div className={styles.devReminderCmd}>
+          <code>{devCommand}</code>
+          <button
+            type="button"
+            className={styles.devReminderCopy}
+            onClick={handleCopy}
+            aria-label="Komutu kopyala"
+          >
+            {copied ? 'Kopyalandı ✓' : 'Kopyala'}
+          </button>
+        </div>
+      </aside>
     </section>
   );
 }
