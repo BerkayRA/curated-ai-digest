@@ -1,8 +1,8 @@
 {
-  "lastRunId": "file-2026-08-23T03:09:56.898Z",
-  "generatedAt": "2026-08-23T03:09:56.898Z",
+  "lastRunId": "file-2026-08-24T03:10:45.263Z",
+  "generatedAt": "2026-08-24T03:10:45.263Z",
   "source": "rss+radar",
-  "errorsCount": 0,
+  "errorsCount": 1,
   "poolSize": 200,
-  "added": 106
+  "added": 52
 }
